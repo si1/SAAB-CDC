@@ -92,6 +92,14 @@ void CANClass::begin(uint16_t speed)
     switch(speed)
     {
         case 47:
+            /*
+             Supposed to use...?
+             SJW = 1
+             SP% ~= 75
+             
+             
+            */
+            
             /* Original CNF values
              mcp2515_write_register(CNF1,0xC7);
              mcp2515_write_register(CNF2,0xBE);
@@ -135,11 +143,11 @@ void CANClass::begin(uint16_t speed)
             mcp2515_write_register(CNF3,0x03);
             
             /*
-             T1   =
-             T2   =
-             BTQ  =
-             SP%  =
-             SJW  =
+             T1   = 10
+             T2   = 4
+             BTQ  = 14
+             SP%  = 71.4
+             SJW  = 2
              Err% = 0
              
              // Version 4
