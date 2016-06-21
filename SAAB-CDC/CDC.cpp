@@ -68,11 +68,10 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
     {0x62,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1}
 };
 int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
-int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x01,0x41,0x01,0xFF,0xFF,0xD0,-1};
-//int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0x01,0xFF,0xFF,0xD0,-1};
-//int cdcGeneralStatusCmd[] = {0x20,0x00,0x17,0x45,0x1,0x01,0x01,0xD0,-1};
+int cdcGeneralStatusCmd[] = {0xE0,0x00,0x01,0x31,0x01,0xFF,0xFF,0xD0,-1}; // CD in slot #1 playing 1st track. CD changer is married to the car.
+int cdcNotPlayingStatusCmd[] = {0x20,0x00,0x01,0x01,0xFF,0x0FF,0xFF,0xD0,-1}; // Not playing. There's still CD in slot #1 and CD changer is married to the car.
+int *currentCdcStatusCmd = cdcGeneralStatusCmd;
 int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1};
-
 
 /**
  * DEBUG: Prints the CAN TX frame to serial output
@@ -175,19 +174,19 @@ void CDChandler::handleRxFrame() {
 
 void CDChandler::handleIhuButtons() {
     checkCanEvent(1);
-    if (CAN_RxMsg.data[0] == 0x80) {
-        switch (CAN_RxMsg.data[1]) {
-            case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
-                cdcActive = true;
-                BT.bt_reconnect();
-                sendCanFrame(SOUND_REQUEST, soundCmd);
-                break;
-            case 0x14: // CDC = OFF (Back to Radio or Tape mode)
-                cdcActive = false;
-                displayWanted = false;
-                BT.bt_disconnect();
-                break;
-        }
+    switch (CAN_RxMsg.data[1]) {
+        case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
+            cdcActive = true;
+            currentCdcStatusCmd = cdcGeneralStatusCmd;
+            BT.bt_reconnect();
+            sendCanFrame(SOUND_REQUEST, soundCmd);
+            break;
+        case 0x14: // CDC = OFF (Back to Radio or Tape mode)
+            cdcActive = false;
+            currentCdcStatusCmd = cdcNotPlayingStatusCmd;
+            displayWanted = false;
+            BT.bt_disconnect();
+            break;
     }
     if (cdcActive) {
         switch (CAN_RxMsg.data[1]) {
@@ -197,7 +196,7 @@ void CDChandler::handleIhuButtons() {
             case 0x84: // SEEK button (middle) long press on IHU
                 BT.bt_visible();
                 break;
-            case 0X88: // > 2 sec long press of SEEK button (middle) on IHU
+            case 0x88: // > 2 sec long press of SEEK button (middle) on IHU
                 BT.bt_invisible();
                 break;
             case 0x76: // Random ON/OFF (Long press of CD/RDM button)
@@ -261,7 +260,8 @@ void CDChandler::handleCdcStatus() {
 }
 
 void CDChandler::sendCdcStatus(boolean event, boolean remote) {
-    sendCanFrame(GENERAL_STATUS_CDC, cdcGeneralStatusCmd);
+
+    sendCanFrame(GENERAL_STATUS_CDC, currentCdcStatusCmd);
     
     // Record the time of sending and reset status variables
     cdcStatusLastSendTime = millis();
