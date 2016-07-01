@@ -69,7 +69,7 @@ void CANClass::begin(uint16_t speed)
     SET_INPUT(MCP2515_INT);
     SET(MCP2515_INT);
     
-    // activamos el SPI de Arduino como Master y Fosc/2=8 MHz
+    // We activate the SPI Arduino as Master and Fosc/2=8 MHz
     SPCR = (1<<SPE)|(1<<MSTR) | (0<<SPR1)|(0<<SPR0);
     SPSR = (1<<SPI2X);
 #if (DEBUGMODE==1)
@@ -248,16 +248,16 @@ void CANClass::begin(uint16_t speed)
     
     
     
-    //Activamos Interrupcion de RX
-    mcp2515_write_register(CANINTE,(1<<RX1IE)|(1<<RX0IE)); //Los dos buffers activan pin de interrupcion
+    //Activate RX Interruption
+    mcp2515_write_register(CANINTE,(1<<RX1IE)|(1<<RX0IE)); //The two buffers activated interrupt pin
     
-    //Filtros
-    //Bufer 0: Todos los msjes y Rollover=>Si buffer 0 lleno,envia a buffer 1
-    mcp2515_write_register(RXB0CTRL,(1<<RXM1)|(1<<RXM0)|(1<<BUKT)); //RXM1 y RXM0 para filter/mask off+Rollover
-    //Bufer 1: Todos los msjes
-    mcp2515_write_register(RXB1CTRL,(1<<RXM1)|(1<<RXM0)); //RXM1 y RXM0 para filter/mask off
+    //Filters
+    //Buffer 0: All Messages and Rollover=>If buffer 0 full, send to buffer 1
+    mcp2515_write_register(RXB0CTRL,(1<<RXM1)|(1<<RXM0)|(1<<BUKT)); //RXM1 & RXM0 the filter/mask off+Rollover
+    //Buffer 1: All Messages
+    mcp2515_write_register(RXB1CTRL,(1<<RXM1)|(1<<RXM0)); //RXM1 & RXM0 the filter/mask off
     
-    //Borrar bits de mascara de recepcion
+    //Clear reception mask bits
     mcp2515_write_register( RXM0SIDH, 0 );
     mcp2515_write_register( RXM0SIDL, 0 );
     mcp2515_write_register( RXM0EID8, 0 );
@@ -267,15 +267,15 @@ void CANClass::begin(uint16_t speed)
     mcp2515_write_register( RXM1EID8, 0 );
     mcp2515_write_register( RXM1EID0, 0 );
     
-    //Encender el led de la placa conectado a RX0BF/RX1BF cuando hay una msje en el buffer
+    //Turn the LED on the board connected to RX0BF / RX1BF when a msg in the buffer
     mcp2515_write_register( BFPCTRL, 0b00001111 );
     
-    //Pasar el MCP2515 a modo normal y One Shot Mode 0b00001000
+    //Pass the MCP2515 to normal mode and One Shot Mode 0b00001000
     // OSM switched off
     
     mcp2515_write_register(CANCTRL, 0);
     
-    //Inicializo buffer
+    //Initialize buffer
     _CAN_RX_BUFFER.head=0;
     _CAN_RX_BUFFER.tail=0;
     
