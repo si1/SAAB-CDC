@@ -69,8 +69,6 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
 };
 int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
 int cdcGeneralStatusCmd[] = {0xE0,0x00,0x01,0x31,0x01,0xFF,0xFF,0xD0,-1}; // CD in slot #1 playing 1st track. CD changer is married to the car.
-int cdcNotPlayingStatusCmd[] = {0x20,0x00,0x01,0x01,0xFF,0x0FF,0xFF,0xD0,-1}; // Not playing. There's still CD in slot #1 and CD changer is married to the car.
-int *currentCdcStatusCmd = cdcGeneralStatusCmd;
 int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1};
 
 /**
@@ -174,19 +172,20 @@ void CDChandler::handleRxFrame() {
 
 void CDChandler::handleIhuButtons() {
     checkCanEvent(1);
-    switch (CAN_RxMsg.data[1]) {
-        case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
-            cdcActive = true;
-            currentCdcStatusCmd = cdcGeneralStatusCmd;
-            BT.bt_reconnect();
-            sendCanFrame(SOUND_REQUEST, soundCmd);
-            break;
-        case 0x14: // CDC = OFF (Back to Radio or Tape mode)
-            cdcActive = false;
-            currentCdcStatusCmd = cdcNotPlayingStatusCmd;
-            displayWanted = false;
-            BT.bt_disconnect();
-            break;
+    if ((CAN_RxMsg.data[0] == 0x80) && (CAN_RxMsg.data[1] != 0)) {
+        switch (CAN_RxMsg.data[1]) {
+            case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
+                cdcActive = true;
+                BT.bt_reconnect();
+                break;
+            case 0x14: // CDC = OFF (Back to Radio or Tape mode)
+                cdcActive = false;
+                displayWanted = false;
+                BT.bt_disconnect();
+                break;
+            default:
+                break;
+        }
     }
     if (cdcActive) {
         switch (CAN_RxMsg.data[1]) {
@@ -225,6 +224,7 @@ void CDChandler::handleIhuButtons() {
  */
 
 void CDChandler::handleSteeringWheelButtons() {
+    
     checkCanEvent(4);
     switch (CAN_RxMsg.data[2]) {
         case 0x04: // NXT button on wheel
@@ -261,8 +261,8 @@ void CDChandler::handleCdcStatus() {
 
 void CDChandler::sendCdcStatus(boolean event, boolean remote) {
 
-    sendCanFrame(GENERAL_STATUS_CDC, currentCdcStatusCmd);
-    
+    sendCanFrame(GENERAL_STATUS_CDC, cdcGeneralStatusCmd);
+
     // Record the time of sending and reset status variables
     cdcStatusLastSendTime = millis();
     cdcStatusResendNeeded = false;
@@ -376,8 +376,9 @@ void CDChandler::checkCanEvent(int frameElement) {
     if (!cdcActive) {
         return;
     }
+    
     boolean event = (CAN_RxMsg.data[0] == 0x80);
-    if ((!event) && (CAN_RxMsg.data[frameElement]) != 0) { // Long press of a steering wheel button has taken place.
+    if (!event && (CAN_RxMsg.data[frameElement]) != 0) { // Long press of a steering wheel button has taken place.
         if (millis() - lastIcomingEventTime > LAST_EVENT_IN_TIMEOUT) {
             incomingEventCounter = 0;
         }
@@ -387,12 +388,15 @@ void CDChandler::checkCanEvent(int frameElement) {
             switch (CAN_RxMsg.data[frameElement]) {
                 case 0x04: // Long press of NXT button on steering wheel
                     BT.bt_vassistant();
+                    //Serial.println("NXT long press on steering wheel");
                     break;
                 case 0x45: // SEEK+ button long press on IHU
                     BT.bt_visible();
+                    //Serial.println("SEEK+ long press on IHU");
                     break;
                 case 0x46: // SEEK- button long press on IHU
                     BT.bt_invisible();
+                    //Serial.println("SEEK- long press on IHU");
                     break;
                 default:
                     break;
@@ -400,4 +404,8 @@ void CDChandler::checkCanEvent(int frameElement) {
         }
     }
     return;
+}
+
+void CDChandler::sidBeep() {
+    sendCanFrame(SOUND_REQUEST, soundCmd);
 }

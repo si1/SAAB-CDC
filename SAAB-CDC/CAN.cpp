@@ -96,14 +96,13 @@ void CANClass::begin(uint16_t speed)
              Supposed to use...?
              SJW = 1
              SP% ~= 75
-             
-             
             */
             
-            /* Original CNF values
+            //Original CNF values
              mcp2515_write_register(CNF1,0xC7);
              mcp2515_write_register(CNF2,0xBE);
              mcp2515_write_register(CNF3,0x04);
+            /*
              T1   = 16
              T2   = 5
              BTQ  = 21
@@ -115,8 +114,9 @@ void CANClass::begin(uint16_t speed)
             /*
              // Version 1
              mcp2515_write_register(CNF1,0xC7);
-             mcp2515_write_register(CNF2,0xB5);
-             mcp2515_write_register(CNF3,0x06);
+             mcp2515_write_register(CNF2,0xFE);
+             mcp2515_write_register(CNF3,0x04);
+            /*
              T1   = 14
              T2   = 7
              BTQ  = 21
@@ -126,9 +126,11 @@ void CANClass::begin(uint16_t speed)
              
              
              // Version 2
-             mcp2515_write_register(CNF1,0x06);
-             mcp2515_write_register(CNF2,0xBE);
-             mcp2515_write_register(CNF3,0x07);
+             
+             mcp2515_write_register(CNF1,0xC7);
+             mcp2515_write_register(CNF2,0xFE);
+             mcp2515_write_register(CNF3,0x44);
+            /*
              T1   = 16
              T2   = 8
              BTQ  = 24
@@ -136,51 +138,16 @@ void CANClass::begin(uint16_t speed)
              SJW  = 1
              Err% = 0
              */
-            
-            // Version 3
-            mcp2515_write_register(CNF1,0x4B);
-            mcp2515_write_register(CNF2,0xF1);
-            mcp2515_write_register(CNF3,0x03);
-            
             /*
+            // Version 3
+            mcp2515_write_register(CNF1,0xC7);
+            mcp2515_write_register(CNF2,0xBE);
+            mcp2515_write_register(CNF3,0x44);
              T1   = 10
              T2   = 4
              BTQ  = 14
              SP%  = 71.4
              SJW  = 2
-             Err% = 0
-             
-             // Version 4
-             mcp2515_write_register(CNF1,0x0B);
-             mcp2515_write_register(CNF2,0x9B);
-             mcp2515_write_register(CNF3,0x04);
-             T1   = 9
-             T2   = 5
-             BTQ  = 14
-             SP%  = 64.29
-             SJW  = 1
-             Err% = 0
-             
-             // Version 5
-             mcp2515_write_register(CNF1,0x0D);
-             mcp2515_write_register(CNF2,0x9A);
-             mcp2515_write_register(CNF3,0x03);
-             T1   = 8
-             T2   = 4
-             BTQ  = 12
-             SP%  = 66.67
-             SJW  = 1
-             Err% = 0
-             
-             // Version 6
-             mcp2515_write_register(CNF1,0x14);
-             mcp2515_write_register(CNF2,0x89);
-             mcp2515_write_register(CNF3,0x02);
-             T1   = 5
-             T2   = 3
-             BTQ  = 8
-             SP%  = 62.5
-             SJW  = 1
              Err% = 0
              */
             
