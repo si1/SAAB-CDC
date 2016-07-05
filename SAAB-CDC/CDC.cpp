@@ -68,7 +68,7 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
     {0x62,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1}
 };
 int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
-int cdcGeneralStatusCmd[] = {0xE0,0x00,0x01,0x31,0x01,0xFF,0xFF,0xD0,-1}; // CD in slot #1 playing 1st track. CD changer is married to the car.
+int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
 int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1};
 
 /**
@@ -228,13 +228,13 @@ void CDChandler::handleSteeringWheelButtons() {
     checkCanEvent(4);
     switch (CAN_RxMsg.data[2]) {
         case 0x04: // NXT button on wheel
-            BT.bt_play();
+            //BT.bt_play();
             break;
         case 0x10: // Seek+ button on wheel
-            BT.bt_next();
+            //BT.bt_next();
             break;
         case 0x08: // Seek- button on wheel
-            BT.bt_prev();
+            //BT.bt_prev();
             break;
         default:
             //Serial.print(CAN_RxMsg.data[2],HEX);
