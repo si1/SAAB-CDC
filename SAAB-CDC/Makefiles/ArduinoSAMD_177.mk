@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Jan 22, 2015 release 4.1.9
+# Last update: Apr 22, 2016 release 4.5.0
 
 
 
@@ -19,7 +19,7 @@ include $(MAKEFILE_PATH)/About.mk
 #
 PLATFORM         := Arduino
 BUILD_CORE       := samd
-PLATFORM_TAG      = ARDUINO=10700 ARDUINO_SAM_ZERO ARDUINO_ARCH_SAMD EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(BOARD_NAME) $(filter __%__ ,$(GCC_PREPROCESSOR_DEFINITIONS))
+PLATFORM_TAG      = ARDUINO=107010 ARDUINO_SAM_ZERO ARDUINO_ARCH_SAMD EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(BOARD_NAME) $(filter __%__ ,$(GCC_PREPROCESSOR_DEFINITIONS))
 APPLICATION_PATH := $(ARDUINO_ORG_PATH)
 #PLATFORM_VERSION := 1.7.7
 
@@ -60,6 +60,8 @@ ifeq ($(UPLOADER),avrdude)
     USB_RESET        = python $(UTILITIES_PATH)/reset_1200.py
     AVRDUDE_COM_OPTS = -p$(AVRDUDE_MCU) -C$(AVRDUDE_CONF)
     AVRDUDE_OPTS     = -c$(AVRDUDE_PROGRAMMER) -b$(AVRDUDE_BAUDRATE)
+    M0_SERIAL_PORT   = /dev/tty.usbmodem0041
+    COMMAND_UPLOAD   = $(AVRDUDE_EXEC) $(AVRDUDE_COM_OPTS) $(AVRDUDE_OPTS) -P$(M0_SERIAL_PORT) -Uflash:w:$(TARGET_HEX):i
 else
     UPLOADER         = openocd
     UPLOADER_PATH    = $(OTHER_TOOLS_PATH)/OpenOCD-0.9.0-arduino
@@ -201,10 +203,12 @@ ASFLAGS      = -x assembler-with-cpp
 LDFLAGS      = $(OPTIMISATION) $(WARNING_FLAGS) -save-temps
 LDFLAGS     += -$(MCU_FLAG_NAME)=$(MCU) --specs=nano.specs
 LDFLAGS     += -T $(VARIANT_PATH)/$(LDSCRIPT) -mthumb
+LDFLAGS     += -Wl,--cref -Wl,-Map,Builds/embeddedcomputing.map # Output a cross reference table.
 LDFLAGS     += -Wl,--check-sections -Wl,--gc-sections -Wl,--entry=Reset_Handler
 LDFLAGS     += -Wl,--unresolved-symbols=report-all
 LDFLAGS     += -Wl,--warn-common -Wl,--warn-section-align -Wl,--warn-unresolved-symbols
 LDFLAGS     += -Wl,--section-start=.text=$(call PARSE_BOARD,$(BOARD_TAG),build.section.start)
+LDFLAGS     += -Wl,--start-group -lm -lgcc -Wl,--end-group
 
 # Specific OBJCOPYFLAGS for objcopy only
 # objcopy uses OBJCOPYFLAGS only

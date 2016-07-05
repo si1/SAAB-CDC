@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Jan 12, 2016 release 4.2.0
+# Last update: Apr 28, 2016 release 4.5.1
 
 
 
@@ -144,7 +144,9 @@ endif
 ARDUINO_PATH        := $(ARDUINO_APP)/Contents/Java
 ARDUINO_CC_PATH     := $(ARDUINO_CC_APP)/Contents/Java
 ARDUINO_ORG_PATH    := $(ARDUINO_ORG_APP)/Contents/Java
-
+ARDUINO_ORG_AVR_BOARDS  = $(ARDUINO_ORG_PATH)/hardware/arduino/avr/boards.txt
+ARDUINO_ORG_SAM_BOARDS  = $(ARDUINO_ORG_PATH)/hardware/arduino/sam/boards.txt
+ARDUINO_ORG_SAMD_BOARDS = $(ARDUINO_ORG_PATH)/hardware/arduino/samd/boards.txt
 
 ## Only ArduinoORG IDE supports Arduino M0 Pro
 ##
@@ -159,7 +161,7 @@ ARDUINO_ORG_PATH    := $(ARDUINO_ORG_APP)/Contents/Java
 WIRING_APP    = $(APPLICATIONS_PATH)/Wiring.app
 ENERGIA_APP   = $(APPLICATIONS_PATH)/Energia.app
 MAPLE_APP     = $(APPLICATIONS_PATH)/MapleIDE.app
-MBED_APP      = $(EMBEDXCODE_APP)/mbed
+MBED_APP      = $(EMBEDXCODE_APP)/mbed-$(MBED_SDK_RELEASE)
 
 include $(MAKEFILE_PATH)/About.mk
 RELEASE_NOW = $(shell echo $(EMBEDXCODE_RELEASE) | sed 's/\.//g')
@@ -186,7 +188,7 @@ ARDUINO_AVR_1 = $(PACKAGES_PATH)/arduino
 ifneq ($(wildcard $(ARDUINO_AVR_1)/hardware/avr),)
     ARDUINO_AVR_APP     = $(ARDUINO_AVR_1)
     ARDUINO_AVR_PATH    = $(ARDUINO_AVR_APP)
-    ARDUINO_AVR_BOARDS  = $(ARDUINO_AVR_APP)/hardware/avr/$(ARDUINO_AVR_RELEASE)/boards.txt
+    ARDUINO_CC_AVR_BOARDS  = $(ARDUINO_AVR_APP)/hardware/avr/$(ARDUINO_AVR_RELEASE)/boards.txt
 endif
 
 ARDUINO_SAM_1 = $(PACKAGES_PATH)/arduino
@@ -194,7 +196,7 @@ ARDUINO_SAM_1 = $(PACKAGES_PATH)/arduino
 ifneq ($(wildcard $(ARDUINO_SAM_1)/hardware/sam),)
     ARDUINO_SAM_APP     = $(ARDUINO_SAM_1)
     ARDUINO_SAM_PATH    = $(ARDUINO_SAM_APP)
-    ARDUINO_SAM_BOARDS  = $(ARDUINO_SAM_APP)/hardware/sam/$(ARDUINO_SAM_RELEASE)/boards.txt
+    ARDUINO_CC_SAM_BOARDS  = $(ARDUINO_SAM_APP)/hardware/sam/$(ARDUINO_SAM_RELEASE)/boards.txt
 endif
 
 ARDUINO_SAMD_1 = $(PACKAGES_PATH)/arduino
@@ -202,17 +204,17 @@ ARDUINO_SAMD_1 = $(PACKAGES_PATH)/arduino
 ifneq ($(wildcard $(ARDUINO_SAMD_1)/hardware/samd),)
     ARDUINO_SAMD_APP     = $(ARDUINO_SAMD_1)
     ARDUINO_SAMD_PATH    = $(ARDUINO_SAMD_APP)
-    ARDUINO_SAMD_BOARDS  = $(ARDUINO_SAMD_APP)/hardware/samd/$(ARDUINO_SAMD_RELEASE)/boards.txt
+    ARDUINO_CC_SAMD_BOARDS  = $(ARDUINO_SAMD_APP)/hardware/samd/$(ARDUINO_SAMD_RELEASE)/boards.txt
 endif
 
 # Adafruit.app path for ArduinoCC 1.6.5
 #
-ADAFRUIT_1  = $(PACKAGES_PATH)/adafruit
+ADAFRUIT_AVR_1  = $(PACKAGES_PATH)/adafruit
 
-ifneq ($(wildcard $(ADAFRUIT_1)),)
-    ADAFRUIT_APP     = $(ADAFRUIT_1)
-    ADAFRUIT_PATH    = $(ADAFRUIT_APP)
-    ADAFRUIT_BOARDS  = $(ADAFRUIT_APP)/hardware/avr/$(ADAFRUIT_AVR_RELEASE)/boards.txt
+ifneq ($(wildcard $(ADAFRUIT_AVR_1)/hardware/avr),)
+    ADAFRUIT_AVR_APP     = $(ADAFRUIT_AVR_1)
+    ADAFRUIT_AVR_PATH    = $(ADAFRUIT_AVR_APP)
+    ADAFRUIT_AVR_BOARDS  = $(ADAFRUIT_AVR_APP)/hardware/avr/$(ADAFRUIT_AVR_RELEASE)/boards.txt
 endif
 
 # chipKIT.app path for ArduinoCC 1.6.5
@@ -236,13 +238,14 @@ endif
 
 # IntelArduino.app path for ArduinoCC 1.6.5
 #
-GALILEO_1    = $(PACKAGES_PATH)/Intel
+INTEL_1    = $(PACKAGES_PATH)/Intel
 
-ifneq ($(wildcard $(GALILEO_1)),)
-    GALILEO_APP     = $(GALILEO_1)
-    GALILEO_PATH    = $(GALILEO_APP)
-    GALILEO_BOARDS  = $(GALILEO_APP)/hardware/i586/$(INTEL_GALILEO_RELEASE)/boards.txt
-    EDISON_BOARDS   = $(GALILEO_APP)/hardware/i686/$(INTEL_EDISON_RELEASE)/boards.txt
+ifneq ($(wildcard $(INTEL_1)),)
+    INTEL_APP     = $(INTEL_1)
+    INTEL_PATH    = $(INTEL_APP)
+    INTEL_GALILEO_BOARDS  = $(INTEL_APP)/hardware/i586/$(INTEL_GALILEO_RELEASE)/boards.txt
+    INTEL_EDISON_BOARDS   = $(INTEL_APP)/hardware/i686/$(INTEL_EDISON_RELEASE)/boards.txt
+    INTEL_CURIE_BOARDS    = $(INTEL_APP)/hardware/arc32/$(INTEL_CURIE_RELEASE)/boards.txt
 endif
 
 # RedBearLab.app path for ArduinoCC 1.6.5
@@ -264,19 +267,26 @@ endif
 
 # DigisparkArduino.app path for ArduinoCC 1.6.5
 #
-DIGISPARK_AVR_1 = $(PACKAGES_PATH)/digistump
-DIGISPARK_SAM_1 = $(PACKAGES_PATH)/digistump
+DIGISTUMP_AVR_1 = $(PACKAGES_PATH)/digistump
+DIGISTUMP_SAM_1 = $(PACKAGES_PATH)/digistump
+DIGISTUMP_OAK_1 = $(PACKAGES_PATH)/digistump
 
-ifneq ($(wildcard $(DIGISPARK_AVR_1)),)
-    DIGISPARK_AVR_APP    = $(DIGISPARK_AVR_1)
-    DIGISPARK_AVR_PATH   = $(DIGISPARK_AVR_APP)
-    DIGISPARK_AVR_BOARDS = $(DIGISPARK_AVR_APP)/hardware/avr/$(DIGISPARK_AVR_RELEASE)/boards.txt
+ifneq ($(wildcard $(DIGISTUMP_AVR_1)),)
+    DIGISTUMP_AVR_APP    = $(DIGISTUMP_AVR_1)
+    DIGISTUMP_AVR_PATH   = $(DIGISTUMP_AVR_APP)
+    DIGISTUMP_AVR_BOARDS = $(DIGISTUMP_AVR_APP)/hardware/avr/$(DIGISTUMP_AVR_RELEASE)/boards.txt
 endif
 
-ifneq ($(wildcard $(DIGISPARK_SAM_1)),)
-    DIGISPARK_SAM_APP    = $(DIGISPARK_SAM_1)
-    DIGISPARK_SAM_PATH   = $(DIGISPARK_SAM_APP)
-    DIGISPARK_SAM_BOARDS = $(DIGISPARK_SAM_APP)/hardware/sam/$(DIGISPARK_SAM_RELEASE)/boards.txt
+ifneq ($(wildcard $(DIGISTUMP_SAM_1)),)
+    DIGISTUMP_SAM_APP    = $(DIGISTUMP_SAM_1)
+    DIGISTUMP_SAM_PATH   = $(DIGISTUMP_SAM_APP)
+    DIGISTUMP_SAM_BOARDS = $(DIGISTUMP_SAM_APP)/hardware/sam/$(DIGISTUMP_SAM_RELEASE)/boards.txt
+endif
+
+ifneq ($(wildcard $(DIGISTUMP_OAK_1)/hardware/oak),)
+    DIGISTUMP_OAK_APP    = $(DIGISTUMP_OAK_1)
+    DIGISTUMP_OAK_PATH   = $(DIGISTUMP_OAK_APP)
+    DIGISTUMP_OAK_BOARDS = $(DIGISTUMP_OAK_APP)/hardware/oak/$(DIGISTUMP_OAK_RELEASE)/boards.txt
 endif
 
 # ESP8266 NodeMCU.app path for ArduinoCC 1.6.5
@@ -350,15 +360,15 @@ ifeq ($(wildcard $(ARDUINO_APP)),)
 ifeq ($(wildcard $(ARDUINO_ORG_APP)),)
 ifeq ($(wildcard $(ARDUINO_CC_APP)),)
 ifeq ($(wildcard $(ESP8266_APP)),)
-    ifeq ($(wildcard $(LINKIT_APP)),)
+    ifeq ($(wildcard $(LINKIT_ARM_APP)),)
     ifeq ($(wildcard $(WIRING_APP)),)
     ifeq ($(wildcard $(ENERGIA_APP)),)
     ifeq ($(wildcard $(MAPLE_APP)),)
         ifeq ($(wildcard $(TEENSY_APP)),)
-        ifeq ($(wildcard $(DIGISPARK_APP)),)
+        ifeq ($(wildcard $(DIGISTUMP_APP)),)
         ifeq ($(wildcard $(MICRODUINO_APP)),)
         ifeq ($(wildcard $(LIGHTBLUE_APP)),)
-            ifeq ($(wildcard $(GALILEO_APP)),)
+            ifeq ($(wildcard $(INTEL_APP)),)
             ifeq ($(wildcard $(ROBOTIS_APP)),)
             ifeq ($(wildcard $(RFDUINO_APP)),)
             ifeq ($(wildcard $(REDBEARLAB_APP)),)
@@ -367,7 +377,7 @@ ifeq ($(wildcard $(ESP8266_APP)),)
                 ifeq ($(wildcard $(MBED_APP)/*),) # */
                 ifeq ($(wildcard $(EDISON_YOCTO_APP)/*),) # */
                     ifeq ($(wildcard $(SPARK_APP)/*),) # */
-                    ifeq ($(wildcard $(ADAFRUIT_APP)),)
+                    ifeq ($(wildcard $(ADAFRUIT_AVR_APP)),)
                         $(error Error: no application found)
                     endif
                     endif
@@ -417,14 +427,28 @@ endif
 # Paths list for other genuine IDEs
 #
 MICRODUINO_PATH = $(MICRODUINO_APP)/Contents/Java
+MICRODUINO_AVR_BOARDS       = $(MICRODUINO_PATH)/hardware/Microduino/avr/boards.txt
+
 TEENSY_PATH     = $(TEENSY_APP)/Contents/Java
-WIRING_PATH     = $(WIRING_APP)/Contents/Java
+TEENSY_BOARDS   = $(TEENSY_PATH)/hardware/teensy/avr/boards.txt
+
 ENERGIA_PATH    = $(ENERGIA_APP)/Contents/Resources/Java
+ENERGIA_MSP430_BOARDS       = $(ENERGIA_PATH)/hardware/msp430/boards.txt
+ENERGIA_C2000_BOARDS        = $(ENERGIA_PATH)/hardware/c2000/boards.txt
+ENERGIA_LM4F_BOARDS         = $(ENERGIA_PATH)/hardware/lm4f/boards.txt
+ENERGIA_CC3200_BOARDS       = $(ENERGIA_PATH)/hardware/cc3200/boards.txt
+ENERGIA_CC2600_EMT_BOARDS   = $(ENERGIA_PATH)/hardware/cc2600emt/boards.txt
+ENERGIA_MSP432_EMT_BOARDS   = $(ENERGIA_PATH)/hardware/msp432/boards.txt
+ENERGIA_CC3200_EMT_BOARDS   = $(ENERGIA_PATH)/hardware/cc3200emt/boards.txt
+
 MAPLE_PATH      = $(MAPLE_APP)/Contents/Resources/Java
+MAPLE_BOARDS    = $(MAPLE_PATH)/hardware/leaflabs/boards.txt
+WIRING_PATH     = $(WIRING_APP)/Contents/Java
+WIRING_BOARDS   = $(WIRING_PATH)/hardware/Wiring/boards.txt
 
 # Paths list for IDE-less platforms
 #
-MBED_PATH       = $(EMBEDXCODE_APP)/mbed
+MBED_PATH       = $(MBED_APP)
 
 
 # Miscellaneous
@@ -474,7 +498,7 @@ endif
 # Look if BOARD_TAG is listed as a MapleIDE/LeafLabs board
 # Look if BOARD_TAG is listed as a Teensy/Teensy board
 # Look if BOARD_TAG is listed as a Microduino/Microduino board
-# Look if BOARD_TAG is listed as a Digispark/Digispark board
+# Look if BOARD_TAG is listed as a Digistump/Digistump board
 # Look if BOARD_TAG is listed as a IntelGalileo/arduino/x86 board
 # Look if BOARD_TAG is listed as a Adafruit/Arduino board
 # Look if BOARD_TAG is listed as a LittleRobotFriends board
@@ -492,7 +516,7 @@ ifneq ($(MAKECMDGOALS),boards)
 #            include $(MAKEFILE_PATH)/Arduino.mk
 #        else
         # Arduino.CC or Genuino
-        ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_AVR_BOARDS)),)
+        ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_CC_AVR_BOARDS)),)
             include $(MAKEFILE_PATH)/ArduinoAVR_166.mk
 
         else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_CC_PATH)/hardware/arduino/avr/boards.txt),)
@@ -500,27 +524,29 @@ ifneq ($(MAKECMDGOALS),boards)
         else ifneq ($(call PARSE_FILE,$(BOARD_TAG1),name,$(ARDUINO_CC_PATH)/hardware/arduino/avr/boards.txt),)
             include $(MAKEFILE_PATH)/ArduinoAVR_165.mk
 
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_SAM_BOARDS)),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_CC_SAM_BOARDS)),)
             include $(MAKEFILE_PATH)/ArduinoSAM_165.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_SAMD_BOARDS)),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_CC_SAMD_BOARDS)),)
             include $(MAKEFILE_PATH)/ArduinoSAMD_165.mk
 
         # Arduino.ORG
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_ORG_PATH)/hardware/arduino/avr/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_ORG_AVR_BOARDS)),)
             include $(MAKEFILE_PATH)/ArduinoAVR_177.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG1),name,$(ARDUINO_ORG_PATH)/hardware/arduino/avr/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG1),name,$(ARDUINO_ORG_AVR_BOARDS)),)
             include $(MAKEFILE_PATH)/ArduinoAVR_177
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_ORG_PATH)/hardware/arduino/sam/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_ORG_SAM_BOARDS)),)
             include $(MAKEFILE_PATH)/ArduinoSAM_177.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_ORG_PATH)/hardware/arduino/samd/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ARDUINO_ORG_SAMD_BOARDS)),)
             include $(MAKEFILE_PATH)/ArduinoSAMD_177.mk
 
-        # Additioanl boards for Arduino.CC or Genuino
+        # Additional boards for Arduino.CC or Genuino
         # Intel
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(GALILEO_BOARDS)),)
-            include $(MAKEFILE_PATH)/Galileo_165.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(EDISON_BOARDS)),)
-            include $(MAKEFILE_PATH)/Edison_165.mk
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(INTEL_GALILEO_BOARDS)),)
+            include $(MAKEFILE_PATH)/IntelGalileo_165.mk
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(INTEL_EDISON_BOARDS)),)
+            include $(MAKEFILE_PATH)/IntelEdison_165.mk
+		else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(INTEL_CURIE_BOARDS)),)
+			include $(MAKEFILE_PATH)/IntelCurie_165.mk
 
         # panStamp
         else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(PANSTAMP_AVR_BOARDS)),)
@@ -533,25 +559,27 @@ ifneq ($(MAKECMDGOALS),boards)
             include $(MAKEFILE_PATH)/chipKIT_165.mk
 
         # Energia
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_PATH)/hardware/msp430/boards.txt),)
-            include $(MAKEFILE_PATH)/EnergiaMSP430.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_PATH)/hardware/c2000/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_MSP430_BOARDS)),)
+            include $(MAKEFILE_PATH)/EnergiaMSP430.mk$
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_C2000_BOARDS)),)
             include $(MAKEFILE_PATH)/EnergiaC2000.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_PATH)/hardware/lm4f/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_LM4F_BOARDS)),)
             include $(MAKEFILE_PATH)/EnergiaLM4F.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_PATH)/hardware/cc3200/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_CC3200_BOARDS)),)
             include $(MAKEFILE_PATH)/EnergiaCC3200.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_PATH)/hardware/msp432/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_MSP432_EMT_BOARDS)),)
             include $(MAKEFILE_PATH)/EnergiaMSP432EMT.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_PATH)/hardware/cc3200emt/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_CC3200_EMT_BOARDS)),)
             include $(MAKEFILE_PATH)/EnergiaCC3200EMT.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_PATH)/hardware/cc2600emt/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ENERGIA_CC2600_EMT_BOARDS)),)
             include $(MAKEFILE_PATH)/EnergiaCC2600EMT.mk
 
         # Others boards for Arduino.CC 1.6.5
         # Adafruit
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ADAFRUIT_BOARDS)),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ADAFRUIT_AVR_BOARDS)),)
             include $(MAKEFILE_PATH)/AdafruitAVR_165.mk
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ADAFRUIT_SAMD_BOARDS)),)
+            include $(MAKEFILE_PATH)/AdafruitSAMD_165.mk
 
         # ESP8266
         else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(ESP8266_BOARDS)),)
@@ -562,10 +590,12 @@ ifneq ($(MAKECMDGOALS),boards)
             include $(MAKEFILE_PATH)/LittleRobotFriends_165.mk
 
         # Digistump
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(DIGISPARK_AVR_BOARDS)),)
-            include $(MAKEFILE_PATH)/DigisparkAVR_165.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(DIGISPARK_SAM_BOARDS)),)
-            include $(MAKEFILE_PATH)/DigisparkSAM_165.mk
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(DIGISTUMP_AVR_BOARDS)),)
+            include $(MAKEFILE_PATH)/DigistumpAVR_165.mk
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(DIGISTUMP_SAM_BOARDS)),)
+            include $(MAKEFILE_PATH)/DigistumpSAM_165.mk
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(DIGISTUMP_OAK_BOARDS)),)
+            include $(MAKEFILE_PATH)/DigistumpOAK_165.mk
 
         # RedBearLab
         else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(REDBEARLAB_AVR_BOARDS)),)
@@ -575,26 +605,23 @@ ifneq ($(MAKECMDGOALS),boards)
 
         # UDOO Neo
         else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(UDOO_NEO_BOARDS)),)
-            include $(MAKEFILE_PATH)/UDOONeo_165.mk
+            include $(MAKEFILE_PATH)/UdooNeo_165.mk
 
         # Other boards
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(MAPLE_PATH)/hardware/leaflabs/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(MAPLE_BOARDS)),)
             include $(MAKEFILE_PATH)/MapleIDE.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(WIRING_PATH)/hardware/Wiring/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(WIRING_BOARDS)),)
             include $(MAKEFILE_PATH)/Wiring.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(TEENSY_PATH)/hardware/teensy/avr/boards.txt),)
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(TEENSY_BOARDS)),)
             include $(MAKEFILE_PATH)/Teensy.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG1),name,$(MICRODUINO_PATH)/hardware/Microduino/avr/boards.txt),)
-            include $(MAKEFILE_PATH)/Microduino_16.mk
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(MICRODUINO_PATH)/hardware/Microduino/avr/boards.txt),)
-            include $(MAKEFILE_PATH)/Microduino_16.mk
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG1),name,$(MICRODUINO_AVR_BOARDS)),)
+            include $(MAKEFILE_PATH)/Microduino_168.mk
+        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(MICRODUINO_AVR_BOARDS)),)
+            include $(MAKEFILE_PATH)/Microduino_168.mk
 
         # Other frameworks
         else ifeq ($(filter MBED,$(GCC_PREPROCESSOR_DEFINITIONS)),MBED)
             include $(MAKEFILE_PATH)/mbed.mk
-
-        else ifneq ($(call PARSE_FILE,$(BOARD_TAG),name,$(REDBEARLAB_PATH)/hardware/arduino/RBL_nRF51822/boards.txt),)
-            include $(MAKEFILE_PATH)/RedBearLab.mk
 
         else ifeq ($(filter SPARK,$(GCC_PREPROCESSOR_DEFINITIONS)),SPARK)
             include $(MAKEFILE_PATH)/Particle.mk

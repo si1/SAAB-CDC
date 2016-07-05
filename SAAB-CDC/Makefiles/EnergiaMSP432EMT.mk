@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Dec 05, 2015 release 4.0.6
+# Last update: Mar 21, 2016 release 4.4.1
 
 
 
@@ -115,6 +115,7 @@ INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/tools/lm4f/include
 INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/msp432/cores/msp432/inc/CMSIS
 INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt/xdc/cfg
 INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt
+INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt/ti
 INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/msp432
 INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/
 

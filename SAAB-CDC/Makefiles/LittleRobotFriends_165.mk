@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Jan 16, 2016 release 4.1.7
+# Last update: Feb 10, 2016 release 4.2.5
 
 
 include $(MAKEFILE_PATH)/About.mk
@@ -47,7 +47,7 @@ ifeq ($(wildcard $(OTHER_TOOLS_PATH)),)
 endif
 
 BUILD_CORE       = avr
-BOARDS_TXT      := $(LITTLEROBOTFRIENDS_1)/hardware/avr/1.6.0/boards.txt
+BOARDS_TXT      := $(LITTLEROBOTFRIENDS_1)/hardware/avr/$(LITTLEROBOTFRIENDS_AVR_RELEASE)/boards.txt
 lrf1200          = $(call PARSE_BOARD,$(BOARD_TAG),build.core)
 BUILD_CORE       = $(patsubst arduino:%,%,$(lrf1200))
 #BUILD_CORE       = $(call PARSE_BOARD,$(BOARD_TAG),build.core)
@@ -102,7 +102,7 @@ APP_LIBS_LOCK = 1
 # ?ibraries required for libraries and Libraries
 #
 ifeq ($(USER_LIBRARY_DIR)/Arduino15/preferences.txt,)
-    $(error Error: run Arduino or panStamp once and define the sketchbook path)
+    $(error Error: run Arduino once and define the sketchbook path)
 endif
 
 ifeq ($(wildcard $(SKETCHBOOK_DIR)),)

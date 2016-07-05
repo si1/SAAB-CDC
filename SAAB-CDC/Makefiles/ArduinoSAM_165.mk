@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Dec 28, 2015 release 4.1.4
+# Last update: Mar 07, 2016 release 4.3.9
 
 
 
@@ -20,7 +20,7 @@ include $(MAKEFILE_PATH)/About.mk
 #
 PLATFORM         := Arduino
 BUILD_CORE       := sam
-PLATFORM_TAG      = ARDUINO=$(ARDUINO_RELEASE) ARDUINO_ARCH_SAM EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(BOARD_NAME) $(filter __%__ ,$(GCC_PREPROCESSOR_DEFINITIONS))
+PLATFORM_TAG      = ARDUINO=10607 ARDUINO_ARCH_SAM EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(BOARD_NAME) $(filter __%__ ,$(GCC_PREPROCESSOR_DEFINITIONS))
 APPLICATION_PATH := $(ARDUINO_PATH)
 PLATFORM_VERSION := SAM $(ARDUINO_SAM_RELEASE) for Arduino $(ARDUINO_CC_RELEASE)
 
@@ -44,7 +44,8 @@ APP_LIB_PATH     := $(HARDWARE_PATH)/libraries
 BOARDS_TXT       := $(HARDWARE_PATH)/boards.txt
 BOARD_NAME        = $(call PARSE_BOARD,$(BOARD_TAG),build.board)
 
-FIRST_O_IN_A     = $$(find . -name variant.cpp.o)
+FIRST_O_IN_A     = $$(find . -name \*.S.o)
+#FIRST_O_IN_A     = $$(find . -name variant.cpp.o)
 #FIRST_O_IN_A     = $(filter %/variant.cpp.o,$(BUILD_CORE_OBJS))
 
 VARIANT             = $(call PARSE_BOARD,$(BOARD_TAG),build.variant)
@@ -60,7 +61,7 @@ VARIANT_OBJS        = $(patsubst $(HARDWARE_PATH)/%,$(OBJDIR)/%,$(VARIANT_OBJ_FI
 # Tested by Mike Roberts
 #
 UPLOADER          = bossac
-UPLOADER_PATH     = $(OTHER_TOOLS_PATH)/bossac/1.6-arduino
+UPLOADER_PATH     = $(OTHER_TOOLS_PATH)/bossac/$(BOSSAC_RELEASE)
 UPLOADER_EXEC     = $(UPLOADER_PATH)/bossac
 UPLOADER_PORT     = $(subst /dev/,,$(AVRDUDE_PORT))
 UPLOADER_OPTS     = -i -d --port=$(UPLOADER_PORT) -U $(call PARSE_BOARD,$(BOARD_TAG),upload.native_usb) -e -w -v -b
@@ -208,12 +209,12 @@ CPPFLAGS    += $(addprefix -I, $(INCLUDE_PATH))
 # Specific CFLAGS for gcc only
 # gcc uses CPPFLAGS and CFLAGS
 #
-CFLAGS       =
+CFLAGS       = -std=gnu11
 
 # Specific CXXFLAGS for g++ only
 # g++ uses CPPFLAGS and CXXFLAGS
 #
-CXXFLAGS     = -fno-rtti -fno-exceptions
+CXXFLAGS     = -fno-rtti -fno-exceptions -fno-threadsafe-statics -std=gnu++11
 
 # Specific ASFLAGS for gcc assembler only
 # gcc assembler uses CPPFLAGS and ASFLAGS
@@ -226,10 +227,10 @@ ASFLAGS      = -x assembler-with-cpp
 LDFLAGS      = $(OPTIMISATION) $(WARNING_FLAGS)
 LDFLAGS     += -$(MCU_FLAG_NAME)=$(MCU)
 LDFLAGS     += -T $(VARIANT_PATH)/$(LDSCRIPT) -mthumb
-LDFLAGS     += -Wl,-Map,Builds/embeddedcomputing.map $(VARIANT_OBJS)
-LDFLAGS     += -lgcc -mthumb -Wl,--cref -Wl,--check-sections -Wl,--gc-sections
+LDFLAGS     += -Wl,-Map,Builds/embeddedcomputing.map
+LDFLAGS     += -mthumb -Wl,--cref -Wl,--check-sections -Wl,--gc-sections
 LDFLAGS     += -Wl,--unresolved-symbols=report-all -Wl,--warn-common -Wl,--warn-section-align
-LDFLAGS     += -Wl,--warn-unresolved-symbols -Wl,--entry=Reset_Handler
+LDFLAGS     += -Wl,--entry=Reset_Handler -Wl,--gc-sections
 #LDFLAGS     += -lm -Wl,--gc-sections,-u,main
 
 # Specific OBJCOPYFLAGS for objcopy only
@@ -243,7 +244,7 @@ OBJCOPYFLAGS  = -v -Obinary
 # Link command
 #
 FIRST_O_IN_LD   = $$(find . -name syscalls_sam3.c.o)
-COMMAND_LINK    = $(CXX) $(LDFLAGS) $(OUT_PREPOSITION)$@ -L$(OBJDIR) -Wl,--start-group $(FIRST_O_IN_LD) $(SYSTEM_OBJS) $(LOCAL_OBJS) $(TARGET_A) -Wl,--end-group -lm -lgcc
+COMMAND_LINK    = $(CC) $(LDFLAGS) $(OUT_PREPOSITION)$@ -L$(OBJDIR) -Wl,--start-group $(FIRST_O_IN_LD) $(SYSTEM_OBJS) $(LOCAL_OBJS) $(TARGET_A) -Wl,--end-group -lm -lgcc
 
 # Upload command
 #

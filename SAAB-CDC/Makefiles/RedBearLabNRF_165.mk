@@ -115,7 +115,7 @@ APP_LIBS_LOCK = 1
 # ?ibraries required for libraries and Libraries
 #
 ifeq ($(USER_LIBRARY_DIR)/Arduino15/preferences.txt,)
-    $(error Error: run Arduino or panStamp once and define the sketchbook path)
+    $(error Error: run Arduino once and define the sketchbook path)
 endif
 
 ifeq ($(wildcard $(SKETCHBOOK_DIR)),)

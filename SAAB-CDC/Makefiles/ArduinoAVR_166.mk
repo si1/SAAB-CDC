@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Dec 28, 2015 release 4.1.4
+# Last update: Mar 28, 2015 release 4.4.2
 
 
 
@@ -197,7 +197,7 @@ USB_PRODUCT := $(call PARSE_BOARD,$(BOARD_TAG),build.usb_product)
 ifneq ($(USB_VID),)
 USB_FLAGS    = -DUSB_VID=$(USB_VID)
 USB_FLAGS   += -DUSB_PID=$(USB_PID)
-USB_FLAGS   += -DUSBCON
+#USB_FLAGS   += -DUSBCON
 USB_FLAGS   += -DUSB_MANUFACTURER=''
 USB_FLAGS   += -DUSB_PRODUCT='$(USB_PRODUCT)'
 endif

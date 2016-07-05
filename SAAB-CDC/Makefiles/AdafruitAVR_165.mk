@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Jan 16, 2016 release 4.1.7
+# Last update: May 07, 2015 release 4.5.4
 
 
 
@@ -20,9 +20,9 @@ include $(MAKEFILE_PATH)/About.mk
 PLATFORM         := Adafruit
 PLATFORM_TAG      = ARDUINO=10605 ADAFRUIT EMBEDXCODE=$(RELEASE_NOW)
 APPLICATION_PATH := $(ARDUINO_PATH)
-PLATFORM_VERSION := $(ADAFRUIT_AVR_RELEASE) for Arduino $(ARDUINO_CC_RELEASE)
+PLATFORM_VERSION := AVR $(ADAFRUIT_AVR_RELEASE) for Arduino $(ARDUINO_CC_RELEASE)
 
-HARDWARE_PATH     = $(ADAFRUIT_PATH)/hardware/avr/$(ADAFRUIT_AVR_RELEASE)
+HARDWARE_PATH     = $(ADAFRUIT_AVR_PATH)/hardware/avr/$(ADAFRUIT_AVR_RELEASE)
 
 # With ArduinoCC 1.6.6, AVR 1.6.9 used to be under ~/Library
 TOOL_CHAIN_PATH   = $(ARDUINO_AVR_PATH)/tools/avr-gcc/$(AVR_GCC_RELEASE)
@@ -90,7 +90,7 @@ APP_LIBS_LOCK = 1
 # ?ibraries required for libraries and Libraries
 #
 ifeq ($(USER_LIBRARY_DIR)/Arduino15/preferences.txt,)
-    $(error Error: run Arduino or panStamp once and define the sketchbook path)
+    $(error Error: run Arduino once and define the sketchbook path)
 endif
 
 ifeq ($(wildcard $(SKETCHBOOK_DIR)),)
@@ -134,6 +134,21 @@ MCU              = $(call PARSE_BOARD,$(BOARD_TAG),build.mcu)
 F_CPU            = $(call PARSE_BOARD,$(BOARD_TAG),build.f_cpu)
 OPTIMISATION     = -Os
 
+# Adafruit Feather AVR USB PID VID
+#
+USB_VID     := $(call PARSE_BOARD,$(BOARD_TAG),build.vid)
+USB_PID     := $(call PARSE_BOARD,$(BOARD_TAG),build.pid)
+USB_PRODUCT := $(call PARSE_BOARD,$(BOARD_TAG),build.usb_product)
+USB_VENDOR  := $(call PARSE_BOARD,$(BOARD_TAG),build.usb_manufacturer)
+
+ifneq ($(USB_VID),)
+    USB_FLAGS    = -DUSB_VID=$(USB_VID)
+    USB_FLAGS   += -DUSB_PID=$(USB_PID)
+    USB_FLAGS   += -DUSBCON
+    USB_FLAGS   += -DUSB_MANUFACTURER='$(USB_VENDOR)'
+    USB_FLAGS   += -DUSB_PRODUCT='$(USB_PRODUCT)'
+endif
+
 INCLUDE_PATH     = $(CORE_LIB_PATH) $(APP_LIB_PATH) $(VARIANT_PATH) $(HARDWARE_PATH)
 INCLUDE_PATH    += $(sort $(dir $(APP_LIB_CPP_SRC) $(APP_LIB_C_SRC) $(APP_LIB_H_SRC)))
 INCLUDE_PATH    += $(sort $(dir $(BUILD_APP_LIB_CPP_SRC) $(BUILD_APP_LIB_C_SRC)))
@@ -159,7 +174,7 @@ CFLAGS           =
 # Specific CXXFLAGS for g++ only
 # g++ uses CPPFLAGS and CXXFLAGS
 #
-CXXFLAGS         = -fno-exceptions -fno-threadsafe-statics
+CXXFLAGS         = -fno-exceptions -fno-threadsafe-statics -std=gnu++11
 
 # Specific ASFLAGS for gcc assembler only
 # gcc assembler uses CPPFLAGS and ASFLAGS
@@ -193,4 +208,4 @@ TARGET_EEP       = $(OBJDIR)/$(TARGET).eep
 #
 COMMAND_LINK    = $(CC) $(OUT_PREPOSITION)$@ $(LOCAL_OBJS) $(TARGET_A) -LBuilds $(LDFLAGS)
 
-COMMAND_UPLOAD  = $(AVRDUDE_EXEC) -p$(AVRDUDE_MCU) -D -c$(AVRDUDE_PROGRAMMER) -C$(AVRDUDE_CONF) -Uflash:w:$(TARGET_HEX):i
+#COMMAND_UPLOAD  = $(AVRDUDE_EXEC) -p$(AVRDUDE_MCU) -D -c$(AVRDUDE_PROGRAMMER) -C$(AVRDUDE_CONF) -Uflash:w:$(TARGET_HEX):i
