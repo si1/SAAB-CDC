@@ -228,13 +228,13 @@ void CDChandler::handleSteeringWheelButtons() {
     checkCanEvent(4);
     switch (CAN_RxMsg.data[2]) {
         case 0x04: // NXT button on wheel
-            //RN52.write(PLAYPAUSE);
+            BT.bt_play();
             break;
         case 0x10: // Seek+ button on wheel
-            //RN52.write(NEXTTRACK);
+            BT.bt_next();
             break;
         case 0x08: // Seek- button on wheel
-            //RN52.write(PREVTRACK);
+            BT.bt_prev();
             break;
         default:
             //Serial.print(CAN_RxMsg.data[2],HEX);
