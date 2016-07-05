@@ -19,9 +19,9 @@
 
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+#include <Arduino.h>
 #else
-#include "WProgram.h"
+#include <WProgram.h>
 #endif
 
 #include "CAN.h"
@@ -69,7 +69,7 @@ void CANClass::begin(uint16_t speed)
     SET_INPUT(MCP2515_INT);
     SET(MCP2515_INT);
     
-    // activamos el SPI de Arduino como Master y Fosc/2=8 MHz
+    // We activate the SPI Arduino as Master and Fosc/2=8 MHz
     SPCR = (1<<SPE)|(1<<MSTR) | (0<<SPR1)|(0<<SPR0);
     SPSR = (1<<SPI2X);
 #if (DEBUGMODE==1)
@@ -92,45 +92,63 @@ void CANClass::begin(uint16_t speed)
     switch(speed)
     {
         case 47:
-            /* Original CNF values
+            /*
+             Supposed to use...?
+             SJW = 1
+             SP% ~= 75
+            */
+            
+            //Original CNF values
              mcp2515_write_register(CNF1,0xC7);
              mcp2515_write_register(CNF2,0xBE);
              mcp2515_write_register(CNF3,0x04);
+            /*
+             T1   = 16
+             T2   = 5
+             BTQ  = 21
+             SP%  = 76.19
+             SJW  = 4
+             Err% = 0
              */
             
             /*
              // Version 1
              mcp2515_write_register(CNF1,0xC7);
-             mcp2515_write_register(CNF2,0xB5);
-             mcp2515_write_register(CNF3,0x06);
+             mcp2515_write_register(CNF2,0xFE);
+             mcp2515_write_register(CNF3,0x04);
+            /*
+             T1   = 14
+             T2   = 7
+             BTQ  = 21
+             SP%  = 66.67
+             SJW  = 4
+             Err% = 0
              
              
              // Version 2
-             mcp2515_write_register(CNF1,0x06);
-             mcp2515_write_register(CNF2,0xBE);
-             mcp2515_write_register(CNF3,0x07);
-             */
-            
-            // Version 3
-            mcp2515_write_register(CNF1,0x4B);
-            mcp2515_write_register(CNF2,0xF1);
-            mcp2515_write_register(CNF3,0x03);
-            
+             
+             mcp2515_write_register(CNF1,0xC7);
+             mcp2515_write_register(CNF2,0xFE);
+             mcp2515_write_register(CNF3,0x44);
             /*
-             // Version 4
-             mcp2515_write_register(CNF1,0x0B);
-             mcp2515_write_register(CNF2,0x9B);
-             mcp2515_write_register(CNF3,0x04);
-             
-             // Version 5
-             mcp2515_write_register(CNF1,0x0D);
-             mcp2515_write_register(CNF2,0x9A);
-             mcp2515_write_register(CNF3,0x03);
-             
-             // Version 6
-             mcp2515_write_register(CNF1,0x14);
-             mcp2515_write_register(CNF2,0x89);
-             mcp2515_write_register(CNF3,0x02);
+             T1   = 16
+             T2   = 8
+             BTQ  = 24
+             SP%  = 66.67
+             SJW  = 1
+             Err% = 0
+             */
+            /*
+            // Version 3
+            mcp2515_write_register(CNF1,0xC7);
+            mcp2515_write_register(CNF2,0xBE);
+            mcp2515_write_register(CNF3,0x44);
+             T1   = 10
+             T2   = 4
+             BTQ  = 14
+             SP%  = 71.4
+             SJW  = 2
+             Err% = 0
              */
             
 #if (DEBUGMODE==1)
@@ -197,16 +215,16 @@ void CANClass::begin(uint16_t speed)
     
     
     
-    //Activamos Interrupcion de RX
-    mcp2515_write_register(CANINTE,(1<<RX1IE)|(1<<RX0IE)); //Los dos buffers activan pin de interrupcion
+    //Activate RX Interruption
+    mcp2515_write_register(CANINTE,(1<<RX1IE)|(1<<RX0IE)); //The two buffers activated interrupt pin
     
-    //Filtros
-    //Bufer 0: Todos los msjes y Rollover=>Si buffer 0 lleno,envia a buffer 1
-    mcp2515_write_register(RXB0CTRL,(1<<RXM1)|(1<<RXM0)|(1<<BUKT)); //RXM1 y RXM0 para filter/mask off+Rollover
-    //Bufer 1: Todos los msjes
-    mcp2515_write_register(RXB1CTRL,(1<<RXM1)|(1<<RXM0)); //RXM1 y RXM0 para filter/mask off
+    //Filters
+    //Buffer 0: All Messages and Rollover=>If buffer 0 full, send to buffer 1
+    mcp2515_write_register(RXB0CTRL,(1<<RXM1)|(1<<RXM0)|(1<<BUKT)); //RXM1 & RXM0 the filter/mask off+Rollover
+    //Buffer 1: All Messages
+    mcp2515_write_register(RXB1CTRL,(1<<RXM1)|(1<<RXM0)); //RXM1 & RXM0 the filter/mask off
     
-    //Borrar bits de mascara de recepcion
+    //Clear reception mask bits
     mcp2515_write_register( RXM0SIDH, 0 );
     mcp2515_write_register( RXM0SIDL, 0 );
     mcp2515_write_register( RXM0EID8, 0 );
@@ -216,15 +234,15 @@ void CANClass::begin(uint16_t speed)
     mcp2515_write_register( RXM1EID8, 0 );
     mcp2515_write_register( RXM1EID0, 0 );
     
-    //Encender el led de la placa conectado a RX0BF/RX1BF cuando hay una msje en el buffer
+    //Turn the LED on the board connected to RX0BF / RX1BF when a msg in the buffer
     mcp2515_write_register( BFPCTRL, 0b00001111 );
     
-    //Pasar el MCP2515 a modo normal y One Shot Mode 0b00001000
+    //Pass the MCP2515 to normal mode and One Shot Mode 0b00001000
     // OSM switched off
     
     mcp2515_write_register(CANCTRL, 0);
     
-    //Inicializo buffer
+    //Initialize buffer
     _CAN_RX_BUFFER.head=0;
     _CAN_RX_BUFFER.tail=0;
     

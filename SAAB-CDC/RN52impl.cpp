@@ -23,6 +23,7 @@
  */
 
 #include "RN52impl.h"
+#include "CDC.h"
 
 /**
  * Reads the input (if any) from UART over software serial connection
@@ -68,6 +69,7 @@ void RN52impl::onProfileChange(BtProfile profile, bool connected) {
     switch(profile) {
         case A2DP:bt_a2dp = connected;
             if (connected && playing) {
+                CDC.sidBeep();
                 // Serial.println("DEBUG: RN52 connection ok; 'auto-play' should kick in now!");
                 sendAVCRP(RN52::RN52driver::PLAY);
             }

@@ -39,7 +39,7 @@
  */
 
 #define MODULE_NAME                 "BT TEST"
-#define LAST_EVENT_IN_TIMEOUT       2000    // Milliseconds
+#define LAST_EVENT_IN_TIMEOUT       3000    // Milliseconds
 #define DISPLAY_NAME_TIMEOUT        5000    // Milliseconds
 #define NODE_STATUS_TX_MSG_SIZE     4       // Decimal; defines how many frames do we need to reply with to '6A1'
 
@@ -95,6 +95,8 @@ public:
     void sendDisplayRequest();
     void sendCanFrame(int message_id, int *msg);
     void writeTextOnDisplay(char text[]);
+    void checkCanEvent(int frameElement);
+    void sidBeep();
 };
 
 void sendCdcStatusOnTime(void*);
