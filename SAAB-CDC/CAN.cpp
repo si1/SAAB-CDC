@@ -810,17 +810,17 @@ void CANClass::store(msgCAN *message)
     
     int i=(_CAN_RX_BUFFER.head+1)%RX_CAN_BUFFER_SIZE;
     
-    //Hay que guardar en el buffer,siempre y cuando estes por detras de la cola
-    //Vemos ejemplo si el tamanyo del buffer es 10:
-    //Resto de 1/10=1, meto dato CAN_RX_BUFFER.buffer[0]; i=1
-    //Resto de 2/10=2, meto dato CAN_RX_BUFFER.buffer[1]; i=2
+    //Must be stored in the buffer, as long as're from behind the tail
+    //We see example if the buffer size is 10:
+    //The rest of 1/10=1, meter data CAN_RX_BUFFER.buffer[0]; i=1
+    //The rest of 2/10=2, meter data CAN_RX_BUFFER.buffer[1]; i=2
     //...
-    //Resto de 10/10=0, BUFFER LLENO. No hace nada.
+    //The rest of 10/10=0, BUFFER FULL. Does nothing.
     
     if (i!=_CAN_RX_BUFFER.tail)
     {
         _CAN_RX_BUFFER.buffer[_CAN_RX_BUFFER.head]=*message;
-        //incremento la posicion actual del buffer circular
+        //increase the current position of the circular buffer
         _CAN_RX_BUFFER.head=i;
         
     }else{
@@ -871,7 +871,7 @@ void CANClass::read(msgCAN *message)
     
     if (_CAN_RX_BUFFER.head==_CAN_RX_BUFFER.tail)
     {
-        //Significa que no hay dato 
+        //It means no data
         message->id=0;
         
     }else{
