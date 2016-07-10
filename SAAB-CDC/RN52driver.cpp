@@ -291,7 +291,7 @@ namespace RN52 {
                 break;
             case VASSISTANT:
                 queueCommand(RN52_CMD_AVCRP_VASSISTANT);
-                // Serial.println("DEBUG: Sending 'Invoke voice assistant' command to RN52.");
+                //Serial.println("DEBUG: Sending 'Invoke voice assistant' command to RN52.");
                 break;
             case VOLUP:
                 queueCommand(RN52_CMD_AVCRP_VOLUP);

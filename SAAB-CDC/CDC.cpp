@@ -68,7 +68,7 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
     {0x62,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1}
 };
 int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
-int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
+int cdcGeneralStatusCmd[] = {0xE0,0x00,0x3F,0x61,0xFF,0x00,0x00,0xD0,-1};
 int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1};
 
 /**
@@ -77,7 +77,7 @@ int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0
 
 void CDChandler::printCanTxFrame() {
     Serial.print(CAN_TxMsg.id,HEX);
-    Serial.print(" -> ");
+    Serial.print(" Tx-> ");
     for (int i = 0; i < 8; i++) {
         Serial.print(CAN_TxMsg.data[i],HEX);
         Serial.print(" ");
@@ -91,7 +91,7 @@ void CDChandler::printCanTxFrame() {
 
 void CDChandler::printCanRxFrame() {
     Serial.print(CAN_RxMsg.id,HEX);
-    Serial.print(" -> ");
+    Serial.print(" Rx-> ");
     for (int i = 0; i < 8; i++) {
         Serial.print(CAN_RxMsg.data[i],HEX);
         Serial.print(" ");
@@ -176,6 +176,7 @@ void CDChandler::handleIhuButtons() {
         switch (CAN_RxMsg.data[1]) {
             case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
                 cdcActive = true;
+                //sendCanFrame(SOUND_REQUEST, soundCmd);
                 BT.bt_reconnect();
                 break;
             case 0x14: // CDC = OFF (Back to Radio or Tape mode)
@@ -188,6 +189,19 @@ void CDChandler::handleIhuButtons() {
         }
     }
     if (cdcActive) {
+        printCanRxFrame();
+        if ((CAN_RxMsg.data[0] == 0x80) && (CAN_RxMsg.data[1] == 0x68)) { // Buttons "1-6" on IHU
+            switch (CAN_RxMsg.data[2]) {
+                case 0x1:
+                    BT.bt_volup();
+                    break;
+                case 0x4:
+                    BT.bt_voldown();
+                    break;
+                default:
+                    break;
+            }
+        }
         switch (CAN_RxMsg.data[1]) {
             case 0x59: // NXT
                 BT.bt_play();
@@ -404,8 +418,4 @@ void CDChandler::checkCanEvent(int frameElement) {
         }
     }
     return;
-}
-
-void CDChandler::sidBeep() {
-    sendCanFrame(SOUND_REQUEST, soundCmd);
 }

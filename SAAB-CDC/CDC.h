@@ -96,7 +96,6 @@ public:
     void sendCanFrame(int message_id, int *msg);
     void writeTextOnDisplay(char text[]);
     void checkCanEvent(int frameElement);
-    void sidBeep();
 };
 
 void sendCdcStatusOnTime(void*);

@@ -43,6 +43,8 @@ public:
     void bt_prev();
     void bt_next();
     void bt_vassistant();
+    void bt_volup();
+    void bt_voldown();
     void bt_visible();
     void bt_invisible();
     void bt_reconnect();

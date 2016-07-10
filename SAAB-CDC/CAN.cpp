@@ -97,7 +97,6 @@ void CANClass::begin(uint16_t speed)
              SJW = 1
              SP% ~= 75
             */
-            
             //Original CNF values
              mcp2515_write_register(CNF1,0xC7);
              mcp2515_write_register(CNF2,0xBE);
@@ -113,9 +112,9 @@ void CANClass::begin(uint16_t speed)
             
             /*
              // Version 1
-             mcp2515_write_register(CNF1,0xC7);
-             mcp2515_write_register(CNF2,0xFE);
-             mcp2515_write_register(CNF3,0x04);
+             mcp2515_write_register(CNF1,0x4B);
+             mcp2515_write_register(CNF2,0xF1);
+             mcp2515_write_register(CNF3,0x03);
             /*
              T1   = 14
              T2   = 7
@@ -126,7 +125,6 @@ void CANClass::begin(uint16_t speed)
              
              
              // Version 2
-             
              mcp2515_write_register(CNF1,0xC7);
              mcp2515_write_register(CNF2,0xFE);
              mcp2515_write_register(CNF3,0x44);

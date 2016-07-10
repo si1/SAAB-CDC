@@ -60,6 +60,14 @@ void RN52handler::bt_vassistant() {
     driver.sendAVCRP(RN52::RN52driver::VASSISTANT);
 }
 
+void RN52handler::bt_volup() {
+    driver.sendAVCRP(RN52::RN52driver::VOLUP);
+}
+
+void RN52handler::bt_voldown() {
+    driver.sendAVCRP(RN52::RN52driver::VOLDOWN);
+}
+
 void RN52handler::bt_visible() {
     driver.visible(true);
 }
