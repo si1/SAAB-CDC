@@ -32,16 +32,16 @@ const char *RN52_CMD_DETAILS = "D\r";
 const char *RN52_CMD_RECONNECTLAST = "B,06\r";
 const char *RN52_CMD_DISCONNECT = "K,06\r";
 const char* RN52_CMD_MAXVOL = "SS,0F\r";
-
 const char* RN52_CMD_RESET = "R,1\r";
-const char* RN52_CMD_AVCRP_VOLUP = "AV+\r";
-const char* RN52_CMD_AVCRP_VOLDOWN = "AV-\r";
+const char* RN52_CMD_VOLUP = "AV+\r";
+const char* RN52_CMD_VOLDOWN = "AV-\r";
+const char* RN52_CMD_DISCOVERY_ON = "@,1\r";
+const char* RN52_CMD_DISCOVERY_OFF = "@,0\r";
+
 const char* RN52_CMD_AVCRP_NEXT = "AT+\r";
 const char* RN52_CMD_AVCRP_PREV = "AT-\r";
 const char* RN52_CMD_AVCRP_VASSISTANT = "P\r";
 const char* RN52_CMD_AVCRP_PLAYPAUSE = "AP\r";
-const char* RN52_CMD_DISCOVERY_ON = "@,1\r";
-const char* RN52_CMD_DISCOVERY_OFF = "@,0\r";
 
 const char *RN52_RX_OK = "AOK\r\n";
 const char *RN52_RX_ERROR = "ERR\r\n";

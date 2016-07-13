@@ -68,6 +68,10 @@ void RN52handler::bt_voldown() {
     driver.sendAVCRP(RN52::RN52driver::VOLDOWN);
 }
 
+void RN52handler::bt_maxvol() {
+    driver.sendAVCRP(RN52::RN52driver::MAXVOL);
+}
+
 void RN52handler::bt_visible() {
     driver.visible(true);
 }

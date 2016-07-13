@@ -221,6 +221,14 @@ void CDChandler::handleIhuButtons() {
                     case 0x04:
                         BT.bt_voldown();
                         break;
+                    case 0x02:
+                        BT.bt_maxvol();
+                        break;
+                    case 0x03:
+                        BT.bt_reconnect();
+                        break;
+                    case 0x06:
+                        BT.bt_disconnect();
                     default:
                         break;
                 }

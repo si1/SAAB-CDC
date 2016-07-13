@@ -294,10 +294,10 @@ namespace RN52 {
                 //Serial.println("DEBUG: Sending 'Invoke voice assistant' command to RN52.");
                 break;
             case VOLUP:
-                queueCommand(RN52_CMD_AVCRP_VOLUP);
+                queueCommand(RN52_CMD_VOLUP);
                 break;
             case VOLDOWN:
-                queueCommand(RN52_CMD_AVCRP_VOLDOWN);
+                queueCommand(RN52_CMD_VOLDOWN);
                 break;
             case MAXVOL:
                 queueCommand(RN52_CMD_MAXVOL);

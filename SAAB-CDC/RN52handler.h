@@ -45,6 +45,7 @@ public:
     void bt_vassistant();
     void bt_volup();
     void bt_voldown();
+    void bt_maxvol();
     void bt_visible();
     void bt_invisible();
     void bt_reconnect();
