@@ -2614,7 +2614,7 @@ int main(void)
 #endif                                                                          // end IDE
 
 // Sketch
-#include "SAAB_CDC.ino"
+#include "SAAB-CDC.ino"
 
 
 #endif                                                                          // end embedXcode
