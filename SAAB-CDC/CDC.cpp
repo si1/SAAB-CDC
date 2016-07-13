@@ -68,7 +68,7 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
     {0x62,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1}
 };
 int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
-int cdcGeneralStatusCmd[] = {0xE0,0x00,0x3F,0x61,0xFF,0x00,0x00,0xD0,-1};
+int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
 int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1};
 
 /**
@@ -189,18 +189,6 @@ void CDChandler::handleIhuButtons() {
     }
     if (cdcActive) {
         checkCanEvent(1);
-        if ((event) && (CAN_RxMsg.data[1] == 0x68)) { // Buttons "1-6" on IHU
-            switch (CAN_RxMsg.data[2]) {
-                case 0x1:
-                    BT.bt_volup();
-                    break;
-                case 0x4:
-                    BT.bt_voldown();
-                    break;
-                default:
-                    break;
-            }
-        }
         switch (CAN_RxMsg.data[1]) {
             case 0x59: // NXT
                 BT.bt_play();
@@ -225,6 +213,17 @@ void CDChandler::handleIhuButtons() {
             case 0x36: // Track -
                 BT.bt_prev();
                 break;
+            case 0x68:
+                switch (CAN_RxMsg.data[2]) {
+                    case 0x01:
+                        BT.bt_volup();
+                        break;
+                    case 0x04:
+                        BT.bt_voldown();
+                        break;
+                    default:
+                        break;
+                }
             default:
                 break;
         }
