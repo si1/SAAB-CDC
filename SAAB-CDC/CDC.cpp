@@ -171,26 +171,25 @@ void CDChandler::handleRxFrame() {
  */
 
 void CDChandler::handleIhuButtons() {
-    checkCanEvent(1);
-    if ((CAN_RxMsg.data[0] == 0x80) && (CAN_RxMsg.data[1] != 0)) {
+    boolean event = (CAN_RxMsg.data[0] == 0x80);
+    if ((event) && (CAN_RxMsg.data[1] != 0)) {
         switch (CAN_RxMsg.data[1]) {
             case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
-                cdcActive = true;
-                //sendCanFrame(SOUND_REQUEST, soundCmd);
                 BT.bt_reconnect();
+                cdcActive = true;
                 break;
             case 0x14: // CDC = OFF (Back to Radio or Tape mode)
-                cdcActive = false;
-                displayWanted = false;
                 BT.bt_disconnect();
+                displayWanted = false;
+                cdcActive = false;
                 break;
             default:
                 break;
         }
     }
     if (cdcActive) {
-        printCanRxFrame();
-        if ((CAN_RxMsg.data[0] == 0x80) && (CAN_RxMsg.data[1] == 0x68)) { // Buttons "1-6" on IHU
+        checkCanEvent(1);
+        if ((event) && (CAN_RxMsg.data[1] == 0x68)) { // Buttons "1-6" on IHU
             switch (CAN_RxMsg.data[2]) {
                 case 0x1:
                     BT.bt_volup();
@@ -238,22 +237,23 @@ void CDChandler::handleIhuButtons() {
  */
 
 void CDChandler::handleSteeringWheelButtons() {
-    
-    checkCanEvent(4);
-    switch (CAN_RxMsg.data[2]) {
-        case 0x04: // NXT button on wheel
-            //BT.bt_play();
-            break;
-        case 0x10: // Seek+ button on wheel
-            //BT.bt_next();
-            break;
-        case 0x08: // Seek- button on wheel
-            //BT.bt_prev();
-            break;
-        default:
-            //Serial.print(CAN_RxMsg.data[2],HEX);
-            //Serial.println("DEBUG: Unknown button message");
-            break;
+    if (cdcActive) {
+        checkCanEvent(4);
+        switch (CAN_RxMsg.data[2]) {
+            case 0x04: // NXT button on wheel
+                //BT.bt_play();
+                break;
+            case 0x10: // Seek+ button on wheel
+                //BT.bt_next();
+                break;
+            case 0x08: // Seek- button on wheel
+                //BT.bt_prev();
+                break;
+            default:
+                //Serial.print(CAN_RxMsg.data[2],HEX);
+                //Serial.println("DEBUG: Unknown button message");
+                break;
+        }
     }
 }
 
@@ -387,10 +387,6 @@ void CDChandler::writeTextOnDisplay(char text[]) {
 }
 
 void CDChandler::checkCanEvent(int frameElement) {
-    if (!cdcActive) {
-        return;
-    }
-    
     boolean event = (CAN_RxMsg.data[0] == 0x80);
     if (!event && (CAN_RxMsg.data[frameElement]) != 0) { // Long press of a steering wheel button has taken place.
         if (millis() - lastIcomingEventTime > LAST_EVENT_IN_TIMEOUT) {
