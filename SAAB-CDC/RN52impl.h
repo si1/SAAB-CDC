@@ -34,9 +34,13 @@
  * Atmel 328 pin definitions:
  */
 
+const int BT_FACT_RST_PIN = A0;             // RN52 factory reset pin GPIO4
+const int PIN_A2 = A2;                      // Pin A2 on ATMEGA-328
+const int PIN_A3 = A3;                      // Pin A3 on ATMEGA-328
+const int PIN_A4 = A4;                      // Pin A4 on ATMEGA-328
+const int PIN_A5 = A5;                      // Pin A5 on ATMEGA-328
 const int BT_EVENT_INDICATOR_PIN = 3;       // RN52 GPIO2 pin for reading current status of the module
 const int BT_CMD_PIN = 4;                   // RN52 GPIO9 pin for enabling command mode
-const int BT_FACT_RST_PIN = A0;             // RN52 factory reset pin GPIO4
 const int BT_PWREN_PIN = 9;                 // RN52 Power enable pin
 const int UART_TX_PIN = 5;                  // UART Tx
 const int UART_RX_PIN = 6;                  // UART Rx

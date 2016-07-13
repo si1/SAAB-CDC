@@ -87,6 +87,10 @@ void RN52impl::initialize() {
     pinMode(BT_EVENT_INDICATOR_PIN,INPUT);
     pinMode(BT_CMD_PIN, OUTPUT);
     pinMode(BT_FACT_RST_PIN,INPUT);             // Some REALLY crazy stuff is going on if this pin is set as output and pulled low. Leave it alone! Trust me...
+    pinMode(PIN_A2,OUTPUT);
+    pinMode(PIN_A3,OUTPUT);
+    pinMode(PIN_A4,OUTPUT);
+    pinMode(PIN_A5,OUTPUT);
     pinMode(BT_PWREN_PIN,OUTPUT);
     digitalWrite(BT_EVENT_INDICATOR_PIN,HIGH);  // Default state of GPIO2, per data sheet, is HIGH
     digitalWrite(BT_CMD_PIN,HIGH);              // Default state of GPIO9, per data sheet, is HIGH
