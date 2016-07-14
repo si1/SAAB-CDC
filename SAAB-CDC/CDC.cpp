@@ -171,21 +171,18 @@ void CDChandler::handleRxFrame() {
  */
 
 void CDChandler::handleIhuButtons() {
-    boolean event = (CAN_RxMsg.data[0] == 0x80);
-    if ((event) && (CAN_RxMsg.data[1] != 0)) {
-        switch (CAN_RxMsg.data[1]) {
-            case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
-                BT.bt_reconnect();
-                cdcActive = true;
-                break;
-            case 0x14: // CDC = OFF (Back to Radio or Tape mode)
-                BT.bt_disconnect();
-                displayWanted = false;
-                cdcActive = false;
-                break;
-            default:
-                break;
-        }
+    switch (CAN_RxMsg.data[1]) {
+        case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
+            BT.bt_reconnect();
+            cdcActive = true;
+            break;
+        case 0x14: // CDC = OFF (Back to Radio or Tape mode)
+            BT.bt_disconnect();
+            displayWanted = false;
+            cdcActive = false;
+            break;
+        default:
+            break;
     }
     if (cdcActive) {
         checkCanEvent(1);
