@@ -100,27 +100,35 @@ void RN52handler::monitor_serial_input() {
         switch (incomingByte) {
             case 'V':
                 bt_visible();
+                Serial.println("Going _V_isible");
                 break;
             case 'I':
                 bt_invisible();
+                Serial.println("Going _I_nvisible");
                 break;
             case 'C':
                 bt_reconnect();
+                Serial.println("Re_C_onnect");
                 break;
             case 'D':
                 bt_disconnect();
+                Serial.println("_D_isconnect");
                 break;
             case 'P':
                 bt_play();
+                Serial.println("_P_lay");
                 break;
             case 'N':
                 bt_next();
+                Serial.println("_N_ext");
                 break;
             case 'R':
                 bt_prev();
+                Serial.println("P_R_evious");
                 break;
             case 'A':
                 bt_vassistant();
+                Serial.println("_A_ssistant");
                 break;
             default:
                 break;
