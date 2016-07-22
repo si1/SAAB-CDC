@@ -175,6 +175,7 @@ void CDChandler::handleIhuButtons() {
         case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
             BT.bt_reconnect();
             cdcActive = true;
+            sendCanFrame(SOUND_REQUEST, soundCmd);
             break;
         case 0x14: // CDC = OFF (Back to Radio or Tape mode)
             BT.bt_disconnect();
