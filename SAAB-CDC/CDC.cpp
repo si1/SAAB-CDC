@@ -68,8 +68,10 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
     {0x62,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1}
 };
 int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
-// 0xE0 seems to indicate that we are sending a "engineering test" command.
-// The "original" CD changer never sends 0xE0 as the first byte of frame.
+/*
+ 0xE0 in cdcGeneralStatusCmd seems to indicate that we are sending an "engineering test" command
+ The "original" CD changer never sends 0xE0 as the first byte of frame
+ */
 int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
 int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1};
 
@@ -148,21 +150,21 @@ void CDChandler::handleRxFrame() {
                 break;
             case DISPLAY_RESOURCE_GRANT:
                 if ((CAN_RxMsg.data[1] == 0x02) && (CAN_RxMsg.data[3] == CDC_SID_FUNCTION_ID)) {
-                    //Serial.println("DEBUG: We have been granted the right to write text to the second row in the SID");
-                    //Somehow this never happens as CDC is not "supposed" to ask SID for a display resource grant. CDC needs to pretend being someone else. IHU??
+                    // Serial.println("DEBUG: We have been granted the right to write text to the second row in the SID");
+                    // Somehow this never happens as CDC is not "supposed" to ask SID for a display resource grant
                     displayRequestGranted = true;
                     writeTextOnDisplay(MODULE_NAME);
                 }
                 else if (CAN_RxMsg.data[1] == 0x02) {
-                    //Serial.println("DEBUG: Someone else has been granted the second row, we need to back down");
+                    // Serial.println("DEBUG: Someone else has been granted the second row, we need to back down");
                     displayRequestGranted = false;
                 }
                 else if (CAN_RxMsg.data[1] == 0x00) {
-                    //Serial.println("DEBUG: Someone else has been granted the entire display, we need to back down");
+                    // Serial.println("DEBUG: Someone else has been granted the entire display, we need to back down");
                     displayRequestGranted = false;
                 }
                 else {
-                    //Serial.println("DEBUG: Someone else has been granted the first row; if we had the grant to the 2nd row, we still have it.");
+                    // Serial.println("DEBUG: Someone else has been granted the first row; if we had the grant to the 2nd row, we still have it.");
                 }
                 break;
         }
@@ -205,10 +207,10 @@ void CDChandler::handleIhuButtons() {
             case 0x76: // Random ON/OFF (Long press of CD/RDM button)
                 break;
             case 0xB1: // Pause ON
-                // N/A for now; never implemented
+                // N/A for now
                 break;
             case 0xB0: // Pause OFF
-                // N/A for now; never implemented
+                // N/A for now
                 break;
             case 0x35: // Track +
                 BT.bt_next();
@@ -396,6 +398,14 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     writeTextOnDisplayLastSendTime = millis();
 }
 
+/**
+ * Checks for a long press of a button event
+ * A long press is considered if the first byte of CAN frame != 0x80
+ * Then we look at 'frameElement' passed in by function call to look at which element we should put the counter on
+ * Once we reach 3 on the counter, we assert that a certain button has been held for a while and take an action accordingly
+ * LAST_EVENT_IN_TIMEOUT indicates how many milliseconds have to pass till we reset all the counters and wait for the next potential long press to come in
+ */
+
 void CDChandler::checkCanEvent(int frameElement) {
     boolean event = (CAN_RxMsg.data[0] == 0x80);
     if (!event && (CAN_RxMsg.data[frameElement]) != 0) { // Long press of a steering wheel button has taken place.
@@ -408,15 +418,15 @@ void CDChandler::checkCanEvent(int frameElement) {
             switch (CAN_RxMsg.data[frameElement]) {
                 case 0x04: // Long press of NXT button on steering wheel
                     BT.bt_vassistant();
-                    //Serial.println("NXT long press on steering wheel");
+                    // Serial.println("NXT long press on steering wheel");
                     break;
                 case 0x45: // SEEK+ button long press on IHU
                     BT.bt_visible();
-                    //Serial.println("SEEK+ long press on IHU");
+                    // Serial.println("SEEK+ long press on IHU");
                     break;
                 case 0x46: // SEEK- button long press on IHU
                     BT.bt_invisible();
-                    //Serial.println("SEEK- long press on IHU");
+                    // Serial.println("SEEK- long press on IHU");
                     break;
                 default:
                     break;
