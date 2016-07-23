@@ -68,6 +68,8 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
     {0x62,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1}
 };
 int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
+// 0xE0 seems to indicate that we are sending a "engineering test" command.
+// The "original" CD changer never sends 0xE0 as the first byte of frame.
 int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
 int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1};
 
@@ -147,6 +149,7 @@ void CDChandler::handleRxFrame() {
             case DISPLAY_RESOURCE_GRANT:
                 if ((CAN_RxMsg.data[1] == 0x02) && (CAN_RxMsg.data[3] == CDC_SID_FUNCTION_ID)) {
                     //Serial.println("DEBUG: We have been granted the right to write text to the second row in the SID");
+                    //Somehow this never happens as CDC is not "supposed" to ask SID for a display resource grant. CDC needs to pretend being someone else. IHU??
                     displayRequestGranted = true;
                     writeTextOnDisplay(MODULE_NAME);
                 }
@@ -173,6 +176,8 @@ void CDChandler::handleRxFrame() {
 void CDChandler::handleIhuButtons() {
     switch (CAN_RxMsg.data[1]) {
         case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
+            // Total number of hours spent trying to figure out what's wrong here as of July 2016 = 14,3; Incremented accordingly... :).
+            // In some cases handling of this case causes a reset of ATMEGA-328P-PU, thus causing Bluetooth and auto-play to fail.
             BT.bt_reconnect();
             cdcActive = true;
             sendCanFrame(SOUND_REQUEST, soundCmd);
@@ -200,10 +205,10 @@ void CDChandler::handleIhuButtons() {
             case 0x76: // Random ON/OFF (Long press of CD/RDM button)
                 break;
             case 0xB1: // Pause ON
-                // N/A for now
+                // N/A for now; never implemented
                 break;
             case 0xB0: // Pause OFF
-                // N/A for now
+                // N/A for now; never implemented
                 break;
             case 0x35: // Track +
                 BT.bt_next();
