@@ -78,6 +78,16 @@ void RN52impl::onProfileChange(BtProfile profile, bool connected) {
     }
 }
 
+void RN52impl::update() {
+    readFromUART();
+    if (digitalRead(BT_EVENT_INDICATOR_PIN) == 0) {
+        if ((millis() - lastEventIndicatorPinStateChange) > 100) {
+            lastEventIndicatorPinStateChange = millis();
+            onGPIO2();
+        }
+    }
+}
+
 /**
  * Initializes Atmel pins and software serial for their initial state on startup
  */
@@ -103,4 +113,25 @@ void RN52impl::initialize() {
     
     // Configuring RN52
     
+    set_discovery_mask();
+    waitForResponse();
+    set_connection_mask();
+    waitForResponse();
+    set_cod();
+    waitForResponse();
+    set_device_name();
+    waitForResponse();
+    set_normalized_name();
+    waitForResponse();
+    set_max_volume();
+    waitForResponse();
+    set_extended_features();
+    waitForResponse();
+    reboot();
+}
+
+void RN52impl::waitForResponse() {
+    do {
+        update();
+    } while (currentCommand != NULL);
 }

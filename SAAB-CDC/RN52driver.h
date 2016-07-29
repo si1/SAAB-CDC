@@ -60,6 +60,7 @@ namespace RN52 {
         void reboot();
         void visible(bool visible);
         int sendAVCRP(AVCRP cmd);
+        const char *currentCommand;
         
     protected:
         void refreshState();
@@ -80,7 +81,6 @@ namespace RN52 {
         char cmdRxBuffer[CMD_RX_BUFFER_SIZE];
         int cmdRxBufferPos;
         
-        const char *currentCommand;
         const char *commandQueue[CMD_QUEUE_SIZE];
         int commandQueuePos;
         

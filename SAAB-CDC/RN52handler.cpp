@@ -31,13 +31,7 @@ RN52handler BT;
  */
 
 void RN52handler::update() {
-    driver.readFromUART();
-    if (digitalRead(BT_EVENT_INDICATOR_PIN) == 0) {
-    if ((millis() - lastEventIndicatorPinStateChange) > 100) {
-        lastEventIndicatorPinStateChange = millis();
-        driver.onGPIO2();
-        }
-    }
+    driver.update();
 }
 
 void RN52handler::bt_play() {
@@ -80,37 +74,10 @@ void RN52handler::bt_disconnect() {
     driver.disconnect();
 }
 
-void RN52handler::bt_set_discovery_mask() {
-    driver.set_discovery_mask();
-}
-
-void RN52handler::bt_set_connection_mask() {
-    driver.set_connection_mask();
-}
-
-void RN52handler::bt_set_cod() {
-    driver.set_cod();
-}
-
-void RN52handler::bt_set_device_name() {
-    driver.set_device_name();
-}
-
-void RN52handler::bt_set_normalized_name() {
-    driver.set_normalized_name();
-}
-
 void RN52handler::bt_set_maxvol() {
     driver.set_max_volume();
 }
 
-void RN52handler::bt_set_extended_features() {
-    driver.set_extended_features();
-}
-
-void RN52handler::bt_reboot() {
-    driver.reboot();
-}
 
 /**
  * Debug function used only in 'bench' testing. Listens to input on serial console and calls out corresponding function.

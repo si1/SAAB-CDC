@@ -54,6 +54,8 @@ class RN52impl : public RN52::RN52driver {
     
     SoftwareSerial softSerial =  SoftwareSerial(UART_RX_PIN, UART_TX_PIN);
     
+    unsigned long lastEventIndicatorPinStateChange;
+    
     bool playing;
     bool bt_iap;
     bool bt_spp;
@@ -68,6 +70,7 @@ public:
         bt_spp = false;
         bt_a2dp = false;
         bt_hfp = false;
+        lastEventIndicatorPinStateChange = 0;
     }
     
     void readFromUART();
@@ -85,6 +88,10 @@ public:
     // devices connects
     void onGPIO2();
     void initialize();
+    void update();
+
+private:
+    void waitForResponse();
 };
 
 #endif
