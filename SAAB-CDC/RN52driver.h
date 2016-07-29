@@ -34,7 +34,7 @@ namespace RN52 {
         enum BtProfile { IAP, SPP, A2DP, HFP };
         enum Mode { COMMAND, DATA };
         enum Error { TIMEOUT, OVERFLOW, NOTCONNECTED, PROTOCOL };
-        enum AVCRP { PLAYPAUSE, NEXT, PREV, VASSISTANT, VOLUP, VOLDOWN, MAXVOL, PLAY, PAUSE, };
+        enum AVCRP { PLAYPAUSE, NEXT, PREV, VASSISTANT, VOLUP, VOLDOWN };
         
         RN52driver();
         virtual ~RN52driver(){}
@@ -50,6 +50,14 @@ namespace RN52 {
         
         void reconnectLast();
         void disconnect();
+        void set_discovery_mask();
+        void set_connection_mask();
+        void set_cod();
+        void set_device_name();
+        void set_normalized_name();
+        void set_max_volume();
+        void set_extended_features();
+        void reboot();
         void visible(bool visible);
         int sendAVCRP(AVCRP cmd);
         

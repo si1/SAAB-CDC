@@ -69,7 +69,7 @@ void RN52impl::onProfileChange(BtProfile profile, bool connected) {
         case A2DP:bt_a2dp = connected;
             if (connected && playing) {
                 // Serial.println("DEBUG: RN52 connection ok; 'auto-play' should kick in now!");
-                sendAVCRP(RN52::RN52driver::PLAY);
+                sendAVCRP(RN52::RN52driver::PLAYPAUSE);
             }
             break;
         case SPP:bt_spp = connected;break;
@@ -84,6 +84,13 @@ void RN52impl::onProfileChange(BtProfile profile, bool connected) {
 
 void RN52impl::initialize() {
     softSerial.begin(9600);
+    
+    // Initializing ATMEGA pins
+    pinMode(BT_PWREN_PIN,OUTPUT);
+    int revision = digitalRead(BT_PWREN_PIN);
+    if (revision == 0) { // PCB seems to be > v3.2
+        digitalWrite(BT_PWREN_PIN,HIGH);
+    }
     pinMode(BT_EVENT_INDICATOR_PIN,INPUT);
     pinMode(BT_CMD_PIN, OUTPUT);
     pinMode(BT_FACT_RST_PIN,INPUT);             // Some REALLY crazy stuff is going on if this pin is set as output and pulled low. Leave it alone! Trust me...
@@ -91,8 +98,9 @@ void RN52impl::initialize() {
     pinMode(PIN_A3,OUTPUT);
     pinMode(PIN_A4,OUTPUT);
     pinMode(PIN_A5,OUTPUT);
-    pinMode(BT_PWREN_PIN,OUTPUT);
     digitalWrite(BT_EVENT_INDICATOR_PIN,HIGH);  // Default state of GPIO2, per data sheet, is HIGH
     digitalWrite(BT_CMD_PIN,HIGH);              // Default state of GPIO9, per data sheet, is HIGH
-    digitalWrite(BT_PWREN_PIN,HIGH);            // Keeping the PWREN pin HIGH for now to keep the module ON at all times. TODO: implement go-to-sleep/wakeup function.
+    
+    // Configuring RN52
+    
 }

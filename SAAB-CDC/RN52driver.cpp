@@ -299,19 +299,6 @@ namespace RN52 {
             case VOLDOWN:
                 queueCommand(RN52_CMD_VOLDOWN);
                 break;
-            case MAXVOL:
-                queueCommand(RN52_CMD_MAXVOL);
-                break;
-            case PLAY:
-                //nice but not reliable:
-                if (state != 13)
-                    queueCommand(RN52_CMD_AVCRP_PLAYPAUSE);
-                break;
-            case PAUSE:
-                //nice but not reliable:
-                if (state == 13)
-                    queueCommand(RN52_CMD_AVCRP_PLAYPAUSE);
-                break;
         }
         return 0;
     }
@@ -333,6 +320,42 @@ namespace RN52 {
             queueCommand(RN52_CMD_DISCOVERY_OFF);
             // Serial.println("DEBUG: RN52 discoverable = OFF (connectable).");
         }
+    }
+    
+    void RN52driver::set_discovery_mask() {
+        queueCommand(RN52_SET_DISCOVERY_MASK);
+    }
+    
+    void RN52driver::set_connection_mask() {
+        queueCommand(RN52_SET_CONNECTION_MASK);
+    }
+    
+    
+    void RN52driver::set_cod() {
+        queueCommand(RN52_SET_COD);
+    }
+    
+    
+    void RN52driver::set_device_name() {
+        queueCommand(RN52_SET_DEVICE_NAME);
+    }
+    
+    
+    void RN52driver::set_normalized_name() {
+        queueCommand(RN52_SET_NORMALIZED_NAME);
+    }
+    
+    
+    void RN52driver::set_max_volume() {
+        queueCommand(RN52_SET_MAXVOL);
+    }
+    
+    void RN52driver::set_extended_features() {
+        queueCommand(RN52_SET_EXTENDED_FEATURES);
+    }
+    
+    void RN52driver::reboot() {
+        queueCommand(RN52_CMD_REBOOT);
     }
     
     void RN52driver::refreshState() {

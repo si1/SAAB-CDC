@@ -44,10 +44,6 @@ void RN52handler::bt_play() {
     driver.sendAVCRP(RN52::RN52driver::PLAYPAUSE);
 }
 
-void RN52handler::bt_pause() {
-    driver.sendAVCRP(RN52::RN52driver::PAUSE);
-}
-
 void RN52handler::bt_prev() {
     driver.sendAVCRP(RN52::RN52driver::PREV);
 }
@@ -68,10 +64,6 @@ void RN52handler::bt_voldown() {
     driver.sendAVCRP(RN52::RN52driver::VOLDOWN);
 }
 
-void RN52handler::bt_maxvol() {
-    driver.sendAVCRP(RN52::RN52driver::MAXVOL);
-}
-
 void RN52handler::bt_visible() {
     driver.visible(true);
 }
@@ -86,6 +78,38 @@ void RN52handler::bt_reconnect() {
 
 void RN52handler::bt_disconnect() {
     driver.disconnect();
+}
+
+void RN52handler::bt_set_discovery_mask() {
+    driver.set_discovery_mask();
+}
+
+void RN52handler::bt_set_connection_mask() {
+    driver.set_connection_mask();
+}
+
+void RN52handler::bt_set_cod() {
+    driver.set_cod();
+}
+
+void RN52handler::bt_set_device_name() {
+    driver.set_device_name();
+}
+
+void RN52handler::bt_set_normalized_name() {
+    driver.set_normalized_name();
+}
+
+void RN52handler::bt_set_maxvol() {
+    driver.set_max_volume();
+}
+
+void RN52handler::bt_set_extended_features() {
+    driver.set_extended_features();
+}
+
+void RN52handler::bt_reboot() {
+    driver.reboot();
 }
 
 /**
