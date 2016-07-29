@@ -113,6 +113,7 @@ void RN52impl::initialize() {
     
     // Configuring RN52
     
+    Serial.print("Configuring RN52... ");
     set_discovery_mask();
     waitForResponse();
     set_connection_mask();
@@ -128,6 +129,7 @@ void RN52impl::initialize() {
     set_extended_features();
     waitForResponse();
     reboot();
+    Serial.println("Done!");
 }
 
 void RN52impl::waitForResponse() {
