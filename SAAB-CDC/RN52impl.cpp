@@ -112,7 +112,7 @@ void RN52impl::initialize() {
     digitalWrite(BT_CMD_PIN,HIGH);              // Default state of GPIO9, per data sheet, is HIGH
     
     // Configuring RN52
-    
+    /*
     Serial.print("Configuring RN52... ");
     set_discovery_mask();
     waitForResponse();
@@ -130,6 +130,7 @@ void RN52impl::initialize() {
     waitForResponse();
     reboot();
     Serial.println("Done!");
+     */
 }
 
 void RN52impl::waitForResponse() {
