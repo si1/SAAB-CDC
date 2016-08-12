@@ -19,11 +19,18 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Last modified on: Aug 11, 2016
  */
 
 #ifndef RN52STRINGS_H_
 #define RN52STRINGS_H_
+
+#define DISCOVERY_MASK      "06"
+#define CONNECTION_MASK     "06"
+#define COD                 "200420"
+#define DEVICE_NAME         "BlueSaab"
+#define BAUDRATE_9600       "SU,01"
+#define EXTENDED_FEATURES   "0084"
 
 // Action commands
 const char *RN52_CMD_BEGIN = "CMD\r\n";
@@ -39,13 +46,13 @@ const char *RN52_CMD_DISCOVERY_ON = "@,1\r";
 const char *RN52_CMD_DISCOVERY_OFF = "@,0\r";
 
 // RN52 settings commands
-const char *RN52_SET_DISCOVERY_MASK = "SD,06\r"; // A2DP/AVRCP + SPP profiles
-const char *RN52_SET_CONNECTION_MASK = "SK,06\r"; // A2DP/AVRCP + SPP profiles
-const char *RN52_SET_COD = "SC,200420\r"; // "Major service class" = Audio; "Major device class" = Audio/Video; "Minor device class" = Car audio
-const char *RN52_SET_DEVICE_NAME = "SN,BlueSaab\r"; // Broadcasted and shown in audio source's settigns
-const char *RN52_SET_NORMALIZED_NAME = "S-,SAAB\r"; // Not broadcaseted; invisible to end user
-const char *RN52_SET_MAXVOL = "SS,0F\r"; // Sets the volume gain to MAX level 15 (default 11)
-const char *RN52_SET_EXTENDED_FEATURES = "S%,0084\r"; // Discoverable on startup; Disable system tones
+const char *RN52_SET_DISCOVERY_MASK = "SD," DISCOVERY_MASK "\r";        // A2DP/AVRCP + SPP profiles
+const char *RN52_SET_CONNECTION_MASK = "SK," CONNECTION_MASK "\r";      // A2DP/AVRCP + SPP profiles
+const char *RN52_SET_COD = "SC," COD "\r";                              // "Major service class" = Audio; "Major device class" = Audio/Video; "Minor device class" = Car audio
+const char *RN52_SET_DEVICE_NAME = "SN," DEVICE_NAME "\r";              // Broadcasted and shown in audio source's settigns
+const char *RN52_SET_BAUDRATE_9600 = "SU," BAUDRATE_9600 "\r";          // Enables serial communications on RN52 @ 9600bps
+const char *RN52_SET_MAXVOL = "SS,0F\r";                                // Sets the volume gain to MAX level 15 (default 11)
+const char *RN52_SET_EXTENDED_FEATURES = "S%," EXTENDED_FEATURES "\r";  // Discoverable on startup; Disable system tones
 
 
 // AVRCP commands

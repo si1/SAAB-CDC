@@ -19,7 +19,7 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Last modified on: Aug 11, 2016
  */
 
 #include <Arduino.h>
@@ -323,38 +323,52 @@ namespace RN52 {
     }
     
     void RN52driver::set_discovery_mask() {
+        Serial.print("Setting discovery mask to: ");
+        Serial.println(DISCOVERY_MASK);
         queueCommand(RN52_SET_DISCOVERY_MASK);
     }
     
     void RN52driver::set_connection_mask() {
+        Serial.print("Setting connection mask to: ");
+        Serial.println(CONNECTION_MASK);
         queueCommand(RN52_SET_CONNECTION_MASK);
     }
     
     
     void RN52driver::set_cod() {
+        Serial.print("Setting class of device to: ");
+        Serial.println(COD);
         queueCommand(RN52_SET_COD);
     }
     
     
     void RN52driver::set_device_name() {
+        Serial.print("Setting device name to: ");
+        Serial.println(DEVICE_NAME);
         queueCommand(RN52_SET_DEVICE_NAME);
     }
     
     
-    void RN52driver::set_normalized_name() {
-        queueCommand(RN52_SET_NORMALIZED_NAME);
+    void RN52driver::set_baudrate() {
+        Serial.print("Setting RN52 baudrate to: ");
+        Serial.println(BAUDRATE_9600);
+        queueCommand(RN52_SET_BAUDRATE_9600);
     }
     
     
     void RN52driver::set_max_volume() {
+        Serial.println("Turning RN52 volume gain to max...");
         queueCommand(RN52_SET_MAXVOL);
     }
     
     void RN52driver::set_extended_features() {
+        Serial.print("Setting extended features to: ");
+        Serial.println(EXTENDED_FEATURES);
         queueCommand(RN52_SET_EXTENDED_FEATURES);
     }
     
     void RN52driver::reboot() {
+        Serial.println("Rebooting RN52...");
         queueCommand(RN52_CMD_REBOOT);
     }
     

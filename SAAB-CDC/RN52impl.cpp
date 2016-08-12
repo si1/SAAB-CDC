@@ -19,7 +19,7 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Last modified on: Aug 11, 2016
  */
 
 #include "RN52impl.h"
@@ -97,10 +97,6 @@ void RN52impl::initialize() {
     
     // Initializing ATMEGA pins
     pinMode(BT_PWREN_PIN,OUTPUT);
-    int revision = digitalRead(BT_PWREN_PIN);
-    if (revision == 0) { // PCB seems to be > v3.2
-        digitalWrite(BT_PWREN_PIN,HIGH);
-    }
     pinMode(BT_EVENT_INDICATOR_PIN,INPUT);
     pinMode(BT_CMD_PIN, OUTPUT);
     pinMode(BT_FACT_RST_PIN,INPUT);             // Some REALLY crazy stuff is going on if this pin is set as output and pulled low. Leave it alone! Trust me...
@@ -108,28 +104,39 @@ void RN52impl::initialize() {
     pinMode(PIN_A3,OUTPUT);
     pinMode(PIN_A4,OUTPUT);
     pinMode(PIN_A5,OUTPUT);
+    digitalWrite(BT_PWREN_PIN,HIGH);
     digitalWrite(BT_EVENT_INDICATOR_PIN,HIGH);  // Default state of GPIO2, per data sheet, is HIGH
     digitalWrite(BT_CMD_PIN,HIGH);              // Default state of GPIO9, per data sheet, is HIGH
     
     // Configuring RN52
     /*
-    Serial.print("Configuring RN52... ");
+    Serial.begin(9600);
+    Serial.println("Configuring RN52... ");
+    set_baudrate();
+    waitForResponse();
+    delay(1000);
+    reboot();
+    delay(5000);
     set_discovery_mask();
     waitForResponse();
+    delay(1000);
     set_connection_mask();
     waitForResponse();
+    delay(1000);
     set_cod();
     waitForResponse();
+    delay(1000);
     set_device_name();
     waitForResponse();
-    set_normalized_name();
-    waitForResponse();
-    set_max_volume();
-    waitForResponse();
+    delay(1000);
     set_extended_features();
     waitForResponse();
+    delay(1000);
+    set_max_volume();
+    waitForResponse();
+    delay(1000);
     reboot();
-    Serial.println("Done!");
+    Serial.end();
      */
 }
 

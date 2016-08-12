@@ -1,5 +1,5 @@
 /*
- SAAB-CDC v3.0
+ BlueSaab v3.6
 
  A CD changer emulator for older SAAB cars with RN52 bluetooth module.
  
@@ -30,10 +30,11 @@ Timer time;
 // Setup
 void setup() {
     Serial.begin(9600);
-    Serial.println("SAAB-CDC v3.6 - July 2016");
+    Serial.println("\"BlueSaab\" v3.6 - August 2016");
+    Serial.end();
+    BT.initialize();
     CDC.openCanBus();
     time.every(CDC_STATUS_TX_TIME, &sendCdcStatusOnTime,NULL);
-    BT.initialize();
 }
 
 // Main loop
@@ -41,5 +42,5 @@ void loop() {
     time.update();
     CDC.handleCdcStatus();
     BT.update();
-    BT.monitor_serial_input();
+//    BT.monitor_serial_input(); // Switching the serial OFF for now; not sure why or if, but this seems to mess up things...
 }

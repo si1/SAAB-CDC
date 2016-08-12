@@ -54,7 +54,7 @@ namespace RN52 {
         void set_connection_mask();
         void set_cod();
         void set_device_name();
-        void set_normalized_name();
+        void set_baudrate();
         void set_max_volume();
         void set_extended_features();
         void reboot();
