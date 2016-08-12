@@ -9,12 +9,8 @@
  Initial CDC code: Seth Evans and Emil Fors
  CAN code: Igor Real (http://secuduino.blogspot.com)
  Information on SAAB I-Bus: Tomi Liljemark (http://pikkupossu.1g.fi/tomi/projects/i-bus/i-bus.html)
- RN52 handing:  based on code by Tim Otto
+ RN52 handling:  based on code by Tim Otto
  Additions/bug fixes: Karlis Veilands and Girts Linde
-
- "BEERWARE"
- As long as you retain this notice you can do whatever you want with this code.
- If we meet some day, and you think this stuff is worth it, you can buy us a beer in return.
 */
 
 
