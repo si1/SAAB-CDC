@@ -1,6 +1,6 @@
 
-#ifndef CAN_H
-#define CAN_H
+#ifndef CAN_h
+#define CAN_h
 
 
 

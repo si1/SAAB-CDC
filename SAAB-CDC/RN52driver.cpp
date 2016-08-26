@@ -19,11 +19,12 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Last modified on: Aug 11, 2016
+ * Last modified on: Aug 26, 2016
  */
 
 #include <Arduino.h>
 #include <string.h>
+#include "Globals.h"
 #include "RN52driver.h"
 #include "RN52strings.h"
 
@@ -254,7 +255,9 @@ namespace RN52 {
             return;
         enterCommandMode = true;
         setMode(COMMAND);
-        // Serial.println("DEBUG: RN52 'SPP -> CMD'.");
+        if (DEBUGMODE==1) {
+            Serial.println("RN52: 'SPP -> CMD'.");
+        }
     }
     
     void RN52driver::prepareDataMode() {
@@ -266,32 +269,44 @@ namespace RN52 {
             enterCommandMode = false;
         }
         setMode(DATA);
-        // Serial.println("DEBUG: RN52 'CMD -> SPP'.");
+        if (DEBUGMODE==1) {
+            Serial.println("RN52: 'CMD -> SPP'.");
+        }
     }
     
     int RN52driver::sendAVCRP(AVCRP cmd)
     {
         if(!a2dpConnected) {
             onError(6, NOTCONNECTED);
-            // Serial.println("ERROR: RN52 A2DP not connected.");
+            if (DEBUGMODE==1) {
+                Serial.println("RN52: A2DP profile not connected.");
+            }
             return -2;
         }
         switch(cmd) {
             case PLAYPAUSE:
+                if (DEBUGMODE==1) {
+                    Serial.println("RN52: Sending 'Play/Pause' command to paired device.");
+                }
                 queueCommand(RN52_CMD_AVCRP_PLAYPAUSE);
-                // Serial.println("DEBUG: Sending 'Play/Pause' command to RN52.");
                 break;
             case PREV:
+                if (DEBUGMODE==1) {
+                    Serial.println("RN52: Sending 'Previous Track' command to paired device.");
+                }
                 queueCommand(RN52_CMD_AVCRP_PREV);
-                // Serial.println("DEBUG: Sending 'Previous Track' command to RN52.");
                 break;
             case NEXT:
+                if (DEBUGMODE==1) {
+                    Serial.println("RN52: Sending 'Next Track' command to paired device.");
+                }
                 queueCommand(RN52_CMD_AVCRP_NEXT);
-                // Serial.println("DEBUG: Sending 'Next Track' command to RN52.");
                 break;
             case VASSISTANT:
+                if (DEBUGMODE==1) {
+                    Serial.println("RN52: Sending 'Invoke voice assistant' command to paired device.");
+                }
                 queueCommand(RN52_CMD_AVCRP_VASSISTANT);
-                //Serial.println("DEBUG: Sending 'Invoke voice assistant' command to RN52.");
                 break;
             case VOLUP:
                 queueCommand(RN52_CMD_VOLUP);
@@ -304,71 +319,95 @@ namespace RN52 {
     }
     
     void RN52driver::reconnectLast(){
+        if (DEBUGMODE==1) {
+            Serial.println("RN52: Connecting to the last known device.");
+        }
         queueCommand(RN52_CMD_RECONNECTLAST);
-        // Serial.println("DEBUG: RN52 connecting to the last known device.");
     }
     void RN52driver::disconnect(){
+        if (DEBUGMODE==1) {
+            Serial.println("RN52: Disconnecting from the 'active' device.");
+        }
         queueCommand(RN52_CMD_DISCONNECT);
-        // Serial.println("DEBUG: RN52 disconnecting from the 'active' device.");
     }
     void RN52driver::visible(bool visible){
         if (visible) {
+            if (DEBUGMODE==1) {
+                Serial.println("RN52: Discoverable = ON (connectable).");
+            }
             queueCommand(RN52_CMD_DISCOVERY_ON);
-            // Serial.println("DEBUG: RN52 discoverable = ON.");
         }
         else {
+            if (DEBUGMODE==1) {
+                Serial.println("RN52: Discoverable = OFF (connectable).");
+            }
             queueCommand(RN52_CMD_DISCOVERY_OFF);
-            // Serial.println("DEBUG: RN52 discoverable = OFF (connectable).");
         }
     }
     
     void RN52driver::set_discovery_mask() {
-        Serial.print("Setting discovery mask to: ");
-        Serial.println(DISCOVERY_MASK);
+        if (DEBUGMODE==1) {
+            Serial.print("RN52: Setting discovery mask to: ");
+            Serial.println(DISCOVERY_MASK);
+        }
         queueCommand(RN52_SET_DISCOVERY_MASK);
     }
     
     void RN52driver::set_connection_mask() {
-        Serial.print("Setting connection mask to: ");
-        Serial.println(CONNECTION_MASK);
+        if (DEBUGMODE==1) {
+            Serial.print("RN52: Setting connection mask to: ");
+            Serial.println(CONNECTION_MASK);
+        }
         queueCommand(RN52_SET_CONNECTION_MASK);
     }
     
     
     void RN52driver::set_cod() {
-        Serial.print("Setting class of device to: ");
-        Serial.println(COD);
+        if (DEBUGMODE==1) {
+            Serial.print("Setting class of device to: ");
+            Serial.println(COD);
+        }
         queueCommand(RN52_SET_COD);
     }
     
     
     void RN52driver::set_device_name() {
-        Serial.print("Setting device name to: ");
-        Serial.println(DEVICE_NAME);
+        if (DEBUGMODE==1) {
+            Serial.print("Setting device name to: ");
+            Serial.println(DEVICE_NAME);
+        }
         queueCommand(RN52_SET_DEVICE_NAME);
     }
     
     
     void RN52driver::set_baudrate() {
-        Serial.print("Setting RN52 baudrate to: ");
-        Serial.println(BAUDRATE_9600);
+        if (DEBUGMODE==1) {
+            Serial.print("Setting RN52 baudrate to: ");
+            Serial.println(BAUDRATE_9600);
+        }
         queueCommand(RN52_SET_BAUDRATE_9600);
     }
     
     
     void RN52driver::set_max_volume() {
-        Serial.println("Turning RN52 volume gain to max...");
+        if (DEBUGMODE==1) {
+            Serial.println("Turning RN52 volume gain to max...");
+        }
         queueCommand(RN52_SET_MAXVOL);
     }
     
     void RN52driver::set_extended_features() {
-        Serial.print("Setting extended features to: ");
-        Serial.println(EXTENDED_FEATURES);
+        if (DEBUGMODE==1) {
+            Serial.print("Setting extended features to: ");
+            Serial.println(EXTENDED_FEATURES);
+        }
         queueCommand(RN52_SET_EXTENDED_FEATURES);
     }
     
     void RN52driver::reboot() {
-        Serial.println("Rebooting RN52...");
+        if (DEBUGMODE==1) {
+            Serial.println("Rebooting RN52...");
+        }
         queueCommand(RN52_CMD_REBOOT);
     }
     
@@ -384,4 +423,4 @@ namespace RN52 {
             return (c-'A'+10);
     }
     
-} /* namespace RN52 */
+}

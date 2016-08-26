@@ -19,11 +19,11 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Last modified on: Aug 11, 2016
+ * Last modified on: Aug 26, 2016
  */
 
-#ifndef RN52STRINGS_H_
-#define RN52STRINGS_H_
+#ifndef RN52strings_h
+#define RN52strings_h
 
 #define DISCOVERY_MASK      "06"
 #define CONNECTION_MASK     "06"
@@ -67,4 +67,4 @@ const char *RN52_RX_ERROR = "ERR\r\n";
 const char *RN52_RX_WHAT = "?\r\n";
 
 
-#endif /* RN52STRINGS_H_ */
+#endif
