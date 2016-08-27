@@ -19,11 +19,11 @@
  * Created by: Karlis Veilands
  * Created on: Jun 4, 2015
  * Modified by: Karlis Veilands
- * Modified on: Aug 26, 2016
+ * Modified on: May 17, 2016
  */
 
-#ifndef CDC_h
-#define CDC_h
+#ifndef CDC_H
+#define CDC_H
 
 
 

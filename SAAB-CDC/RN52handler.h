@@ -19,11 +19,11 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Modified on: Aug 26, 2016
+ * Modified on: May 17, 2016
  */
 
-#ifndef RN52handler_h
-#define RN52handler_h
+#ifndef RN52HANDLER_H
+#define RN52HANDLER_H
 
 #include <Arduino.h>
 #include "RN52impl.h"

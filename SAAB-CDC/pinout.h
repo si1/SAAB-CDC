@@ -6,8 +6,8 @@
  ADAPTED FROM http://www.kreatives-chaos.com
  By IGOR REAL (03 - 03 - 2011)	
 ----------------------------------------------------------------------------------*/
-#ifndef	pinout_h
-#define	pinout_h
+#ifndef	PINOUT_H
+#define	PINOUT_H
 
 #ifdef __AVR_ATmega1280__
 //---------------------------------------------------
@@ -42,4 +42,4 @@
 //---------------------------------------------------
 #endif
 #endif
-#endif
+#endif	// PINOUT_H

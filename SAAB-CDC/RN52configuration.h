@@ -19,15 +19,15 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Modified on: Aug 26, 2016
+ * Modified on: May 17, 2016
  */
 
-#ifndef RN52configuration_h
-#define RN52configuration_h
+#ifndef RN52CONFIGURATION_H
+#define RN52CONFIGURATION_H
 
 
 #define SPP_TX_BUFFER_SIZE		128
 #define CMD_RX_BUFFER_SIZE		64
 #define CMD_QUEUE_SIZE			8
 
-#endif
+#endif /* RN52CONFIGURATION_H */

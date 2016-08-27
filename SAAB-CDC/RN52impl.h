@@ -22,8 +22,8 @@
  * Modified on: May 17, 2016
  */
 
-#ifndef RN52impl_h
-#define RN52impl_h
+#ifndef RN52impl_H
+#define RN52impl_H
 
 #include <Arduino.h>
 #include "RN52driver.h"

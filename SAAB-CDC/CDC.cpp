@@ -25,7 +25,6 @@
 #include <Arduino.h>
 #include "CAN.h"
 #include "CDC.h"
-#include "Globals.h"
 #include "RN52handler.h"
 #include "Timer.h"
 
@@ -82,7 +81,7 @@ int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0
 
 void CDChandler::printCanTxFrame() {
     Serial.print(CAN_TxMsg.id,HEX);
-    Serial.print("CDC Tx: ");
+    Serial.print(" Tx-> ");
     for (int i = 0; i < 8; i++) {
         Serial.print(CAN_TxMsg.data[i],HEX);
         Serial.print(" ");
@@ -96,7 +95,7 @@ void CDChandler::printCanTxFrame() {
 
 void CDChandler::printCanRxFrame() {
     Serial.print(CAN_RxMsg.id,HEX);
-    Serial.print("CDC Rx: ");
+    Serial.print(" Rx-> ");
     for (int i = 0; i < 8; i++) {
         Serial.print(CAN_RxMsg.data[i],HEX);
         Serial.print(" ");
@@ -151,29 +150,21 @@ void CDChandler::handleRxFrame() {
                 break;
             case DISPLAY_RESOURCE_GRANT:
                 if ((CAN_RxMsg.data[1] == 0x02) && (CAN_RxMsg.data[3] == CDC_SID_FUNCTION_ID)) {
-                    if (DEBUGMODE==1) {
-                        Serial.println("CDC: We have been granted the right to write text to the second row in the SID");
-                    }
+                    // Serial.println("DEBUG: We have been granted the right to write text to the second row in the SID");
                     // Somehow this never happens as CDC is not "supposed" to ask SID for a display resource grant
                     displayRequestGranted = true;
                     writeTextOnDisplay(MODULE_NAME);
                 }
                 else if (CAN_RxMsg.data[1] == 0x02) {
-                    if (DEBUGMODE==1) {
-                        Serial.println("CDC: Someone else has been granted the second row, we need to back down");
-                    }
+                    // Serial.println("DEBUG: Someone else has been granted the second row, we need to back down");
                     displayRequestGranted = false;
                 }
                 else if (CAN_RxMsg.data[1] == 0x00) {
-                    if (DEBUGMODE==1) {
-                        Serial.println("CDC: Someone else has been granted the entire display, we need to back down");
-                    }
+                    // Serial.println("DEBUG: Someone else has been granted the entire display, we need to back down");
                     displayRequestGranted = false;
                 }
                 else {
-                    if (DEBUGMODE==1) {
-                        Serial.println("CDC: Someone else has been granted the first row; if we had the grant to the 2nd row, we still have it.");
-                    }
+                    // Serial.println("DEBUG: Someone else has been granted the first row; if we had the grant to the 2nd row, we still have it.");
                 }
                 break;
         }
@@ -271,12 +262,8 @@ void CDChandler::handleSteeringWheelButtons() {
                 //BT.bt_prev();
                 break;
             default:
-                /*
-                if (DEBUGMODE==1) {
-                    Serial.print("CDC: Unknown button event: ");
-                }
-                Serial.println(CAN_RxMsg.data[2],HEX);
-                */
+                //Serial.print(CAN_RxMsg.data[2],HEX);
+                //Serial.println("DEBUG: Unknown button message");
                 break;
         }
     }
@@ -430,22 +417,16 @@ void CDChandler::checkCanEvent(int frameElement) {
         if (incomingEventCounter == 3) {
             switch (CAN_RxMsg.data[frameElement]) {
                 case 0x04: // Long press of NXT button on steering wheel
-                    if (DEBUGMODE==1) {
-                        Serial.println("NXT long press on steering wheel");
-                    }
                     BT.bt_vassistant();
+                    // Serial.println("NXT long press on steering wheel");
                     break;
                 case 0x45: // SEEK+ button long press on IHU
-                    if (DEBUGMODE==1) {
-                        Serial.println("SEEK+ long press on IHU");
-                    }
                     BT.bt_visible();
+                    // Serial.println("SEEK+ long press on IHU");
                     break;
                 case 0x46: // SEEK- button long press on IHU
-                    if (DEBUGMODE==1) {
-                        Serial.println("SEEK- long press on IHU");
-                    }
                     BT.bt_invisible();
+                    // Serial.println("SEEK- long press on IHU");
                     break;
                 default:
                     break;

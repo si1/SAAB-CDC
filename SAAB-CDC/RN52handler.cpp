@@ -22,7 +22,6 @@
  * Modified on: May 17, 2016
  */
 
-#include "Globals.h"
 #include "RN52handler.h"
 
 RN52handler BT;
@@ -91,52 +90,36 @@ void RN52handler::monitor_serial_input() {
         incomingByte = Serial.read();
         switch (incomingByte) {
             case 'V':
-                if (DEBUGMODE==1) {
-                    Serial.println("RN52: Going \"V\"isible");
-                }
                 bt_visible();
+                Serial.println("Going _V_isible");
                 break;
             case 'I':
-                if (DEBUGMODE==1) {
-                    Serial.println("RN52: Going \"I\"nvisible");
-                }
                 bt_invisible();
+                Serial.println("Going _I_nvisible");
                 break;
             case 'C':
-                if (DEBUGMODE==1) {
-                    Serial.println("RN52: Re\"C\"onnect");
-                }
                 bt_reconnect();
+                Serial.println("Re_C_onnect");
                 break;
             case 'D':
-                if (DEBUGMODE==1) {
-                    Serial.println("RN52: \"D\"isconnect");
-                }
                 bt_disconnect();
+                Serial.println("_D_isconnect");
                 break;
             case 'P':
-                if (DEBUGMODE==1) {
-                    Serial.println("RN52: \"P\"lay");
-                }
                 bt_play();
+                Serial.println("_P_lay");
                 break;
             case 'N':
-                if (DEBUGMODE==1) {
-                    Serial.println("RN52: \"N\"ext");
-                }
                 bt_next();
+                Serial.println("_N_ext");
                 break;
             case 'R':
-                if (DEBUGMODE==1) {
-                    Serial.println("RN52: P\"R\"evious");
-                }
                 bt_prev();
+                Serial.println("P_R_evious");
                 break;
             case 'A':
-                if (DEBUGMODE==1) {
-                    Serial.println("RN52: \"A\"ssistant");
-                }
                 bt_vassistant();
+                Serial.println("_A_ssistant");
                 break;
             default:
                 break;

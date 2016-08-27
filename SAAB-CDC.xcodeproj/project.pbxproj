@@ -122,7 +122,6 @@
 		A8E261F21C6162A0009BEB39 /* Event.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Event.h; sourceTree = "<group>"; };
 		A8E261F31C6162A0009BEB39 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Timer.cpp; sourceTree = "<group>"; };
 		A8E261F41C6162A0009BEB39 /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
-		A8EBABC01D70EDA0006A81D7 /* Globals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Globals.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -158,7 +157,6 @@
 				A82B27931B2263DC009B19C3 /* CAN.h */,
 				A82B27971B22649F009B19C3 /* CDC.h */,
 				A8E261F21C6162A0009BEB39 /* Event.h */,
-				A8EBABC01D70EDA0006A81D7 /* Globals.h */,
 				A82B27941B2263DC009B19C3 /* pinout.h */,
 				A85D26F71CE3E76B002FE52C /* RN52handler.h */,
 				A82E7D0F1CDC412600BC91BA /* RN52configuration.h */,

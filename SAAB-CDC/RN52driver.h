@@ -22,8 +22,8 @@
  * Modified on: May 17, 2016
  */
 
-#ifndef RN52driver_h
-#define RN52driver_h
+#ifndef RN52DRIVER_H
+#define RN52DRIVER_H
 
 #include "RN52configuration.h"
 
@@ -100,4 +100,4 @@ namespace RN52 {
     };
     
 } /* namespace RN52 */
-#endif
+#endif /* RN52DRIVER_H */

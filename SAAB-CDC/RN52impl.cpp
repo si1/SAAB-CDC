@@ -19,10 +19,9 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Last modified on: Aug 26, 2016
+ * Last modified on: Aug 11, 2016
  */
 
-#include "Globals.h"
 #include "RN52impl.h"
 
 /**
@@ -111,9 +110,8 @@ void RN52impl::initialize() {
     
     // Configuring RN52
     /*
-    if (DEBUGMODE==1) {
-        Serial.println("Configuring RN52... ");
-    }
+    Serial.begin(9600);
+    Serial.println("Configuring RN52... ");
     set_baudrate();
     waitForResponse();
     delay(1000);
@@ -138,6 +136,7 @@ void RN52impl::initialize() {
     waitForResponse();
     delay(1000);
     reboot();
+    Serial.end();
      */
 }
 
