@@ -73,7 +73,7 @@ int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
  The "original" CD changer never sends 0xE0 as the first byte of frame
  */
 int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
-int displayRequestCmd[] = {CDC_APL_ADR,0x02,0x02,CDC_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1};
+int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x02,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
 
 /**
  * DEBUG: Prints the CAN TX frame to serial output
@@ -149,11 +149,10 @@ void CDChandler::handleRxFrame() {
                 handleSteeringWheelButtons();
                 break;
             case DISPLAY_RESOURCE_GRANT:
-                if ((CAN_RxMsg.data[1] == 0x02) && (CAN_RxMsg.data[3] == CDC_SID_FUNCTION_ID)) {
+                if ((CAN_RxMsg.data[1] == 0x02) && (CAN_RxMsg.data[3] == SPA_SID_FUNCTION_ID)) {
                     // Serial.println("DEBUG: We have been granted the right to write text to the second row in the SID");
-                    // Somehow this never happens as CDC is not "supposed" to ask SID for a display resource grant
                     displayRequestGranted = true;
-                    writeTextOnDisplay(MODULE_NAME);
+                    //writeTextOnDisplay(MODULE_NAME);
                 }
                 else if (CAN_RxMsg.data[1] == 0x02) {
                     // Serial.println("DEBUG: Someone else has been granted the second row, we need to back down");
@@ -331,18 +330,26 @@ void sendCdcNodeStatus(void *p) {
     }
     CDC.sendCanFrame(NODE_STATUS_TX, ((int(*)[9])currentCdcCmd)[i]);
     if (i < NODE_STATUS_TX_MSG_SIZE) {
-        currentTimerEvent = time.after(NODE_STATUS_TX_TIME,sendCdcNodeStatus,(void*)(i + 1));
+        currentTimerEvent = time.after(NODE_STATUS_TX_INTERVAL,sendCdcNodeStatus,(void*)(i + 1));
     }
     
     else currentTimerEvent = -1;
 }
 
 /**
- * Sends CDC status very CDC_STATUS_TX_TIME interval
+ * Sends CDC status every NODE_STATUS_TX_BASETIME interval
  */
 
 void sendCdcStatusOnTime(void*) {
     CDC.sendCdcStatus(false, false);
+}
+
+/**
+ * Sends display request to SID every NODE_STATUS_TX_BASETIME interval
+ */
+
+void sendDisplayRequestOnTime(void*) {
+    CDC.sendDisplayRequest();
 }
 
 /**
