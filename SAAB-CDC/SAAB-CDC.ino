@@ -25,11 +25,11 @@ Timer time;
 // Setup
 void setup() {
     Serial.begin(9600);
-    Serial.println("\"BlueSaab\" v3.7 - August 2016");
+    Serial.println("\"BlueSaab\"");
+    Serial.println("Software version: v3.7");
     BT.initialize();
     CDC.openCanBus();
-    time.every(NODE_STATUS_TX_BASETIME, &sendCdcStatusOnTime,NULL);
-    time.every(NODE_STATUS_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
+    time.every(CDC_STATUS_TX_BASETIME, &sendCdcStatusOnTime,NULL);
 }
 
 // Main loop

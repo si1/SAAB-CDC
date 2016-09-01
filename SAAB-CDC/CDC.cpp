@@ -32,23 +32,24 @@
  * Variables:
  */
 
+unsigned long lastGrant = 0;
+
 extern Timer time;
 void sendCdcNodeStatus(void*);
 void sendCdcActiveStatus(void*);
 void sendCdcPowerdownStatus(void*);
 void *currentCdcCmd = NULL;
 unsigned long cdcStatusLastSendTime = 0;            // Timer used to ensure we send the CDC status frame in a timely manner
-unsigned long displayRequestLastSendTime = 0;       // Timer used to ensure we send the display request frame in a timely manner
-unsigned long writeTextOnDisplayLastSendTime = 0;   // Timer used to ensure we send the write text on display frame in a timely manner
-unsigned long stopDisplayingNameAt = 0;             // Time at which we should stop displaying our name in the SID
 unsigned long lastIcomingEventTime = 0;             // Timer used for determening if we should treat current event as, for example, a long press of a button
 boolean cdcActive = false;                          // True while our module, the simulated CDC, is active
-boolean displayRequestGranted = true;               // True while we are granted the 2nd row of the SID
-boolean displayWanted = false;                      // True while we actually want the display
 boolean cdcStatusResendNeeded = false;              // True if something has triggered the need to send the CDC status frame as an event
 boolean cdcStatusResendDueToCdcCommand = false;     // True if the need for sending the CDC status frame was triggered by a CDC command
+boolean writeTextOnDisplayTimerActive = false;
 int incomingEventCounter = 0;                       // Counter for incoming events to determine when we will treat the event, for example, as a long press of a button
+int displayRequestTimerId;
+int writeTextOnDisplayTimerId;
 int currentTimerEvent = -1;
+//int displayRequestTimerId;
 int cdcPoweronCmd[NODE_STATUS_TX_MSG_SIZE][9] = {
     {0x32,0x00,0x00,0x03,0x01,0x02,0x00,0x00,-1},
     {0x42,0x00,0x00,0x22,0x00,0x00,0x00,0x00,-1},
@@ -149,21 +150,26 @@ void CDChandler::handleRxFrame() {
                 handleSteeringWheelButtons();
                 break;
             case DISPLAY_RESOURCE_GRANT:
-                if ((CAN_RxMsg.data[1] == 0x02) && (CAN_RxMsg.data[3] == SPA_SID_FUNCTION_ID)) {
-                    // Serial.println("DEBUG: We have been granted the right to write text to the second row in the SID");
-                    displayRequestGranted = true;
-                    //writeTextOnDisplay(MODULE_NAME);
+                if (CAN_RxMsg.data[0] == SID_OBJECT2) {
+                    if (CAN_RxMsg.data[1] == SPA_SID_FUNCTION_ID) {
+                        // Serial.println("DEBUG: We have been granted the right to write text to the second row in the SID");
+                        if (!writeTextOnDisplayTimerActive) {
+                            //writeTextOnDisplayTimerId = time.every(SID_CONTROL_TX_BASETIME, &writeTextOnDisplayOnTime,NULL);
+                            writeTextOnDisplayTimerActive = true;
+                        }
+                    }
+                    else {
+                        // ”OK To Write” = false
+                    }
                 }
-                else if (CAN_RxMsg.data[1] == 0x02) {
-                    // Serial.println("DEBUG: Someone else has been granted the second row, we need to back down");
-                    displayRequestGranted = false;
+                else if ((CAN_RxMsg.data[0] == 0x00) && (CAN_RxMsg.data[1] != 0xFF) && (SID_OBJECT2 != 0))  {
+                    // ”OK To Write” = false
                 }
-                else if (CAN_RxMsg.data[1] == 0x00) {
-                    // Serial.println("DEBUG: Someone else has been granted the entire display, we need to back down");
-                    displayRequestGranted = false;
+                else if ((CAN_RxMsg.data[0] != 0x00) && (CAN_RxMsg.data[1] != 0xFF) && (SID_OBJECT2 == 0))  {
+                    // ”OK To Write” = false
                 }
                 else {
-                    // Serial.println("DEBUG: Someone else has been granted the first row; if we had the grant to the 2nd row, we still have it.");
+                    // No action is taken; The status of ”OK To Write” is not changed
                 }
                 break;
         }
@@ -177,16 +183,19 @@ void CDChandler::handleRxFrame() {
 void CDChandler::handleIhuButtons() {
     switch (CAN_RxMsg.data[1]) {
         case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
-            // Total number of hours spent trying to figure out what's wrong here as of July 2016 = 14,3; Incremented accordingly... :).
+            // Total number of hours spent trying to figure out what's wrong here as of July 2016 = 22,3; Incremented accordingly... :).
             // In some cases handling of this case causes a reset of ATMEGA-328P-PU, thus causing Bluetooth and auto-play to fail.
             BT.bt_reconnect();
             cdcActive = true;
+            //displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
             sendCanFrame(SOUND_REQUEST, soundCmd);
             break;
         case 0x14: // CDC = OFF (Back to Radio or Tape mode)
+            //time.stop(displayRequestTimerId);
+            //time.stop(writeTextOnDisplayTimerId);
             BT.bt_disconnect();
-            displayWanted = false;
             cdcActive = false;
+            writeTextOnDisplayTimerActive = false;
             break;
         default:
             break;
@@ -301,7 +310,6 @@ void CDChandler::sendCdcStatus(boolean event, boolean remote) {
 
 void CDChandler::sendDisplayRequest() {
     sendCanFrame(DISPLAY_RESOURCE_REQ, displayRequestCmd);
-    displayRequestLastSendTime = millis();
 }
 
 /**
@@ -337,7 +345,7 @@ void sendCdcNodeStatus(void *p) {
 }
 
 /**
- * Sends CDC status every NODE_STATUS_TX_BASETIME interval
+ * Sends CDC status every CDC_STATUS_TX_BASETIME interval
  */
 
 void sendCdcStatusOnTime(void*) {
@@ -345,7 +353,7 @@ void sendCdcStatusOnTime(void*) {
 }
 
 /**
- * Sends display request to SID every NODE_STATUS_TX_BASETIME interval
+ * Sends display request every SID_CONTROL_TX_BASETIME interval
  */
 
 void sendDisplayRequestOnTime(void*) {
@@ -353,15 +361,23 @@ void sendDisplayRequestOnTime(void*) {
 }
 
 /**
- * Writes the provided text on the SID. This function assumes that we have been granted write access. Do not call it if we haven't!
+ * Writes provided text every SID_CONTROL_TX_BASETIME interval
+ */
+
+void writeTextOnDisplayOnTime(void*) {
+    CDC.writeTextOnDisplay(MODULE_NAME);
+}
+
+/**
+ * Formats provided text for writing on the SID. This function assumes that we have been granted write access. Do not call it if we haven't!
  * NOTE the character set used by the SID is slightly nonstandard. "Normal" characters should work fine.
  */
 
 void CDChandler::writeTextOnDisplay(char text[]) {
+
     if (!text) {
         return;
     }
-    
     // Copy the provided string and make sure we have a new array of the correct length
     char txt[15];
     int i, n;
@@ -375,7 +391,7 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     }
     
     CAN_TxMsg.id = WRITE_TEXT_ON_DISPLAY;
-    
+     
     CAN_TxMsg.data[0] = 0x42; // TODO: check if this is really correct? According to the spec, the 4 shouldn't be there? It's just a normal transport layer sequence numbering?
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
     CAN_TxMsg.data[2] = 0x02; // Sent on basetime, writing to row 2
@@ -387,6 +403,8 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     CAN.send(&CAN_TxMsg);
     
     CAN_TxMsg.data[0] = 0x01; // message 1
+    CAN_TxMsg.data[1] = 0x96; // Address of the SID
+    CAN_TxMsg.data[2] = 0x02; // Sent on basetime, writing to row 2
     CAN_TxMsg.data[3] = txt[5];
     CAN_TxMsg.data[4] = txt[6];
     CAN_TxMsg.data[5] = txt[7];
@@ -395,14 +413,14 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     CAN.send(&CAN_TxMsg);
     
     CAN_TxMsg.data[0] = 0x00; // message 0
+    CAN_TxMsg.data[1] = 0x96; // Address of the SID
+    CAN_TxMsg.data[2] = 0x02; // Sent on basetime, writing to row 2
     CAN_TxMsg.data[3] = txt[10];
     CAN_TxMsg.data[4] = txt[11];
     CAN_TxMsg.data[5] = txt[12];
     CAN_TxMsg.data[6] = txt[13];
     CAN_TxMsg.data[7] = txt[14];
     CAN.send(&CAN_TxMsg);
-    
-    writeTextOnDisplayLastSendTime = millis();
 }
 
 /**

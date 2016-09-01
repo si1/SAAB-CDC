@@ -117,6 +117,7 @@ void RN52impl::initialize() {
         case (91):                                  // PCB v4.3 (100K/10K Ohm network)
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
             digitalWrite(SN_XCEIVER_RS_PIN,LOW);    // This pin needs to be pulled low, otherwise SN65HVD251D CAN transciever goes into sleep mode
+            Serial.println("Hardware version: v4.3");
             break;
         default:                                    // PCB revision is older than v3.3A; PWREN is hardwired to 3v3; no other action needs to be taken
             break;

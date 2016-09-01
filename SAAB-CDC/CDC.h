@@ -28,13 +28,16 @@
 
 
 /**
- * Various constants used for identifying the CDC
+ * Various constants used for SID text control
  */
 
+#define IHU_APL_ADR                 0x11
 #define CDC_APL_ADR                 0x12
 #define SPA_APL_ADR                 0x1F
-#define CDC_SID_FUNCTION_ID         30      // Decimal
-#define SPA_SID_FUNCTION_ID         18      // Decimal
+#define IHU_SID_FUNCTION_ID         0x19
+#define CDC_SID_FUNCTION_ID         0x1E
+#define SPA_SID_FUNCTION_ID         0x18
+#define SID_OBJECT2                 0x02
 
 /**
  * Other useful stuff
@@ -42,7 +45,6 @@
 
 #define MODULE_NAME                 "BlueSaab"
 #define LAST_EVENT_IN_TIMEOUT       3000    // Milliseconds
-#define DISPLAY_NAME_TIMEOUT        5000    // Milliseconds
 #define NODE_STATUS_TX_MSG_SIZE     4       // Decimal; defines how many frames do we need to reply with to '6A1'
 
 /**
@@ -50,9 +52,10 @@
  */
 
 #define GENERAL_STATUS_CDC          0x3C8
-#define DISPLAY_RESOURCE_REQ        0x348   // 'Stolen' from the IHU since CDC doesn't send this frame
-//#define WRITE_TEXT_ON_DISPLAY       0x328 // 'Stolen' from the IHU since CDC doesn't send this frame
-#define WRITE_TEXT_ON_DISPLAY       0x337   // 'Stolen' from the SPA since CDC doesn't send this frame
+#define DISPLAY_RESOURCE_REQ        0x348   // 'Stolen' from the IHU
+#define WRITE_TEXT_ON_DISPLAY       0x328   // 'Stolen' from the IHU
+//#define DISPLAY_RESOURCE_REQ        0x357     // 'Stolen' from the SPA
+//#define WRITE_TEXT_ON_DISPLAY       0x337     // 'Stolen' from the SPA
 #define NODE_STATUS_TX              0x6A2
 #define SOUND_REQUEST               0x430
 
@@ -69,8 +72,9 @@
  * Timer definitions:
  */
 
-#define NODE_STATUS_TX_INTERVAL     140     // Replies to '6A1' request need to be sent with no more than 140ms interval
-#define NODE_STATUS_TX_BASETIME     950     // The CDC status frame must be sent periodically within this timeframe
+#define NODE_STATUS_TX_INTERVAL     140     // Replies to '6A1' request need to be sent with no more than 140ms interval; tolerances +/- 10%
+#define CDC_STATUS_TX_BASETIME      950     // The CDC status frame must be sent periodically within this timeframe; tolerances +/- 10%
+#define SID_CONTROL_TX_BASETIME     1000    // SID control/resource request frames needs to be sent within this timeframe; tolerances +/- 10%
 
 /**
  * SID sound type definitions:
@@ -103,6 +107,7 @@ public:
 
 void sendCdcStatusOnTime(void*);
 void sendDisplayRequestOnTime(void*);
+void writeTextOnDisplayOnTime(void*);
 
 /**
  * Variables:
