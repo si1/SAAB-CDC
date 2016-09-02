@@ -41,15 +41,15 @@ void sendCdcPowerdownStatus(void*);
 void *currentCdcCmd = NULL;
 unsigned long cdcStatusLastSendTime = 0;            // Timer used to ensure we send the CDC status frame in a timely manner
 unsigned long lastIcomingEventTime = 0;             // Timer used for determening if we should treat current event as, for example, a long press of a button
+boolean sidTextControlTestMode = false;             // True while SID text control on behalf of SPA is enabled. Toggled ON/OFF with button #5 on IHU
 boolean cdcActive = false;                          // True while our module, the simulated CDC, is active
 boolean cdcStatusResendNeeded = false;              // True if something has triggered the need to send the CDC status frame as an event
 boolean cdcStatusResendDueToCdcCommand = false;     // True if the need for sending the CDC status frame was triggered by a CDC command
-boolean writeTextOnDisplayTimerActive = false;
+boolean writeTextOnDisplayTimerActive = false;      // True while we are writing custom text on SID every SID_CONTROL_TX_BASETIME interval
 int incomingEventCounter = 0;                       // Counter for incoming events to determine when we will treat the event, for example, as a long press of a button
-int displayRequestTimerId;
-int writeTextOnDisplayTimerId;
+int displayRequestTimerId = -1;
+int writeTextOnDisplayTimerId = -1;
 int currentTimerEvent = -1;
-//int displayRequestTimerId;
 int cdcPoweronCmd[NODE_STATUS_TX_MSG_SIZE][9] = {
     {0x32,0x00,0x00,0x03,0x01,0x02,0x00,0x00,-1},
     {0x42,0x00,0x00,0x22,0x00,0x00,0x00,0x00,-1},
@@ -68,13 +68,46 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
     {0x52,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1},
     {0x62,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1}
 };
-int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
-/*
- 0xE0 in cdcGeneralStatusCmd seems to indicate that we are sending an "engineering test" command
- The "original" CD changer never sends 0xE0 as the first byte of frame
+
+/* Format of SOUND_REQUEST frame:
+ ID: SOUND_REQUEST
+ [0]: Sent on basetime/event; 0 = Basetime; 80 = Event
+ [1]: Type of sound
+ [2-7]: Zeroed out; not in use
  */
-int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
-int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x02,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
+int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
+
+/* Format of GENERAL_STATUS_CDC frame:
+ ID: CDC node ID
+ [0]:
+    byte 0, bit 7: FCI NEW DATA: 0 - sent on basetime, 1 - sent on event
+    byte 0, bit 6: FCI REMOTE CMD: 0 - status change due to internal operation, 1 - status change due to CDC_COMMAND frame
+    byte 0, bit 5: FCI DISC PRESENCE VALID: 0 - disc presence signal is not valid, 1 - disc presence signal is valid
+ [1]: Disc presence validation (boolean)
+    byte 1-2, bits 0-15: DISC PRESENCE: (bitmap) 0 - disc absent, 1 - disc present. Bit 0 is disc 1, bit 1 is disc 2, etc.
+ [2]: Disc presence (bitmap)
+    byte 1-2, bits 0-15: DISC PRESENCE: (bitmap) 0 - disc absent, 1 - disc present. Bit 0 is disc 1, bit 1 is disc 2, etc.
+ [3]: Disc number currently playing
+    byte 3, bits 7-4: DISC MODE
+    byte 3, bits 3-0: DISC NUMBER
+ [4]: Track number currently playing
+ [5]: Minute of the current track
+ [6]: Second of the current track
+ [7]: CD changer status; D0 = Married to the car
+ Note: the command that "used to work": {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
+ Note: command to try: {0xE0,0xFF,0x3F,0x22,0xFF,0xFF,0xFF,0xD0,-1};
+ */
+int cdcGeneralStatusCmd[] = {0x20,0x01,0x01,0x01 | (0x05 << 4) | 0x01,0xFF,0xFF,0xFF,0xD0,-1};
+
+/* Format of DISPLAY_RESOURCE_REQ frame:
+ ID: Node ID requesting to write on SID
+ [0]: Request source
+ [1]: SID object to write on; 0 = entire SID; 1 = 1st row; 2 = 2nd row
+ [2]: Request type: 1 = Engineering test; 2 = Emergency; 3 = Driver action; 4 = ECU action; 5 = Static text; 6 = We don't want to write on SID
+ [3]: Request source function ID
+ [4-7]: Zeroed out; not in use
+ */
+int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x05,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
 
 /**
  * DEBUG: Prints the CAN TX frame to serial output
@@ -123,7 +156,7 @@ void CDChandler::handleRxFrame() {
         CAN_TxMsg.data[0]++;
         CAN.ReadFromDevice(&CAN_RxMsg);
         switch (CAN_RxMsg.id) {
-            case NODE_STATUS_RX:
+            case NODE_STATUS_RX_IHU:
                 /*
                  Here be dragons... This part of the code is responsible for causing lots of headache
                  We look at the bottom half of 3rd byte of '6A1' frame to determine what 'current_cdc_command' should be
@@ -143,7 +176,7 @@ void CDChandler::handleRxFrame() {
                         break;
                 }
                 break;
-            case IHU_BUTTONS:
+            case CDC_CONTROL:
                 handleIhuButtons();
                 break;
             case STEERING_WHEEL_BUTTONS:
@@ -154,7 +187,7 @@ void CDChandler::handleRxFrame() {
                     if (CAN_RxMsg.data[1] == SPA_SID_FUNCTION_ID) {
                         // Serial.println("DEBUG: We have been granted the right to write text to the second row in the SID");
                         if (!writeTextOnDisplayTimerActive) {
-                            //writeTextOnDisplayTimerId = time.every(SID_CONTROL_TX_BASETIME, &writeTextOnDisplayOnTime,NULL);
+                            writeTextOnDisplayTimerId = time.every(SID_CONTROL_TX_BASETIME, &writeTextOnDisplayOnTime,NULL);
                             writeTextOnDisplayTimerActive = true;
                         }
                     }
@@ -177,7 +210,7 @@ void CDChandler::handleRxFrame() {
 }
 
 /**
- * Handles the IHU_BUTTONS frame that the IHU sends us when it wants to control some feature of the CDC
+ * Handles the CDC_CONTROL frame that the IHU sends us when it wants to control some feature of the CDC
  */
 
 void CDChandler::handleIhuButtons() {
@@ -231,14 +264,28 @@ void CDChandler::handleIhuButtons() {
                     case 0x01:
                         BT.bt_volup();
                         break;
-                    case 0x04:
-                        BT.bt_voldown();
-                        break;
                     case 0x02:
                         BT.bt_set_maxvol();
                         break;
                     case 0x03:
                         BT.bt_reconnect();
+                        break;
+                    case 0x04:
+                        BT.bt_voldown();
+                        break;
+                    case 0x05:
+                        if (!sidTextControlTestMode) {
+                            displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
+                            sidTextControlTestMode = true;
+                            sendCanFrame(SOUND_REQUEST, soundCmd);
+                        }
+                        else {
+                            time.stop(displayRequestTimerId);
+                            time.stop(writeTextOnDisplayTimerId);
+                            sidTextControlTestMode = false;
+                            writeTextOnDisplayTimerActive = false;
+                            sendCanFrame(SOUND_REQUEST, soundCmd);
+                        }
                         break;
                     case 0x06:
                         BT.bt_disconnect();
@@ -336,7 +383,7 @@ void sendCdcNodeStatus(void *p) {
     if (currentTimerEvent > NODE_STATUS_TX_MSG_SIZE) {
         time.stop(currentTimerEvent);
     }
-    CDC.sendCanFrame(NODE_STATUS_TX, ((int(*)[9])currentCdcCmd)[i]);
+    CDC.sendCanFrame(NODE_STATUS_TX_CDC, ((int(*)[9])currentCdcCmd)[i]);
     if (i < NODE_STATUS_TX_MSG_SIZE) {
         currentTimerEvent = time.after(NODE_STATUS_TX_INTERVAL,sendCdcNodeStatus,(void*)(i + 1));
     }
@@ -389,12 +436,13 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     for (i = n + 1; i < 16; i++) {
         txt[i] = 0;
     }
-    
+
     CAN_TxMsg.id = WRITE_TEXT_ON_DISPLAY;
      
     CAN_TxMsg.data[0] = 0x42; // TODO: check if this is really correct? According to the spec, the 4 shouldn't be there? It's just a normal transport layer sequence numbering?
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
-    CAN_TxMsg.data[2] = 0x02; // Sent on basetime, writing to row 2
+    CAN_TxMsg.data[2] = 0x80; // Sent on event; writing to row 2
+    //CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
     CAN_TxMsg.data[3] = txt[0];
     CAN_TxMsg.data[4] = txt[1];
     CAN_TxMsg.data[5] = txt[2];
@@ -404,7 +452,8 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     
     CAN_TxMsg.data[0] = 0x01; // message 1
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
-    CAN_TxMsg.data[2] = 0x02; // Sent on basetime, writing to row 2
+    CAN_TxMsg.data[2] = 0x80; // Sent on event; writing to row 2
+    //CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
     CAN_TxMsg.data[3] = txt[5];
     CAN_TxMsg.data[4] = txt[6];
     CAN_TxMsg.data[5] = txt[7];
@@ -414,7 +463,8 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     
     CAN_TxMsg.data[0] = 0x00; // message 0
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
-    CAN_TxMsg.data[2] = 0x02; // Sent on basetime, writing to row 2
+    CAN_TxMsg.data[2] = 0x80; // Sent on event; writing to row 2
+    //CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
     CAN_TxMsg.data[3] = txt[10];
     CAN_TxMsg.data[4] = txt[11];
     CAN_TxMsg.data[5] = txt[12];

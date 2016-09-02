@@ -43,7 +43,7 @@
  * Other useful stuff
  */
 
-#define MODULE_NAME                 "BlueSaab"
+#define MODULE_NAME                 "Yipee Ki Yay"
 #define LAST_EVENT_IN_TIMEOUT       3000    // Milliseconds
 #define NODE_STATUS_TX_MSG_SIZE     4       // Decimal; defines how many frames do we need to reply with to '6A1'
 
@@ -52,20 +52,20 @@
  */
 
 #define GENERAL_STATUS_CDC          0x3C8
-#define DISPLAY_RESOURCE_REQ        0x348   // 'Stolen' from the IHU
-#define WRITE_TEXT_ON_DISPLAY       0x328   // 'Stolen' from the IHU
-//#define DISPLAY_RESOURCE_REQ        0x357     // 'Stolen' from the SPA
-//#define WRITE_TEXT_ON_DISPLAY       0x337     // 'Stolen' from the SPA
-#define NODE_STATUS_TX              0x6A2
+//#define DISPLAY_RESOURCE_REQ        0x348   // 'Stolen' from the IHU
+//#define WRITE_TEXT_ON_DISPLAY       0x328   // 'Stolen' from the IHU
+#define DISPLAY_RESOURCE_REQ        0x357     // 'Stolen' from the SPA
+#define WRITE_TEXT_ON_DISPLAY       0x337     // 'Stolen' from the SPA
+#define NODE_STATUS_TX_CDC          0x6A2
 #define SOUND_REQUEST               0x430
 
 /**
  * RX frames:
  */
 
-#define IHU_BUTTONS                 0x3C0
+#define CDC_CONTROL                 0x3C0
 #define DISPLAY_RESOURCE_GRANT      0x368
-#define NODE_STATUS_RX              0x6A1
+#define NODE_STATUS_RX_IHU          0x6A1
 #define STEERING_WHEEL_BUTTONS      0x290
 
 /**
