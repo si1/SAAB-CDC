@@ -93,7 +93,38 @@ void RN52impl::update() {
  */
 
 void RN52impl::initialize() {
+    // Values used for "smoothing" analogRead() results for hardware revision check
+    const int numReadings = 10;
+    int readings[numReadings];
+    int readIndex = 0;
+    int total = 0;
+    int hwRevisionCheckValue = 0;
+    
     softSerial.begin(9600);
+    
+    // Initialize all the readings to 0
+    for (int thisReading = 0; thisReading < numReadings; thisReading++) {
+        readings[thisReading] = 0;
+    }
+    
+    for (int i = 0; i < numReadings; i++) {
+        // Subtract the last reading
+        total = total - readings[readIndex];
+        // Read the pin
+        readings[readIndex] = analogRead(HW_REV_CHK_PIN);
+        // Add the reading to the total
+        total = total + readings[readIndex];
+        // Advance to the next position in the array
+        readIndex++;
+        
+        // If we're at the end of the array...
+        if (readIndex >= numReadings) {
+            // ...wrap around to the beginning
+            readIndex = 0;
+        }
+        // Calculate the average
+        hwRevisionCheckValue = total / numReadings;
+    }
     
     // Initializing ATMEGA pins
     pinMode(BT_PWREN_PIN,OUTPUT);
@@ -108,14 +139,12 @@ void RN52impl::initialize() {
     digitalWrite(BT_EVENT_INDICATOR_PIN,HIGH);  // Default state of GPIO2, per data sheet, is HIGH
     digitalWrite(BT_CMD_PIN,HIGH);              // Default state of GPIO9, per data sheet, is HIGH
     
-    int hwRevisionCheckValue = analogRead(HW_REV_CHK_PIN);
-    
     switch (hwRevisionCheckValue) {
-        case (46):                                  // PCBs v3.3A, v4.1 or v4.2 (100K/5K Ohm network); TODO: make sure the correct resistors are soldered on!!!
+        case 43 ... 47:                                  // PCBs v3.3A, v4.1 or v4.2 (100K/5K Ohm network); TODO: make sure the correct resistors are soldered on!!!
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
             Serial.println("Hardware version: v3.3A/v4.1/v4.2");
             break;
-        case (91):                                  // PCB v4.3 (100K/10K Ohm network)
+        case 88 ... 92:                                  // PCB v4.3 (100K/10K Ohm network)
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
             digitalWrite(SN_XCEIVER_RS_PIN,LOW);    // This pin needs to be pulled low, otherwise SN65HVD251D CAN transciever goes into sleep mode
             Serial.println("Hardware version: v4.3");
