@@ -111,8 +111,9 @@ void RN52impl::initialize() {
     int hwRevisionCheckValue = analogRead(HW_REV_CHK_PIN);
     
     switch (hwRevisionCheckValue) {
-        case (511):                                 // PCBs v3.3A, v4.1 or v4.2 (100K/5K Ohm network); TODO: make sure the correct resistors are soldered on!!!
+        case (46):                                  // PCBs v3.3A, v4.1 or v4.2 (100K/5K Ohm network); TODO: make sure the correct resistors are soldered on!!!
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
+            Serial.println("Hardware version: v3.3A/v4.1/v4.2");
             break;
         case (91):                                  // PCB v4.3 (100K/10K Ohm network)
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
