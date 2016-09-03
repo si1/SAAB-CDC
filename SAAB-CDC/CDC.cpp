@@ -19,7 +19,7 @@
  * Created by: Karlis Veilands
  * Created on: Jun 4, 2015
  * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Modified on: September 2, 2016
  */
 
 #include <Arduino.h>

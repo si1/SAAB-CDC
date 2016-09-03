@@ -19,7 +19,7 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Modified on: September 2, 2016
  */
 
 #ifndef RN52impl_H

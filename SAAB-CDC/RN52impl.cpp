@@ -19,7 +19,7 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Last modified on: Aug 11, 2016
+ * Last modified on: September 2, 2016
  */
 
 #include "RN52impl.h"
