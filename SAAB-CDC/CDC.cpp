@@ -32,8 +32,6 @@
  * Variables:
  */
 
-unsigned long lastGrant = 0;
-
 extern Timer time;
 void sendCdcNodeStatus(void*);
 void sendCdcActiveStatus(void*);
@@ -94,10 +92,8 @@ int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
  [5]: Minute of the current track
  [6]: Second of the current track
  [7]: CD changer status; D0 = Married to the car
- Note: the command that "used to work": {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
- Note: command to try: {0xE0,0xFF,0x3F,0x22,0xFF,0xFF,0xFF,0xD0,-1};
  */
-int cdcGeneralStatusCmd[] = {0x20,0x01,0x01,0x01 | (0x05 << 4) | 0x01,0xFF,0xFF,0xFF,0xD0,-1};
+int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
 
 /* Format of DISPLAY_RESOURCE_REQ frame:
  ID: Node ID requesting to write on SID
@@ -214,10 +210,16 @@ void CDChandler::handleRxFrame() {
  */
 
 void CDChandler::handleIhuButtons() {
+    boolean event = (CAN_RxMsg.data[0] == 0x80);
+    if (!event) {
+        /*
+         TODO: Pay attention at what's happening in this case
+         Occasionally there's a frame: 0x00 0x24 0x00 0x00 0x00 0x00 0x00 0x00; can we ignore this just because it wasn't sent on an event?
+        */
+        return;
+    }
     switch (CAN_RxMsg.data[1]) {
         case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
-            // Total number of hours spent trying to figure out what's wrong here as of July 2016 = 22,3; Incremented accordingly... :).
-            // In some cases handling of this case causes a reset of ATMEGA-328P-PU, thus causing Bluetooth and auto-play to fail.
             BT.bt_reconnect();
             cdcActive = true;
             //displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
@@ -259,21 +261,22 @@ void CDChandler::handleIhuButtons() {
             case 0x36: // Track -
                 BT.bt_prev();
                 break;
-            case 0x68:
+            case 0x68: // IHU buttons "1-6"
                 switch (CAN_RxMsg.data[2]) {
-                    case 0x01:
+                    case 0x01: // Button "1" on IHU
                         BT.bt_volup();
                         break;
-                    case 0x02:
+                    case 0x02: // Button "2" on IHU
                         BT.bt_set_maxvol();
                         break;
-                    case 0x03:
+                    case 0x03: // Button... aren't we f***ing smart? Take it from here :)
                         BT.bt_reconnect();
                         break;
                     case 0x04:
                         BT.bt_voldown();
                         break;
                     case 0x05:
+                        
                         if (!sidTextControlTestMode) {
                             displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
                             sidTextControlTestMode = true;
@@ -286,6 +289,7 @@ void CDChandler::handleIhuButtons() {
                             writeTextOnDisplayTimerActive = false;
                             sendCanFrame(SOUND_REQUEST, soundCmd);
                         }
+                        
                         break;
                     case 0x06:
                         BT.bt_disconnect();
@@ -441,8 +445,7 @@ void CDChandler::writeTextOnDisplay(char text[]) {
      
     CAN_TxMsg.data[0] = 0x42; // TODO: check if this is really correct? According to the spec, the 4 shouldn't be there? It's just a normal transport layer sequence numbering?
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
-    CAN_TxMsg.data[2] = 0x80; // Sent on event; writing to row 2
-    //CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
+    CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
     CAN_TxMsg.data[3] = txt[0];
     CAN_TxMsg.data[4] = txt[1];
     CAN_TxMsg.data[5] = txt[2];
@@ -452,8 +455,7 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     
     CAN_TxMsg.data[0] = 0x01; // message 1
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
-    CAN_TxMsg.data[2] = 0x80; // Sent on event; writing to row 2
-    //CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
+    CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
     CAN_TxMsg.data[3] = txt[5];
     CAN_TxMsg.data[4] = txt[6];
     CAN_TxMsg.data[5] = txt[7];
@@ -463,8 +465,7 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     
     CAN_TxMsg.data[0] = 0x00; // message 0
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
-    CAN_TxMsg.data[2] = 0x80; // Sent on event; writing to row 2
-    //CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
+    CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
     CAN_TxMsg.data[3] = txt[10];
     CAN_TxMsg.data[4] = txt[11];
     CAN_TxMsg.data[5] = txt[12];
