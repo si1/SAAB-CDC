@@ -276,7 +276,7 @@ void CDChandler::handleIhuButtons() {
                         BT.bt_voldown();
                         break;
                     case 0x05:
-                        
+                        /*
                         if (!sidTextControlTestMode) {
                             displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
                             sidTextControlTestMode = true;
@@ -289,7 +289,7 @@ void CDChandler::handleIhuButtons() {
                             writeTextOnDisplayTimerActive = false;
                             sendCanFrame(SOUND_REQUEST, soundCmd);
                         }
-                        
+                        */
                         break;
                     case 0x06:
                         BT.bt_disconnect();
