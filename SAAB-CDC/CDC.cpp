@@ -41,8 +41,8 @@ unsigned long cdcStatusLastSendTime = 0;            // Timer used to ensure we s
 unsigned long lastIcomingEventTime = 0;             // Timer used for determening if we should treat current event as, for example, a long press of a button
 boolean sidTextControlTestMode = false;             // True while SID text control on behalf of SPA is enabled. Toggled ON/OFF with button #5 on IHU
 boolean cdcActive = false;                          // True while our module, the simulated CDC, is active
-boolean cdcStatusResendNeeded = false;              // True if something has triggered the need to send the CDC status frame as an event
-boolean cdcStatusResendDueToCdcCommand = false;     // True if the need for sending the CDC status frame was triggered by a CDC command
+boolean cdcStatusResendNeeded = false;              // True if something has triggered the need to send the CDC status frame as an event; TODO: fix this
+boolean cdcStatusResendDueToCdcCommand = false;     // True if the need for sending the CDC status frame was triggered by a CDC command; TODO: fix this (remote CAN frame?)
 boolean writeTextOnDisplayTimerActive = false;      // True while we are writing custom text on SID every SID_CONTROL_TX_BASETIME interval
 int incomingEventCounter = 0;                       // Counter for incoming events to determine when we will treat the event, for example, as a long press of a button
 int displayRequestTimerId = -1;
@@ -103,10 +103,10 @@ int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
  [3]: Request source function ID
  [4-7]: Zeroed out; not in use
  */
-int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x05,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
+int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x01,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
 
 /**
- * DEBUG: Prints the CAN TX frame to serial output
+ * DEBUG: Prints the CAN Tx frame to serial output
  */
 
 void CDChandler::printCanTxFrame() {
@@ -120,7 +120,7 @@ void CDChandler::printCanTxFrame() {
 }
 
 /**
- * DEBUG: Prints the CAN RX frame to serial output
+ * DEBUG: Prints the CAN Rx frame to serial output
  */
 
 void CDChandler::printCanRxFrame() {
@@ -155,7 +155,7 @@ void CDChandler::handleRxFrame() {
             case NODE_STATUS_RX_IHU:
                 /*
                  Here be dragons... This part of the code is responsible for causing lots of headache
-                 We look at the bottom half of 3rd byte of '6A1' frame to determine what 'current_cdc_command' should be
+                 We look at the bottom half of 3rd byte of '6A1' frame to determine what 'currentCdcCommand' should be
                  */
                 switch (CAN_RxMsg.data[3] & 0x0F){
                     case (0x3):
@@ -179,7 +179,7 @@ void CDChandler::handleRxFrame() {
                 handleSteeringWheelButtons();
                 break;
             case DISPLAY_RESOURCE_GRANT:
-                if (CAN_RxMsg.data[0] == SID_OBJECT2) {
+                if ((cdcActive) && (CAN_RxMsg.data[0] == SID_OBJECT2)) {
                     if (CAN_RxMsg.data[1] == SPA_SID_FUNCTION_ID) {
                         // Serial.println("DEBUG: We have been granted the right to write text to the second row in the SID");
                         if (!writeTextOnDisplayTimerActive) {

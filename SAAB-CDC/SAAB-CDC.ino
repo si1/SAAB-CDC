@@ -37,5 +37,5 @@ void loop() {
     time.update();
     CDC.handleCdcStatus();
     BT.update();
-//    BT.monitor_serial_input(); // Switching the serial OFF for now; not sure why or if, but this seems to mess up things...
+    BT.monitor_serial_input();
 }
