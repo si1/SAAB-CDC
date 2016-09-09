@@ -75,26 +75,6 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
  */
 int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
 
-/* Format of GENERAL_STATUS_CDC frame:
- ID: CDC node ID
- [0]:
-    byte 0, bit 7: FCI NEW DATA: 0 - sent on basetime, 1 - sent on event
-    byte 0, bit 6: FCI REMOTE CMD: 0 - status change due to internal operation, 1 - status change due to CDC_COMMAND frame
-    byte 0, bit 5: FCI DISC PRESENCE VALID: 0 - disc presence signal is not valid, 1 - disc presence signal is valid
- [1]: Disc presence validation (boolean)
-    byte 1-2, bits 0-15: DISC PRESENCE: (bitmap) 0 - disc absent, 1 - disc present. Bit 0 is disc 1, bit 1 is disc 2, etc.
- [2]: Disc presence (bitmap)
-    byte 1-2, bits 0-15: DISC PRESENCE: (bitmap) 0 - disc absent, 1 - disc present. Bit 0 is disc 1, bit 1 is disc 2, etc.
- [3]: Disc number currently playing
-    byte 3, bits 7-4: DISC MODE
-    byte 3, bits 3-0: DISC NUMBER
- [4]: Track number currently playing
- [5]: Minute of the current track
- [6]: Second of the current track
- [7]: CD changer status; D0 = Married to the car
- */
-int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1};
-
 /* Format of DISPLAY_RESOURCE_REQ frame:
  ID: Node ID requesting to write on SID
  [0]: Request source
@@ -300,6 +280,8 @@ void CDChandler::handleIhuButtons() {
                 break;
         }
     }
+    cdcStatusResendNeeded = true;
+    cdcStatusResendDueToCdcCommand = true;
 }
 
 /**
@@ -339,12 +321,51 @@ void CDChandler::handleCdcStatus() {
     // If the CDC status frame needs to be sent as an event, do so now
     // (note though, that we may not send the frame more often than once every 50 ms)
     
-    if (cdcStatusResendNeeded && (millis() - cdcStatusLastSendTime > 100)) {
-        sendCdcStatus(true, cdcStatusResendDueToCdcCommand);
+    if (cdcStatusResendNeeded && (millis() - cdcStatusLastSendTime > 50)) {
+        sendCdcStatus(cdcStatusResendNeeded, cdcStatusResendDueToCdcCommand);
     }
 }
 
 void CDChandler::sendCdcStatus(boolean event, boolean remote) {
+    
+    /* Format of GENERAL_STATUS_CDC frame:
+     ID: CDC node ID
+     [0]:
+     byte 0, bit 7: FCI NEW DATA: 0 - sent on basetime, 1 - sent on event
+     byte 0, bit 6: FCI REMOTE CMD: 0 - status change due to internal operation, 1 - status change due to CDC_COMMAND frame
+     byte 0, bit 5: FCI DISC PRESENCE VALID: 0 - disc presence signal is not valid, 1 - disc presence signal is valid
+     [1]: Disc presence validation (boolean)
+     byte 1-2, bits 0-15: DISC PRESENCE: (bitmap) 0 - disc absent, 1 - disc present. Bit 0 is disc 1, bit 1 is disc 2, etc.
+     [2]: Disc presence (bitmap)
+     byte 1-2, bits 0-15: DISC PRESENCE: (bitmap) 0 - disc absent, 1 - disc present. Bit 0 is disc 1, bit 1 is disc 2, etc.
+     [3]: Disc number currently playing
+     byte 3, bits 7-4: DISC MODE
+     byte 3, bits 3-0: DISC NUMBER
+     [4]: Track number currently playing
+     [5]: Minute of the current track
+     [6]: Second of the current track
+     [7]: CD changer status; D0 = Married to the car
+     */
+    
+    // int cdcGeneralStatusCmd[] = {0xE0,0xFF,0x3F,0x41,0xFF,0xFF,0xFF,0xD0,-1}; Original command
+    
+    byte discMode       = 0x05; // Play; 0x0E can also be tried for "test mode" but might stop IHU from updating the display
+    byte trackNumber    = 0xFF;
+    byte randomPlay     = (0x00 << 5);
+    byte discRepeat     = (0x00 << 1);
+    byte trackRepeat    = 0x01;
+    int cdcGeneralStatusCmd[8];
+    
+    cdcGeneralStatusCmd[0] = ((event ? 0x07 : 0x00) | (remote ? 0x00 : 0x01)) << 5;
+    cdcGeneralStatusCmd[1] = 0x3F; // Validation for presence of six discs in the magazine
+    cdcGeneralStatusCmd[2] = 0x3F; // There are six discs in the magazine
+    cdcGeneralStatusCmd[3] = 0x41; // ToDo: check 0x01 | (discMode << 4) | 0x01
+    cdcGeneralStatusCmd[4] = trackNumber;
+    cdcGeneralStatusCmd[5] = 0xFF;
+    cdcGeneralStatusCmd[6] = 0xFF;
+    cdcGeneralStatusCmd[7] = 0xD0;
+    cdcGeneralStatusCmd[7] |= randomPlay | discRepeat | trackRepeat;
+    cdcGeneralStatusCmd[8] = -1;
 
     sendCanFrame(GENERAL_STATUS_CDC, cdcGeneralStatusCmd);
 
@@ -400,7 +421,7 @@ void sendCdcNodeStatus(void *p) {
  */
 
 void sendCdcStatusOnTime(void*) {
-    CDC.sendCdcStatus(false, false);
+    CDC.sendCdcStatus(cdcStatusResendNeeded, cdcStatusResendDueToCdcCommand);
 }
 
 /**
