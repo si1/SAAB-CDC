@@ -19,7 +19,7 @@
  * Created by: Karlis Veilands
  * Created on: Jun 4, 2015
  * Modified by: Karlis Veilands
- * Modified on: September 2, 2016
+ * Modified on: September 9, 2016
  */
 
 #ifndef CDC_H
@@ -98,14 +98,13 @@ public:
     void handleIhuButtons();
     void handleSteeringWheelButtons();
     void handleCdcStatus();
-    void sendCdcStatus(boolean event, boolean remote);
+    void sendCdcStatus(boolean event, boolean remote, boolean cdcActive);
     void sendDisplayRequest();
     void sendCanFrame(int message_id, int *msg);
     void writeTextOnDisplay(char text[]);
     void checkCanEvent(int frameElement);
 };
 
-void sendCdcStatusOnTime(void*);
 void sendDisplayRequestOnTime(void*);
 void writeTextOnDisplayOnTime(void*);
 
