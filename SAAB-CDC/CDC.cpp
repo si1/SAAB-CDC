@@ -161,7 +161,7 @@ void CDChandler::handleRxFrame() {
             case DISPLAY_RESOURCE_GRANT:
                 if ((cdcActive) && (CAN_RxMsg.data[0] == SID_OBJECT2)) {
                     if (CAN_RxMsg.data[1] == SPA_SID_FUNCTION_ID) {
-                        // We have been granted the right to write text to the second row on the SID");
+                        // We have been granted the right to write text to the second row on the SID"
                         if (!writeTextOnDisplayTimerActive) {
                             writeTextOnDisplayTimerId = time.every(SID_CONTROL_TX_BASETIME, &writeTextOnDisplayOnTime,NULL);
                             writeTextOnDisplayTimerActive = true;
