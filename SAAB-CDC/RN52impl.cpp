@@ -100,6 +100,7 @@ void RN52impl::initialize() {
     int total = 0;
     int hwRevisionCheckValue = 0;
     
+    Serial.begin(9600);
     softSerial.begin(9600);
     
     // Initialize all the readings to 0
@@ -181,6 +182,7 @@ void RN52impl::initialize() {
     delay(1000);
     reboot();
      */
+    Serial.end();
 }
 
 void RN52impl::waitForResponse() {

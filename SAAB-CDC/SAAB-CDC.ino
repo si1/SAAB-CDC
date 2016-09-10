@@ -27,9 +27,10 @@ void setup() {
     Serial.begin(9600);
     Serial.println("\"BlueSaab\"");
     Serial.println("Software version: v3.7");
+    Serial.end();
     BT.initialize();
     CDC.openCanBus();
-    time.every(CDC_STATUS_TX_BASETIME, &sendCdcStatusOnTime,NULL);
+//    time.every(CDC_STATUS_TX_BASETIME, &sendCdcStatusOnTime,NULL);
 }
 
 // Main loop

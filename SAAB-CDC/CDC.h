@@ -73,7 +73,7 @@
  */
 
 #define NODE_STATUS_TX_INTERVAL     140     // Replies to '6A1' request need to be sent with no more than 140ms interval; tolerances +/- 10%
-#define CDC_STATUS_TX_BASETIME      950     // The CDC status frame must be sent periodically within this timeframe; tolerances +/- 10%
+#define CDC_STATUS_TX_BASETIME      1000    // The CDC status frame must be sent periodically within this timeframe; tolerances +/- 10%
 #define SID_CONTROL_TX_BASETIME     1000    // SID control/resource request frames needs to be sent within this timeframe; tolerances +/- 10%
 
 /**

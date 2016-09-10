@@ -47,7 +47,7 @@ boolean writeTextOnDisplayTimerActive = false;      // True while we are writing
 int incomingEventCounter = 0;                       // Counter for incoming events to determine when we will treat the event, for example, as a long press of a button
 int displayRequestTimerId = -1;
 int writeTextOnDisplayTimerId = -1;
-int currentTimerEvent = -1;
+int currentNodeStatusTxTimerEvent = -1;
 int cdcPoweronCmd[NODE_STATUS_TX_MSG_SIZE][9] = {
     {0x32,0x00,0x00,0x03,0x01,0x02,0x00,0x00,-1},
     {0x42,0x00,0x00,0x22,0x00,0x00,0x00,0x00,-1},
@@ -215,73 +215,75 @@ void CDChandler::handleIhuButtons() {
         default:
             break;
     }
-    if (cdcActive) {
-        checkCanEvent(1);
-        switch (CAN_RxMsg.data[1]) {
-            case 0x59: // NXT
-                BT.bt_play();
-                break;
-            case 0x84: // SEEK button (middle) long press on IHU
-                BT.bt_visible();
-                break;
-            case 0x88: // > 2 sec long press of SEEK button (middle) on IHU
-                BT.bt_invisible();
-                break;
-            case 0x76: // Random ON/OFF (Long press of CD/RDM button)
-                break;
-            case 0xB1: // Pause ON
-                // N/A for now
-                break;
-            case 0xB0: // Pause OFF
-                // N/A for now
-                break;
-            case 0x35: // Track +
-                BT.bt_next();
-                break;
-            case 0x36: // Track -
-                BT.bt_prev();
-                break;
-            case 0x68: // IHU buttons "1-6"
-                switch (CAN_RxMsg.data[2]) {
-                    case 0x01: // Button "1" on IHU
-                        BT.bt_volup();
-                        break;
-                    case 0x02: // Button "2" on IHU
-                        BT.bt_set_maxvol();
-                        break;
-                    case 0x03: // Button... aren't we f***ing smart? Take it from here :)
-                        BT.bt_reconnect();
-                        break;
-                    case 0x04:
-                        BT.bt_voldown();
-                        break;
-                    case 0x05:
-                        /*
-                        if (!sidTextControlTestMode) {
-                            displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
-                            sidTextControlTestMode = true;
-                            sendCanFrame(SOUND_REQUEST, soundCmd);
-                        }
-                        else {
-                            time.stop(displayRequestTimerId);
-                            time.stop(writeTextOnDisplayTimerId);
-                            sidTextControlTestMode = false;
-                            writeTextOnDisplayTimerActive = false;
-                            sendCanFrame(SOUND_REQUEST, soundCmd);
-                        }
-                        */
-                        break;
-                    case 0x06:
-                        BT.bt_disconnect();
-                    default:
-                        break;
-                }
-            default:
-                break;
+    if ((event) && (CAN_RxMsg.data[1] != 0x00)) {
+        if (cdcActive) {
+            checkCanEvent(1);
+            switch (CAN_RxMsg.data[1]) {
+                case 0x59: // NXT
+                    BT.bt_play();
+                    break;
+                case 0x84: // SEEK button (middle) long press on IHU
+                    BT.bt_visible();
+                    break;
+                case 0x88: // > 2 sec long press of SEEK button (middle) on IHU
+                    BT.bt_invisible();
+                    break;
+                case 0x76: // Random ON/OFF (Long press of CD/RDM button)
+                    break;
+                case 0xB1: // Pause ON
+                    // N/A for now
+                    break;
+                case 0xB0: // Pause OFF
+                    // N/A for now
+                    break;
+                case 0x35: // Track +
+                    BT.bt_next();
+                    break;
+                case 0x36: // Track -
+                    BT.bt_prev();
+                    break;
+                case 0x68: // IHU buttons "1-6"
+                    switch (CAN_RxMsg.data[2]) {
+                        case 0x01: // Button "1" on IHU
+                            BT.bt_volup();
+                            break;
+                        case 0x02: // Button "2" on IHU
+                            BT.bt_set_maxvol();
+                            break;
+                        case 0x03: // Button... aren't we f***ing smart? Take it from here :)
+                            BT.bt_reconnect();
+                            break;
+                        case 0x04:
+                            BT.bt_voldown();
+                            break;
+                        case 0x05:
+                            /*
+                             if (!sidTextControlTestMode) {
+                             displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
+                             sidTextControlTestMode = true;
+                             sendCanFrame(SOUND_REQUEST, soundCmd);
+                             }
+                             else {
+                             time.stop(displayRequestTimerId);
+                             time.stop(writeTextOnDisplayTimerId);
+                             sidTextControlTestMode = false;
+                             writeTextOnDisplayTimerActive = false;
+                             sendCanFrame(SOUND_REQUEST, soundCmd);
+                             }
+                             */
+                            break;
+                        case 0x06:
+                            BT.bt_disconnect();
+                        default:
+                            break;
+                    }
+                default:
+                    break;
+            }
         }
+        cdcStatusResendNeeded = true;
+        cdcStatusResendDueToCdcCommand = true;
     }
-    cdcStatusResendNeeded = true;
-    cdcStatusResendDueToCdcCommand = true;
 }
 
 /**
@@ -324,6 +326,12 @@ void CDChandler::handleCdcStatus() {
     if (cdcStatusResendNeeded && (millis() - cdcStatusLastSendTime > 50)) {
         sendCdcStatus(cdcStatusResendNeeded, cdcStatusResendDueToCdcCommand);
     }
+    
+    // the CDC status frame must be sent with a 1000 ms periodicity:
+    if (millis() - cdcStatusLastSendTime > CDC_STATUS_TX_BASETIME) {
+        // send the CDC status message, marked periodical and triggered internally:
+        sendCdcStatus(false, false);
+    }
 }
 
 void CDChandler::sendCdcStatus(boolean event, boolean remote) {
@@ -357,14 +365,14 @@ void CDChandler::sendCdcStatus(boolean event, boolean remote) {
     int cdcGeneralStatusCmd[8];
     
     cdcGeneralStatusCmd[0] = ((event ? 0x07 : 0x00) | (remote ? 0x00 : 0x01)) << 5;
-    cdcGeneralStatusCmd[1] = 0x3F; // Validation for presence of six discs in the magazine
+    cdcGeneralStatusCmd[1] = 0xFF; // Validation for presence of six discs in the magazine
     cdcGeneralStatusCmd[2] = 0x3F; // There are six discs in the magazine
     cdcGeneralStatusCmd[3] = 0x41; // ToDo: check 0x01 | (discMode << 4) | 0x01
     cdcGeneralStatusCmd[4] = trackNumber;
     cdcGeneralStatusCmd[5] = 0xFF;
     cdcGeneralStatusCmd[6] = 0xFF;
     cdcGeneralStatusCmd[7] = 0xD0;
-    cdcGeneralStatusCmd[7] |= randomPlay | discRepeat | trackRepeat;
+    //cdcGeneralStatusCmd[7] |= randomPlay | discRepeat | trackRepeat;
     cdcGeneralStatusCmd[8] = -1;
 
     sendCanFrame(GENERAL_STATUS_CDC, cdcGeneralStatusCmd);
@@ -405,15 +413,15 @@ void CDChandler::sendCanFrame(int messageId, int *msg) {
 void sendCdcNodeStatus(void *p) {
     int i = (int)p;
     
-    if (currentTimerEvent > NODE_STATUS_TX_MSG_SIZE) {
-        time.stop(currentTimerEvent);
+    if (currentNodeStatusTxTimerEvent > NODE_STATUS_TX_MSG_SIZE) {
+        time.stop(currentNodeStatusTxTimerEvent);
     }
     CDC.sendCanFrame(NODE_STATUS_TX_CDC, ((int(*)[9])currentCdcCmd)[i]);
     if (i < NODE_STATUS_TX_MSG_SIZE) {
-        currentTimerEvent = time.after(NODE_STATUS_TX_INTERVAL,sendCdcNodeStatus,(void*)(i + 1));
+        currentNodeStatusTxTimerEvent = time.after(NODE_STATUS_TX_INTERVAL,sendCdcNodeStatus,(void*)(i + 1));
     }
     
-    else currentTimerEvent = -1;
+    else currentNodeStatusTxTimerEvent = -1;
 }
 
 /**
