@@ -100,7 +100,6 @@ void RN52impl::initialize() {
     int total = 0;
     int hwRevisionCheckValue = 0;
     
-    Serial.begin(9600);
     softSerial.begin(9600);
     
     // Initialize all the readings to 0
@@ -151,6 +150,7 @@ void RN52impl::initialize() {
             Serial.println("Hardware version: v4.3");
             break;
         default:                                    // PCB revision is older than v3.3A; PWREN is hardwired to 3v3; no other action needs to be taken
+            Serial.println("Legacy");
             break;
     }
     
