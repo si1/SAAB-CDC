@@ -150,7 +150,7 @@ void RN52impl::initialize() {
             Serial.println("Hardware version: v4.3");
             break;
         default:                                    // PCB revision is older than v3.3A; PWREN is hardwired to 3v3; no other action needs to be taken
-            Serial.println("Legacy");
+            Serial.println("Hardware version: Legacy");
             break;
     }
     
