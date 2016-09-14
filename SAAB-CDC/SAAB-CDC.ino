@@ -1,5 +1,5 @@
 /*
- BlueSaab v3.8
+ BlueSaab v3.8 Beta
 
  A CD changer emulator for older SAAB cars with RN52 Bluetooth module by Microchip Technology Inc.
  
@@ -22,7 +22,6 @@
 CDChandler CDC;
 Timer time;
 
-// Setup
 void setup() {
     Serial.begin(9600);
     Serial.println("\"BlueSaab\"");
@@ -31,7 +30,6 @@ void setup() {
     CDC.openCanBus();
 }
 
-// Main loop
 void loop() {
     time.update();
     CDC.handleCdcStatus();
