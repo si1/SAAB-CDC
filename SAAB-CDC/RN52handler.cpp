@@ -22,6 +22,8 @@
  * Modified on: May 17, 2016
  */
 
+#include <avr/io.h>
+#include <avr/wdt.h>
 #include "RN52handler.h"
 
 RN52handler BT;
@@ -120,6 +122,10 @@ void RN52handler::monitor_serial_input() {
             case 'A':
                 bt_vassistant();
                 Serial.println("\"A\"ssistant");
+                break;
+            case 'B':
+                wdt_enable(WDTO_1S);
+                Serial.println("Re\"B\"oot ATMEGA-328");
                 break;
             default:
                 break;
