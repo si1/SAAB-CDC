@@ -127,7 +127,7 @@ void RN52impl::initialize() {
             digitalWrite(SN_XCEIVER_RS_PIN,LOW);    // This pin needs to be pulled low, otherwise SN65HVD251D CAN transciever goes into sleep mode
             Serial.println("Hardware version: v4.3");
             break;
-        case 166 ... 170:                           // PCB v5.0 (100K/20K Ohm network)
+        case 161 ... 175:                           // PCB v5.0 (100K/20K Ohm network)
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
             digitalWrite(SN_XCEIVER_RS_PIN,LOW);    // This pin needs to be pulled low, otherwise SN65HVD251D CAN transciever goes into sleep mode
             Serial.println("Hardware version: v5.0");
