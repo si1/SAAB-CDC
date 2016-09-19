@@ -23,6 +23,7 @@
  */
 
 #include "RN52impl.h"
+#include "RN52strings.h"
 
 /**
  * Reads the input (if any) from UART over software serial connection
@@ -59,16 +60,14 @@ void RN52impl::setMode(Mode mode){
     }
 };
 
-const char *CMD_QUERY = "Q\r";
 void RN52impl::onGPIO2() {
-    queueCommand(CMD_QUERY);
+    queueCommand(RN52_CMD_QUERY);
 }
 
 void RN52impl::onProfileChange(BtProfile profile, bool connected) {
     switch(profile) {
         case A2DP:bt_a2dp = connected;
             if (connected && playing) {
-                // Serial.println("DEBUG: RN52 connection ok; 'auto-play' should kick in now!");
                 sendAVCRP(RN52::RN52driver::PLAYPAUSE);
             }
             break;
@@ -94,44 +93,23 @@ void RN52impl::update() {
 
 void RN52impl::initialize() {
     // Values used for "smoothing" analogRead() results for hardware revision check
-    const int numReadings = 10;
-    int readings[numReadings];
-    int readIndex = 0;
-    int total = 0;
+    const int numOfReadings = 10;
+    int sumOfReadings = 0;
     int hwRevisionCheckValue = 0;
     
     softSerial.begin(9600);
     
-    // Initialize all the readings to 0
-    for (int thisReading = 0; thisReading < numReadings; thisReading++) {
-        readings[thisReading] = 0;
+    for (int i = 0; i < numOfReadings; i++) {
+        sumOfReadings = sumOfReadings + analogRead(HW_REV_CHK_PIN);
     }
-    
-    for (int i = 0; i < numReadings; i++) {
-        // Subtract the last reading
-        total = total - readings[readIndex];
-        // Read the pin
-        readings[readIndex] = analogRead(HW_REV_CHK_PIN);
-        // Add the reading to the total
-        total = total + readings[readIndex];
-        // Advance to the next position in the array
-        readIndex++;
-        
-        // If we're at the end of the array...
-        if (readIndex >= numReadings) {
-            // ...wrap around to the beginning
-            readIndex = 0;
-        }
-        // Calculate the average
-        hwRevisionCheckValue = total / numReadings;
-    }
+    hwRevisionCheckValue = sumOfReadings / numOfReadings;
     
     // Initializing ATMEGA pins
     pinMode(BT_PWREN_PIN,OUTPUT);
     pinMode(BT_EVENT_INDICATOR_PIN,INPUT);
     pinMode(BT_CMD_PIN, OUTPUT);
     pinMode(BT_FACT_RST_PIN,INPUT);             // Some REALLY crazy stuff is going on if this pin is set as output and pulled low. Leave it alone! Trust me...
-    pinMode(HW_REV_CHK_PIN,INPUT);              // HW revision check pin connected to a resistor divider network. We do an analogRead() on this pin and take action accordingly
+    pinMode(HW_REV_CHK_PIN,INPUT);              // We do an analogRead() on this pin to determine HW version of the module and take action accordingly
     pinMode(PIN_A2,OUTPUT);
     pinMode(SN_XCEIVER_RS_PIN,OUTPUT);
     pinMode(PIN_A4,OUTPUT);
@@ -140,11 +118,11 @@ void RN52impl::initialize() {
     digitalWrite(BT_CMD_PIN,HIGH);              // Default state of GPIO9, per data sheet, is HIGH
     
     switch (hwRevisionCheckValue) {
-        case 43 ... 47:                                  // PCBs v3.3A, v4.1 or v4.2 (100K/5K Ohm network); TODO: make sure the correct resistors are soldered on!!!
+        case 38 ... 52:                             // PCBs v3.3A, v4.1 or v4.2 (100K/5K Ohm network); TODO: make sure the correct resistors are soldered on!!!
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
             Serial.println("Hardware version: v3.3A/v4.1/v4.2");
             break;
-        case 88 ... 92:                                  // PCB v4.3 (100K/10K Ohm network)
+        case 83 ... 97:                             // PCB v4.3 (100K/10K Ohm network)
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
             digitalWrite(SN_XCEIVER_RS_PIN,LOW);    // This pin needs to be pulled low, otherwise SN65HVD251D CAN transciever goes into sleep mode
             Serial.println("Hardware version: v4.3");
@@ -152,8 +130,7 @@ void RN52impl::initialize() {
         default:                                    // PCB revision is older than v3.3A; PWREN is hardwired to 3v3; no other action needs to be taken
             Serial.println("Hardware version: Legacy");
             break;
-    }
-    
+    }    
     // Configuring RN52
     /*
     Serial.println("Configuring RN52... ");
@@ -182,7 +159,6 @@ void RN52impl::initialize() {
     delay(1000);
     reboot();
      */
-    Serial.end();
 }
 
 void RN52impl::waitForResponse() {

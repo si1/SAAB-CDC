@@ -274,6 +274,7 @@ void CDChandler::handleIhuButtons() {
                             break;
                         case 0x06:
                             BT.bt_disconnect();
+                            break;
                         default:
                             break;
                     }
