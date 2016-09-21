@@ -110,10 +110,7 @@ void RN52impl::initialize() {
     pinMode(BT_CMD_PIN, OUTPUT);
     pinMode(BT_FACT_RST_PIN,INPUT);             // Some REALLY crazy stuff is going on if this pin is set as output and pulled low. Leave it alone! Trust me...
     pinMode(HW_REV_CHK_PIN,INPUT);              // We do an analogRead() on this pin to determine HW version of the module and take action accordingly
-    pinMode(PIN_A2,OUTPUT);
     pinMode(SN_XCEIVER_RS_PIN,OUTPUT);
-    pinMode(PIN_A4,OUTPUT);
-    pinMode(PIN_A5,OUTPUT);
     digitalWrite(BT_EVENT_INDICATOR_PIN,HIGH);  // Default state of GPIO2, per data sheet, is HIGH
     digitalWrite(BT_CMD_PIN,HIGH);              // Default state of GPIO9, per data sheet, is HIGH
     

@@ -437,21 +437,21 @@ void writeTextOnDisplayOnTime(void*) {
  * Note: the character set used by the SID is slightly nonstandard. "Normal" characters should work fine.
  */
 
-void CDChandler::writeTextOnDisplay(char text[]) {
+void CDChandler::writeTextOnDisplay(const char textIn[]) {
 
-    if (!text) {
+    if (!textIn) {
         return;
     }
     // Copy the provided string and make sure we have a new array of the correct length
-    char txt[15];
+    char textToSid[15];
     int i, n;
-    n = strlen(text);
+    n = strlen(textIn);
     n = n > 12 ? 12 : n;
     for (i = 0; i < n; i++) {
-        txt[i] = text[i];
+        textToSid[i] = textIn[i];
     }
-    for (i = n + 1; i < 16; i++) {
-        txt[i] = 0;
+    for (i = n; i < 15; i++) {
+        textToSid[i] = 0;
     }
 
     CAN_TxMsg.id = WRITE_TEXT_ON_DISPLAY;
@@ -459,31 +459,31 @@ void CDChandler::writeTextOnDisplay(char text[]) {
     CAN_TxMsg.data[0] = 0x42; // TODO: check if this is really correct? According to the spec, the 4 shouldn't be there? It's just a normal transport layer sequence numbering?
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
     CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
-    CAN_TxMsg.data[3] = txt[0];
-    CAN_TxMsg.data[4] = txt[1];
-    CAN_TxMsg.data[5] = txt[2];
-    CAN_TxMsg.data[6] = txt[3];
-    CAN_TxMsg.data[7] = txt[4];
+    CAN_TxMsg.data[3] = textToSid[0];
+    CAN_TxMsg.data[4] = textToSid[1];
+    CAN_TxMsg.data[5] = textToSid[2];
+    CAN_TxMsg.data[6] = textToSid[3];
+    CAN_TxMsg.data[7] = textToSid[4];
     CAN.send(&CAN_TxMsg);
     
     CAN_TxMsg.data[0] = 0x01; // message 1
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
     CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
-    CAN_TxMsg.data[3] = txt[5];
-    CAN_TxMsg.data[4] = txt[6];
-    CAN_TxMsg.data[5] = txt[7];
-    CAN_TxMsg.data[6] = txt[8];
-    CAN_TxMsg.data[7] = txt[9];
+    CAN_TxMsg.data[3] = textToSid[5];
+    CAN_TxMsg.data[4] = textToSid[6];
+    CAN_TxMsg.data[5] = textToSid[7];
+    CAN_TxMsg.data[6] = textToSid[8];
+    CAN_TxMsg.data[7] = textToSid[9];
     CAN.send(&CAN_TxMsg);
     
     CAN_TxMsg.data[0] = 0x00; // message 0
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
     CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
-    CAN_TxMsg.data[3] = txt[10];
-    CAN_TxMsg.data[4] = txt[11];
-    CAN_TxMsg.data[5] = txt[12];
-    CAN_TxMsg.data[6] = txt[13];
-    CAN_TxMsg.data[7] = txt[14];
+    CAN_TxMsg.data[3] = textToSid[10];
+    CAN_TxMsg.data[4] = textToSid[11];
+    CAN_TxMsg.data[5] = textToSid[12];
+    CAN_TxMsg.data[6] = textToSid[13];
+    CAN_TxMsg.data[7] = textToSid[14];
     CAN.send(&CAN_TxMsg);
 }
 
