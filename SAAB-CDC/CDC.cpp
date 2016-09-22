@@ -83,7 +83,7 @@ int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
  [3]: Request source function ID
  [4-7]: Zeroed out; not in use
  */
-int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x05,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
+int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x01,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
 
 /**
  * DEBUG: Prints the CAN Tx frame to serial output
@@ -465,6 +465,7 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
     CAN_TxMsg.data[6] = textToSid[3];
     CAN_TxMsg.data[7] = textToSid[4];
     CAN.send(&CAN_TxMsg);
+    delay(10);                // TODO: Fix this! This is not the Jedi way to work around a timing issue
     
     CAN_TxMsg.data[0] = 0x01; // Message 1
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
@@ -475,6 +476,7 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
     CAN_TxMsg.data[6] = textToSid[8];
     CAN_TxMsg.data[7] = textToSid[9];
     CAN.send(&CAN_TxMsg);
+    delay(10);                // TODO: Fix this! This is not the Jedi way to work around a timing issue
     
     CAN_TxMsg.data[0] = 0x00; // Message 0
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
@@ -485,6 +487,7 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
     CAN_TxMsg.data[6] = textToSid[13];
     CAN_TxMsg.data[7] = textToSid[14];
     CAN.send(&CAN_TxMsg);
+    delay(10);                // TODO: Fix this! This is not the Jedi way to work around a timing issue
 }
 
 /**
