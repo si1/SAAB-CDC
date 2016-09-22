@@ -83,7 +83,7 @@ int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
  [3]: Request source function ID
  [4-7]: Zeroed out; not in use
  */
-int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x01,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
+int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x05,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
 
 /**
  * DEBUG: Prints the CAN Tx frame to serial output
@@ -202,12 +202,12 @@ void CDChandler::handleIhuButtons() {
         case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
             BT.bt_reconnect();
             cdcActive = true;
-            //displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
+            displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
             sendCanFrame(SOUND_REQUEST, soundCmd);
             break;
         case 0x14: // CDC = OFF (Back to Radio or Tape mode)
-            //time.stop(displayRequestTimerId);
-            //time.stop(writeTextOnDisplayTimerId);
+            time.stop(displayRequestTimerId);
+            time.stop(writeTextOnDisplayTimerId);
             BT.bt_disconnect();
             cdcActive = false;
             writeTextOnDisplayTimerActive = false;
@@ -446,7 +446,7 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
     char textToSid[15];
     int i, n;
     n = strlen(textIn);
-    n = n > 12 ? 12 : n;
+    n = n > 12 ? 12 : n;      // 12 is the number of characters SID can display on each row; anything beyond 12 is going to be zeroed out
     for (i = 0; i < n; i++) {
         textToSid[i] = textIn[i];
     }
@@ -466,7 +466,7 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
     CAN_TxMsg.data[7] = textToSid[4];
     CAN.send(&CAN_TxMsg);
     
-    CAN_TxMsg.data[0] = 0x01; // message 1
+    CAN_TxMsg.data[0] = 0x01; // Message 1
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
     CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
     CAN_TxMsg.data[3] = textToSid[5];
@@ -476,7 +476,7 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
     CAN_TxMsg.data[7] = textToSid[9];
     CAN.send(&CAN_TxMsg);
     
-    CAN_TxMsg.data[0] = 0x00; // message 0
+    CAN_TxMsg.data[0] = 0x00; // Message 0
     CAN_TxMsg.data[1] = 0x96; // Address of the SID
     CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
     CAN_TxMsg.data[3] = textToSid[10];
