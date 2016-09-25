@@ -84,6 +84,7 @@ int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
  [4-7]: Zeroed out; not in use
  */
 int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x01,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
+int sidNotWantedCmd[]   = {SPA_APL_ADR,0x02,0xFF,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We don't want to write to SID anymore; hence 0xFF as "message type"
 
 /**
  * DEBUG: Prints the CAN Tx frame to serial output
@@ -202,15 +203,15 @@ void CDChandler::handleIhuButtons() {
         case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
             BT.bt_reconnect();
             cdcActive = true;
-            displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
+            //displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
             sendCanFrame(SOUND_REQUEST, soundCmd);
             break;
         case 0x14: // CDC = OFF (Back to Radio or Tape mode)
-            time.stop(displayRequestTimerId);
-            time.stop(writeTextOnDisplayTimerId);
+            //time.stop(displayRequestTimerId);
+            //time.stop(writeTextOnDisplayTimerId);
             BT.bt_disconnect();
             cdcActive = false;
-            writeTextOnDisplayTimerActive = false;
+            //writeTextOnDisplayTimerActive = false;
             break;
         default:
             break;
@@ -257,20 +258,19 @@ void CDChandler::handleIhuButtons() {
                             BT.bt_voldown();
                             break;
                         case 0x05:
-                            /*
-                             if (!sidTextControlTestMode) {
-                             displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
-                             sidTextControlTestMode = true;
-                             sendCanFrame(SOUND_REQUEST, soundCmd);
-                             }
-                             else {
-                             time.stop(displayRequestTimerId);
-                             time.stop(writeTextOnDisplayTimerId);
-                             sidTextControlTestMode = false;
-                             writeTextOnDisplayTimerActive = false;
-                             sendCanFrame(SOUND_REQUEST, soundCmd);
-                             }
-                             */
+                            if (!sidTextControlTestMode) {
+                                displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
+                                sidTextControlTestMode = true;
+                                sendCanFrame(SOUND_REQUEST, soundCmd);
+                            }
+                            else {
+                                time.stop(writeTextOnDisplayTimerId);
+                                time.stop(displayRequestTimerId);
+                                sendCanFrame(DISPLAY_RESOURCE_REQ,sidNotWantedCmd);
+                                sidTextControlTestMode = false;
+                                writeTextOnDisplayTimerActive = false;
+                                sendCanFrame(SOUND_REQUEST, soundCmd);
+                            }
                             break;
                         case 0x06:
                             BT.bt_disconnect();
