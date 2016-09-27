@@ -409,7 +409,7 @@ void sendCdcNodeStatus(void *p) {
         time.stop(currentNodeStatusTxTimerEvent);
     }
     CDC.sendCanFrame(NODE_STATUS_TX_CDC, ((int(*)[9])currentCdcCmd)[i]);
-    if (i < NODE_STATUS_TX_MSG_SIZE) {
+    if (i + 1 < NODE_STATUS_TX_MSG_SIZE) {
         currentNodeStatusTxTimerEvent = time.after(NODE_STATUS_TX_INTERVAL,sendCdcNodeStatus,(void*)(i + 1));
     }
     
