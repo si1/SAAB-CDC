@@ -127,6 +127,17 @@ void RN52handler::monitor_serial_input() {
                 wdt_enable(WDTO_1S);
                 Serial.println("Re\"B\"oot ATMEGA-328");
                 break;
+            case 'U':
+                bt_volup();
+                Serial.println("Turning RN52 volume up");
+                break;
+            case 'O':
+                bt_voldown();
+                Serial.println("Turning RN52 volume down");
+            case 'M':
+                bt_set_maxvol();
+                Serial.println("Turning RN52 volume to max");
+                break;
             default:
                 break;
         }
