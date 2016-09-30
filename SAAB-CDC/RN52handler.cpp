@@ -134,6 +134,7 @@ void RN52handler::monitor_serial_input() {
             case 'O':
                 bt_voldown();
                 Serial.println("Turning RN52 volume down");
+                break;
             case 'M':
                 bt_set_maxvol();
                 Serial.println("Turning RN52 volume to max");
