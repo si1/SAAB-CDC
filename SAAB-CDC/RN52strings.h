@@ -46,13 +46,13 @@
 #define RN52_CMD_DISCOVERY_OFF      "@,0\r"
 
 // RN52 settings commands
-#define RN52_SET_DISCOVERY_MASK     "SD," DISCOVERY_MASK "\r"      // A2DP/AVRCP + SPP profiles
-#define RN52_SET_CONNECTION_MASK    "SK," CONNECTION_MASK "\r"     // A2DP/AVRCP + SPP profiles
-#define RN52_SET_COD                "SC," COD "\r"                 // "Major service class" = Audio; "Major device class" = Audio/Video; "Minor device class" = Car audio
-#define RN52_SET_DEVICE_NAME        "SN," DEVICE_NAME "\r"         // Broadcasted and shown in audio source's settigns
-#define RN52_SET_BAUDRATE_9600      "SU," BAUDRATE_9600 "\r"       // Enables serial communications on RN52 @ 9600bps
-#define RN52_SET_MAXVOL             "SS,0F\r"                      // Sets the volume gain to MAX level 15 (default 11)
-#define RN52_SET_EXTENDED_FEATURES  "S%," EXTENDED_FEATURES "\r"   // Discoverable on startup; Disable system tones
+//#define RN52_SET_DISCOVERY_MASK     "SD," DISCOVERY_MASK "\r"      // A2DP/AVRCP + SPP profiles
+//#define RN52_SET_CONNECTION_MASK    "SK," CONNECTION_MASK "\r"     // A2DP/AVRCP + SPP profiles
+//#define RN52_SET_COD                "SC," COD "\r"                 // "Major service class" = Audio; "Major device class" = Audio/Video; "Minor device class" = Car audio
+//#define RN52_SET_DEVICE_NAME        "SN," DEVICE_NAME "\r"         // Broadcasted and shown in audio source's settigns
+//#define RN52_SET_BAUDRATE_9600      "SU," BAUDRATE_9600 "\r"       // Enables serial communications on RN52 @ 9600bps
+//#define RN52_SET_MAXVOL             "SS,0F\r"                      // Sets the volume gain to MAX level 15 (default 11)
+//#define RN52_SET_EXTENDED_FEATURES  "S%," EXTENDED_FEATURES "\r"   // Discoverable on startup; Disable system tones
 
 
 // AVRCP commands
