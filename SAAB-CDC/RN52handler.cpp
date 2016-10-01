@@ -93,51 +93,51 @@ void RN52handler::monitor_serial_input() {
         switch (incomingByte) {
             case 'V':
                 bt_visible();
-                Serial.println("Going \"V\"isible");
+                Serial.println(F("Going into discoverable mode"));
                 break;
             case 'I':
                 bt_invisible();
-                Serial.println("Going \"I\"nvisible");
+                Serial.println(F("Going into non-discoverable/connectable mode"));
                 break;
             case 'C':
                 bt_reconnect();
-                Serial.println("Re\"C\"onnect");
+                Serial.println(F("Re-connecting to the last known device"));
                 break;
             case 'D':
                 bt_disconnect();
-                Serial.println("\"D\"isconnect");
+                Serial.println(F("Disconnecting from the current device"));
                 break;
             case 'P':
                 bt_play();
-                Serial.println("\"P\"lay");
+                Serial.println(F("\"Play/Pause\" current track"));
                 break;
             case 'N':
                 bt_next();
-                Serial.println("\"N\"ext");
+                Serial.println(F("Skip to \"Next\" track"));
                 break;
             case 'R':
                 bt_prev();
-                Serial.println("P\"R\"evious");
+                Serial.println(F("Go back to \"Previous\" track"));
                 break;
             case 'A':
                 bt_vassistant();
-                Serial.println("\"A\"ssistant");
+                Serial.println(F("Invoking voice assistant"));
                 break;
             case 'B':
                 wdt_enable(WDTO_1S);
-                Serial.println("Re\"B\"oot ATMEGA-328");
+                Serial.println(F("Rebooting the main uC"));
                 break;
             case 'U':
                 bt_volup();
-                Serial.println("Turning RN52 volume up");
+                Serial.println(F("Turning RN52 volume up"));
                 break;
             case 'O':
                 bt_voldown();
-                Serial.println("Turning RN52 volume down");
+                Serial.println(F("Turning RN52 volume down"));
                 break;
             case 'M':
                 bt_set_maxvol();
-                Serial.println("Turning RN52 volume to max");
+                Serial.println(F("Turning RN52 volume to max"));
                 break;
             default:
                 break;

@@ -92,7 +92,7 @@ int sidNotWantedCmd[]   = {SPA_APL_ADR,0x02,0xFF,SPA_SID_FUNCTION_ID,0x00,0x00,0
 
 void CDChandler::printCanTxFrame() {
     Serial.print(CAN_TxMsg.id,HEX);
-    Serial.print(" Tx-> ");
+    Serial.print(F(" Tx-> "));
     for (int i = 0; i < 8; i++) {
         Serial.print(CAN_TxMsg.data[i],HEX);
         Serial.print(" ");
@@ -106,7 +106,7 @@ void CDChandler::printCanTxFrame() {
 
 void CDChandler::printCanRxFrame() {
     Serial.print(CAN_RxMsg.id,HEX);
-    Serial.print(" Rx-> ");
+    Serial.print(F(" Rx-> "));
     for (int i = 0; i < 8; i++) {
         Serial.print(CAN_RxMsg.data[i],HEX);
         Serial.print(" ");

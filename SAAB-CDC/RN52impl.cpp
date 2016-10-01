@@ -117,20 +117,20 @@ void RN52impl::initialize() {
     switch (hwRevisionCheckValue) {
         case 38 ... 52:                             // PCBs v3.3A, v4.1 or v4.2 (100K/5K Ohm network); TODO: make sure the correct resistors are soldered on!!!
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
-            Serial.println("Hardware version: v3.3A/v4.1/v4.2");
+            Serial.println(F("Hardware version: v3.3A/v4.1/v4.2"));
             break;
         case 83 ... 97:                             // PCB v4.3 (100K/10K Ohm network)
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
             digitalWrite(SN_XCEIVER_RS_PIN,LOW);    // This pin needs to be pulled low, otherwise SN65HVD251D CAN transciever goes into sleep mode
-            Serial.println("Hardware version: v4.3");
+            Serial.println(F("Hardware version: v4.3"));
             break;
         case 161 ... 175:                           // PCB v5.0 (100K/20K Ohm network)
             time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
             digitalWrite(SN_XCEIVER_RS_PIN,LOW);    // This pin needs to be pulled low, otherwise SN65HVD251D CAN transciever goes into sleep mode
-            Serial.println("Hardware version: v5.0");
+            Serial.println(F("Hardware version: v5.0"));
             break;
         default:                                    // PCB revision is older than v3.3A; PWREN is hardwired to 3v3; no other action needs to be taken
-            Serial.println("Hardware version: Legacy");
+            Serial.println(F("Hardware version: Legacy"));
             break;
     }    
     // Configuring RN52

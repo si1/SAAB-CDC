@@ -22,9 +22,18 @@
 CDChandler CDC;
 Timer time;
 
+int freeRam ()
+{
+    extern int __heap_start, *__brkval;
+    int v;
+    return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
+
 void setup() {
     Serial.begin(9600);
     Serial.println("\"BlueSaab\"");
+    Serial.print(F("SRAM utilization: "));
+    Serial.println(freeRam());
     Serial.println("Software version: v4.0 Beta");
     BT.initialize();
     CDC.openCanBus();
