@@ -135,7 +135,7 @@ void RN52impl::initialize() {
     }    
     // Configuring RN52
     /*
-    Serial.println("Configuring RN52... ");
+    Serial.println(F("Configuring RN52... "));
     set_baudrate();
     waitForResponse();
     delay(1000);

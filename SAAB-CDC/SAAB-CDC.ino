@@ -31,10 +31,11 @@ int freeRam ()
 
 void setup() {
     Serial.begin(9600);
-    Serial.println("\"BlueSaab\"");
-    Serial.print(F("SRAM utilization: "));
-    Serial.println(freeRam());
-    Serial.println("Software version: v4.0 Beta");
+    Serial.println(F("\"BlueSaab\""));
+    Serial.print(F("Free SRAM: "));
+    Serial.print(freeRam());
+    Serial.println(F(" bytes"));
+    Serial.println(F("Software version: v4.0 Beta"));
     BT.initialize();
     CDC.openCanBus();
 }

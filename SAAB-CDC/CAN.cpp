@@ -51,8 +51,7 @@ void CANClass::begin(uint16_t speed)
 {
     
 #if (DEBUGMODE==1)
-  		Serial.begin(115200);
-    Serial.println("-- Constructor Can(uint16_t speed) --");
+    Serial.println(F("-- Constructor Can(uint16_t speed) --"));
 #endif
     
     SET(MCP2515_CS);
@@ -73,7 +72,7 @@ void CANClass::begin(uint16_t speed)
     SPCR = (1<<SPE)|(1<<MSTR) | (0<<SPR1)|(0<<SPR0);
     SPSR = (1<<SPI2X);
 #if (DEBUGMODE==1)
-    Serial.println("SPI=8 Mhz");
+    Serial.println(F("SPI=8 Mhz"));
 #endif
     
     
@@ -150,7 +149,7 @@ void CANClass::begin(uint16_t speed)
              */
             
 #if (DEBUGMODE==1)
-            Serial.println("Speed=47.619Kps");
+            Serial.println(F("Speed = 47.619Kbps"));
 #endif
             break;
             
@@ -159,7 +158,7 @@ void CANClass::begin(uint16_t speed)
             mcp2515_write_register(CNF2,0x90);
             mcp2515_write_register(CNF3,0x02);
 #if (DEBUGMODE==1)
-            Serial.println("Speed=1Mbps");
+            Serial.println(F("Speed = 1Mbps"));
 #endif
             break;
             
@@ -168,7 +167,7 @@ void CANClass::begin(uint16_t speed)
             mcp2515_write_register(CNF2,0x90);
             mcp2515_write_register(CNF3,0x02);
 #if (DEBUGMODE==1)
-            Serial.println("Speed=500kps");
+            Serial.println(F("Speed = 500Kbps"));
 #endif
             break;
             
@@ -177,7 +176,7 @@ void CANClass::begin(uint16_t speed)
             mcp2515_write_register(CNF2,0xB8);
             mcp2515_write_register(CNF3,0x05);
 #if (DEBUGMODE==1)
-            Serial.println("Speed=250kps");
+            Serial.println(F("Speed = 250Kbps"));
 #endif
             break;
             
@@ -186,7 +185,7 @@ void CANClass::begin(uint16_t speed)
             mcp2515_write_register(CNF2,0x90);
             mcp2515_write_register(CNF3,0x02);
 #if (DEBUGMODE==1)
-            Serial.println("Speed=125kps");
+            Serial.println(F("Speed = 125Kbps"));
 #endif
             break;
             
@@ -195,7 +194,7 @@ void CANClass::begin(uint16_t speed)
             mcp2515_write_register(CNF2,0xBA);
             mcp2515_write_register(CNF3,0x07);
 #if (DEBUGMODE==1)
-            Serial.println("Speed=100kps");
+            Serial.println(F("Speed = 100Kbps"));
 #endif
             break;
             
@@ -204,7 +203,7 @@ void CANClass::begin(uint16_t speed)
             mcp2515_write_register(CNF2,0x90);
             mcp2515_write_register(CNF3,0x02);
 #if (DEBUGMODE==1)
-            Serial.println("Speed=Default");
+            Serial.println(F("Speed = Default"));
 #endif
             break;
             
@@ -245,8 +244,7 @@ void CANClass::begin(uint16_t speed)
     _CAN_RX_BUFFER.tail=0;
     
 #if (DEBUGMODE==1)
-    Serial.println("-- End Constructor Can(uint16_t speed) --");
-    Serial.println("");
+    Serial.println(F("-- End Constructor Can(uint16_t speed) --"));
 #endif
     
     
@@ -273,8 +271,7 @@ uint8_t CANClass::send(msgCAN *message)
     
     
 #if (DEBUGMODE==1)
-    Serial.begin(115200);
-    Serial.println("-- uint8_t CANClass::send(msgCAN *message) --");
+    Serial.println(F("-- uint8_t CANClass::send(msgCAN *message) --"));
 #endif
     
     uint8_t status = mcp2515_read_status(SPI_READ_STATUS);
@@ -339,7 +336,7 @@ uint8_t CANClass::send(msgCAN *message)
     
     
 #if (DEBUGMODE==1)
-    Serial.println("-- END uint8_t CANClass::send(msgCAN *message) --");
+    Serial.println(F("-- END uint8_t CANClass::send(msgCAN *message) --"));
 #endif
     
     
@@ -366,8 +363,7 @@ uint8_t CANClass::ReadFromDevice(msgCAN *message)
     
     
 #if (DEBUGMODE==1)
-    Serial.begin(115200);
-    Serial.println("-- START uint8_t ReadFromDevice(msgCAN *message) --");
+    Serial.println(F("-- START uint8_t ReadFromDevice(msgCAN *message) --"));
 #endif
     
     //	static uint8_t previousBuffer;
@@ -378,9 +374,9 @@ uint8_t CANClass::ReadFromDevice(msgCAN *message)
     uint8_t t;
     
 #if (DEBUGMODE==1)
-    Serial.print("MCP2515 Status=");
+    Serial.print(F("MCP2515 Status="));
     Serial.println(status,BIN);
-    Serial.print("Mask to check Buffer=");
+    Serial.print(F("Mask to check Buffer="));
     Serial.println( ((status & 0b11000000)>>6)&0b00000011,BIN);
 #endif
     
@@ -407,8 +403,8 @@ uint8_t CANClass::ReadFromDevice(msgCAN *message)
         addr = SPI_READ_RX;
         
 #if (DEBUGMODE==1)
-        Serial.println("Read From Buffer 0");
-        Serial.print("addr=");
+        Serial.println(F("Read From Buffer 0"));
+        Serial.print(F("addr="));
         Serial.println(addr,HEX);
 #endif
     }
@@ -418,8 +414,8 @@ uint8_t CANClass::ReadFromDevice(msgCAN *message)
         addr = SPI_READ_RX | 0x04;
         
 #if (DEBUGMODE==1)
-        Serial.println("Read From Buffer 1");
-        Serial.print("addr=");
+        Serial.println(F("Read From Buffer 1"));
+        Serial.print(F("addr="));
         Serial.println(addr,HEX);
 #endif
     }
@@ -463,10 +459,9 @@ uint8_t CANClass::ReadFromDevice(msgCAN *message)
     
     
 #if (DEBUGMODE==1)
-    Serial.print("Return=");
+    Serial.print(F("Return = "));
     Serial.println((status & 0x07) + 1,DEC);
     Serial.println("-- END uint8_t Can::ReadFromDevice(msgCAN *message) --");
-    Serial.println("");
 #endif
     
     
@@ -558,8 +553,7 @@ void CANClass::SetFilters(uint16_t *Filters,uint16_t *Masks)
 {
     
 #if (DEBUGMODE==1)
-    Serial.begin(115200);
-    Serial.println("-- void CANClass::SetFilters(uint16_t *Filters) --");
+    Serial.println(F("-- void CANClass::SetFilters(uint16_t *Filters) --"));
 #endif
     
     
@@ -608,85 +602,85 @@ void CANClass::SetFilters(uint16_t *Filters,uint16_t *Masks)
     
     
 #if (DEBUGMODE==1)
-    Serial.print("Filtro 0=");
+    Serial.print(F("Filter 0 = "));
     Serial.print(Filters[0],BIN);
-    Serial.print("-");
+    Serial.print(F("-"));
     Serial.println(Filters[0],HEX);
     
-    Serial.print("Filtro 1=");
+    Serial.print(F("Filter 1 = "));
     Serial.print(Filters[1],BIN);
-    Serial.print("-");
+    Serial.print(F("-"));
     Serial.println(Filters[1],HEX);
     
-    Serial.print("Filtro 2=");
+    Serial.print(F("Filter 2 = "));
     Serial.print(Filters[2],BIN);
-    Serial.print("-");
+    Serial.print(F("-"));
     Serial.println(Filters[2],HEX);
     
-    Serial.print("Filtro 3=");
+    Serial.print(F("Filter 3 = "));
     Serial.print(Filters[3],BIN);
-    Serial.print("-");
+    Serial.print(F("-"));
     Serial.println(Filters[3],HEX);
     
-    Serial.print("Filtro 4=");
+    Serial.print(F("Filter 4 = "));
     Serial.print(Filters[4],BIN);
-    Serial.print("-");
+    Serial.print(F("-"));
     Serial.println(Filters[4],HEX);
     
-    Serial.print("Filtro 5=");
+    Serial.print(F("Filter 5 = "));
     Serial.print(Filters[5],BIN);
-    Serial.print("-");
+    Serial.print(F("-"));
     Serial.println(Filters[5],HEX);
     
-    Serial.print("Mask 0=");
+    Serial.print(F("Mask 0 = "));
     Serial.print(Masks[0],BIN);
-    Serial.print("-");
+    Serial.print(F("-"));
     Serial.println(Masks[0],HEX);
     
-    Serial.print("Mask 1=");
+    Serial.print(F("Mask 1 = "));
     Serial.print(Masks[1],BIN);
-    Serial.print("-");
+    Serial.print(F("-"));
     Serial.println(Masks[1],HEX);
     
-    Serial.print("RXB0CTRL=");
+    Serial.print(F("RXB0CTRL = "));
     Serial.println(mcp2515_read_register(RXB0CTRL),BIN);
-    Serial.print("RXB1CTRL=");
+    Serial.print(F("RXB1CTRL = "));
     Serial.println(mcp2515_read_register(RXB1CTRL),BIN);
-    Serial.println("----------------------");
+    Serial.println(F("----------------------"));
     
-    Serial.print("RXF0SIDH=");
+    Serial.print(F("RXF0SIDH = "));
     Serial.println(mcp2515_read_register(RXF0SIDH),BIN);
-    Serial.print("RXF0SIDL=");
+    Serial.print(F("RXF0SIDL = "));
     Serial.println(mcp2515_read_register(RXF0SIDL),BIN);
-    Serial.print("RXF1SIDH=");
+    Serial.print(F("RXF1SIDH = "));
     Serial.println(mcp2515_read_register(RXF1SIDH),BIN);
-    Serial.print("RXF1SIDL=");
+    Serial.print(F("RXF1SIDL = "));
     Serial.println(mcp2515_read_register(RXF1SIDL),BIN);
-    Serial.print("RXF2SIDH=");
+    Serial.print(F("RXF2SIDH = "));
     Serial.println(mcp2515_read_register(RXF2SIDH),BIN);
-    Serial.print("RXF2SIDL=");
+    Serial.print(F("RXF2SIDL = "));
     Serial.println(mcp2515_read_register(RXF2SIDL),BIN);
-    Serial.print("RXF3SIDH=");
+    Serial.print(F("RXF3SIDH = "));
     Serial.println(mcp2515_read_register(RXF3SIDH),BIN);
-    Serial.print("RXF3SIDL=");
+    Serial.print(F("RXF3SIDL = "));
     Serial.println(mcp2515_read_register(RXF3SIDL),BIN);
-    Serial.print("RXF4SIDH=");
+    Serial.print(F("RXF4SIDH = "));
     Serial.println(mcp2515_read_register(RXF4SIDH),BIN);
-    Serial.print("RXF4SIDL=");
+    Serial.print(F("RXF4SIDL = "));
     Serial.println(mcp2515_read_register(RXF4SIDL),BIN);
-    Serial.print("RXF5SIDH=");
+    Serial.print(F("RXF5SIDH = "));
     Serial.println(mcp2515_read_register(RXF5SIDH),BIN);
-    Serial.print("RXF5SIDL=");
+    Serial.print(F("RXF5SIDL = "));
     Serial.println(mcp2515_read_register(RXF5SIDL),BIN);
-    Serial.println("----------------------");
+    Serial.println(("----------------------"));
     
-    Serial.print("RXM0SIDH=");
+    Serial.print(F("RXM0SIDH = "));
     Serial.println(mcp2515_read_register(RXM0SIDH),BIN);
-    Serial.print("RXM0SIDL=");
+    Serial.print(F("RXM0SIDL = "));
     Serial.println(mcp2515_read_register(RXM0SIDL),BIN);
-    Serial.print("RXM1SIDH=");
+    Serial.print(F("RXM1SIDH = "));
     Serial.println(mcp2515_read_register(RXM1SIDH),BIN);
-    Serial.print("RXM1SIDL=");
+    Serial.print(F("RXM1SIDL = "));
     Serial.println(mcp2515_read_register(RXM1SIDL),BIN);
     
     
@@ -697,7 +691,7 @@ void CANClass::SetFilters(uint16_t *Filters,uint16_t *Masks)
     mcp2515_bit_modify(CANCTRL,0xE0,0);
     
 #if (DEBUGMODE==1)
-    Serial.println("-- END void CANClass::SetFilters(uint16_t *Filters) --");
+    Serial.println(F("-- END void CANClass::SetFilters(uint16_t *Filters) --"));
 #endif
     
     
