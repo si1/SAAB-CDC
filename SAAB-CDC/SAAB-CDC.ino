@@ -37,19 +37,7 @@ void setup() {
     Serial.println(F(" bytes"));
     Serial.println(F("Software version: v4.0 Beta"));
     BT.initialize();
-    Serial.println(F(""));
-    Serial.println(F("V - Go into Discoverable Mode"));
-    Serial.println(F("I - Go into non-Discoverable but Connectable Mode"));
-    Serial.println(F("C - Reconnect to Last Known Device"));
-    Serial.println(F("D - Disconnect from Current Device"));
-    Serial.println(F("P - Play/Pause Current Track"));
-    Serial.println(F("N - Skip to Next Track"));
-    Serial.println(F("R - Previous Track/Beginning of Track"));
-    Serial.println(F("A - Invoke Voice Assistant"));
-    Serial.println(F("B - Reboot the ATMega"));
-    Serial.println(F("U - Turn RN52 Volume Up"));
-    Serial.println(F("O - Turn RN52 Volume Down"));
-    Serial.println(F("M - Turn RN52 Volume to Max"));
+    Serial.println(F("Press H for Help"));
     CDC.openCanBus();
 }
 

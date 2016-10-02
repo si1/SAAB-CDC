@@ -93,53 +93,84 @@ void RN52handler::monitor_serial_input() {
         switch (incomingByte) {
             case 'V':
                 bt_visible();
-                Serial.println(F("Going into discoverable mode"));
+                Serial.println(F("Going into Discoverable Mode"));
                 break;
             case 'I':
                 bt_invisible();
-                Serial.println(F("Going into non-discoverable/connectable mode"));
+                Serial.println(F("Going into non-Discoverable/Connectable Mode"));
                 break;
             case 'C':
                 bt_reconnect();
-                Serial.println(F("Re-connecting to the last known device"));
+                Serial.println(F("Re-connecting to the Last Known Device"));
                 break;
             case 'D':
                 bt_disconnect();
-                Serial.println(F("Disconnecting from the current device"));
+                Serial.println(F("Disconnecting from the Current Device"));
                 break;
             case 'P':
                 bt_play();
-                Serial.println(F("\"Play/Pause\" current track"));
+                Serial.println(F("\"Play/Pause\" Current Track"));
                 break;
             case 'N':
                 bt_next();
-                Serial.println(F("Skip to \"Next\" track"));
+                Serial.println(F("Skip to \"Next\" Track"));
                 break;
             case 'R':
                 bt_prev();
-                Serial.println(F("Go back to \"Previous\" track"));
+                Serial.println(F("Go back to \"Previous\" Track"));
                 break;
             case 'A':
                 bt_vassistant();
-                Serial.println(F("Invoking voice assistant"));
+                Serial.println(F("Invoking Voice Assistant"));
                 break;
             case 'B':
                 wdt_enable(WDTO_1S);
-                Serial.println(F("Rebooting the main uC"));
+                Serial.println(F("Rebooting the ATMega"));
                 break;
             case 'U':
                 bt_volup();
-                Serial.println(F("Turning RN52 volume up"));
+                Serial.println(F("Turning RN52 Volume Up"));
                 break;
             case 'O':
                 bt_voldown();
-                Serial.println(F("Turning RN52 volume down"));
+                Serial.println(F("Turning RN52 Volume Down"));
                 break;
             case 'M':
                 bt_set_maxvol();
-                Serial.println(F("Turning RN52 volume to max"));
+                Serial.println(F("Turning RN52 Volume to Max"));
+                break;
+            case 'H':
+                Serial.println(F(""));
+                Serial.println(F("V - Go into Discoverable Mode"));
+                Serial.println(F("I - Go into non-Discoverable but Connectable Mode"));
+                Serial.println(F("C - Reconnect to Last Known Device"));
+                Serial.println(F("D - Disconnect from Current Device"));
+                Serial.println(F("P - Play/Pause Current Track"));
+                Serial.println(F("N - Skip to Next Track"));
+                Serial.println(F("R - Previous Track/Beginning of Track"));
+                Serial.println(F("A - Invoke Voice Assistant"));
+                Serial.println(F("B - Reboot the ATMega"));
+                Serial.println(F("U - Turn RN52 Volume Up"));
+                Serial.println(F("O - Turn RN52 Volume Down"));
+                Serial.println(F("M - Turn RN52 Volume to Max"));
+                Serial.println(F(""));
                 break;
             default:
+                Serial.println(F(""));
+                Serial.println(F("Invalid command. Try one of these instead."));
+                Serial.println(F("V - Go into Discoverable Mode"));
+                Serial.println(F("I - Go into non-Discoverable but Connectable Mode"));
+                Serial.println(F("C - Reconnect to Last Known Device"));
+                Serial.println(F("D - Disconnect from Current Device"));
+                Serial.println(F("P - Play/Pause Current Track"));
+                Serial.println(F("N - Skip to Next Track"));
+                Serial.println(F("R - Previous Track/Beginning of Track"));
+                Serial.println(F("A - Invoke Voice Assistant"));
+                Serial.println(F("B - Reboot the ATMega"));
+                Serial.println(F("U - Turn RN52 Volume Up"));
+                Serial.println(F("O - Turn RN52 Volume Down"));
+                Serial.println(F("M - Turn RN52 Volume to Max"));
+                Serial.println(F(""));
                 break;
         }
     }
