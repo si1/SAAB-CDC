@@ -32,12 +32,9 @@
  */
 
 #define IHU_APL_ADR                 0x11
-#define CDC_APL_ADR                 0x12
 #define SPA_APL_ADR                 0x1F
 #define IHU_SID_FUNCTION_ID         0x19
-#define CDC_SID_FUNCTION_ID         0x1E
 #define SPA_SID_FUNCTION_ID         0x18
-#define SID_OBJECT2                 0x02
 
 /**
  * Other useful stuff
@@ -75,15 +72,6 @@
 #define NODE_STATUS_TX_INTERVAL     140     // Replies to '6A1' request need to be sent with no more than 140ms interval; tolerances +/- 10%
 #define CDC_STATUS_TX_BASETIME      950     // The CDC status frame must be sent periodically within this timeframe; tolerances +/- 10%
 #define SID_CONTROL_TX_BASETIME     1000    // SID control/resource request frames needs to be sent within this timeframe; tolerances +/- 10%
-
-/**
- * SID sound type definitions:
- */
-
-#define SOUND_ACK                   0x04    // Short "Beep"
-#define SOUND_TAC                   0x08    // "Tack"
-#define SOUND_TIC                   0x10    // "Tick"
-#define SOUND_ALERT                 0x40    // Short "Ding-Dong"
 
 /**
  * Class:

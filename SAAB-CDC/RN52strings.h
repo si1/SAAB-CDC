@@ -53,6 +53,7 @@
 #define RN52_CMD_AVCRP_PREV         "AT-\r"
 #define RN52_CMD_AVCRP_VASSISTANT   "P\r"
 #define RN52_CMD_AVCRP_PLAYPAUSE    "AP\r"
+#define RN52_CMD_GET_TRACK_DATA     "AD\r"
 
 // RN52 reply messages
 #define RN52_RX_OK                  "AOK\r\n"

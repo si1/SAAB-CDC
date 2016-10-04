@@ -48,6 +48,7 @@ int incomingEventCounter = 0;                       // Counter for incoming even
 int displayRequestTimerId = -1;
 int writeTextOnDisplayTimerId = -1;
 int currentNodeStatusTxTimerEvent = -1;
+int textToSidTimer = -1;
 int cdcPoweronCmd[NODE_STATUS_TX_MSG_SIZE][9] = {
     {0x32,0x00,0x00,0x03,0x01,0x02,0x00,0x00,-1},
     {0x42,0x00,0x00,0x22,0x00,0x00,0x00,0x00,-1},
@@ -73,7 +74,7 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
  [1]: Type of sound
  [2-7]: Zeroed out; not in use
  */
-int soundCmd[] = {0x80,SOUND_ACK,0x00,0x00,0x00,0x00,0x00,0x00,-1};
+int soundCmd[] = {0x80,0x04,0x00,0x00,0x00,0x00,0x00,0x00,-1};
 
 /* Format of DISPLAY_RESOURCE_REQ frame:
  ID: Node ID requesting to write on SID
@@ -160,7 +161,7 @@ void CDChandler::handleRxFrame() {
                 handleSteeringWheelButtons();
                 break;
             case DISPLAY_RESOURCE_GRANT:
-                if ((cdcActive) && (CAN_RxMsg.data[0] == SID_OBJECT2)) {
+                if ((cdcActive) && (CAN_RxMsg.data[0] == 0x02)) {
                     if (CAN_RxMsg.data[1] == SPA_SID_FUNCTION_ID) {
                         // We have been granted the right to write text to the second row on the SID"
                         if (!writeTextOnDisplayTimerActive) {
@@ -172,16 +173,10 @@ void CDChandler::handleRxFrame() {
                         // ”OK to write” = false
                     }
                 }
-                else if ((CAN_RxMsg.data[0] == 0x00) && (CAN_RxMsg.data[1] != 0xFF) && (SID_OBJECT2 != 0))  {
-                    // ”OK to write” = false
-                }
-                else if ((CAN_RxMsg.data[0] != 0x00) && (CAN_RxMsg.data[1] != 0xFF) && (SID_OBJECT2 == 0))  {
-                    // ”OK to write” = false
-                }
-                else {
-                    // No action is taken; The status of ”OK to write” has not changed
-                }
                 break;
+            default:
+                break;
+                
         }
     }
 }
@@ -441,7 +436,7 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
     }
     // Copy the provided string and make sure we have a new array of the correct length
     char textToSid[15];
-    int i, n;
+    int i, m, n;
     n = strlen(textIn);
     n = n > 12 ? 12 : n;      // 12 is the number of characters SID can display on each row; anything beyond 12 is going to be zeroed out
     for (i = 0; i < n; i++) {
@@ -450,7 +445,17 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
     for (i = n; i < 15; i++) {
         textToSid[i] = 0;
     }
-
+    /*
+    int sidMessageGroup[3][9] = {
+        {0x42,0x96,0x02,textToSid[0],textToSid[1],textToSid[2],textToSid[3],textToSid[4],-1},
+        {0x01,0x96,0x02,textToSid[5],textToSid[6],textToSid[7],textToSid[8],textToSid[9],-1},
+        {0x00,0x96,0x02,textToSid[10],textToSid[11],textToSid[12],textToSid[13],textToSid[14],-1},
+    };
+    
+    for (m = 0; m < 3; m++) {
+        time.after(10,sendCanFrame(WRITE_TEXT_ON_DISPLAY,sidMessageGroup[m]));
+    }
+    */
     CAN_TxMsg.id = WRITE_TEXT_ON_DISPLAY;
      
     CAN_TxMsg.data[0] = 0x42; // TODO: check if this is really correct? According to the spec, the 4 shouldn't be there? It's just a normal transport layer sequence numbering?

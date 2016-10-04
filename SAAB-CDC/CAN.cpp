@@ -476,7 +476,7 @@ uint8_t CANClass::ReadFromDevice(msgCAN *message)
  Parameters(type):
 	None
  Description:
-	Polls interrption bit
+	Polls interrupt bit
  Returns:
 	0: if there is not messages waiting in the converter
 	1: if there is
