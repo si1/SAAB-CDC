@@ -37,6 +37,7 @@ void setup() {
     Serial.println(F(" bytes"));
     Serial.println(F("Software version: v4.0 Beta"));
     BT.initialize();
+    Serial.println(F("Press H for Help"));
     CDC.openCanBus();
 }
 
