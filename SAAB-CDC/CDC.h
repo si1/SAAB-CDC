@@ -31,9 +31,9 @@
  * Various constants used for SID text control
  */
 
-#define IHU_APL_ADR                 0x11
+//#define IHU_APL_ADR                 0x11
 #define SPA_APL_ADR                 0x1F
-#define IHU_SID_FUNCTION_ID         0x19
+//#define IHU_SID_FUNCTION_ID         0x19
 #define SPA_SID_FUNCTION_ID         0x18
 
 /**
@@ -87,7 +87,7 @@ public:
     void handleSteeringWheelButtons();
     void handleCdcStatus();
     void sendCdcStatus(boolean event, boolean remote, boolean cdcActive);
-    void sendDisplayRequest();
+    void sendDisplayRequest(boolean sidWriteAccessWanted);
     void sendCanFrame(int message_id, int *msg);
     void writeTextOnDisplay(const char textIn[]);
     void checkCanEvent(int frameElement);

@@ -39,8 +39,8 @@ void sendCdcPowerdownStatus(void*);
 void *currentCdcCmd = NULL;
 unsigned long cdcStatusLastSendTime = 0;            // Timer used to ensure we send the CDC status frame in a timely manner
 unsigned long lastIcomingEventTime = 0;             // Timer used for determening if we should treat current event as, for example, a long press of a button
-boolean sidTextControlTestMode = false;             // True while SID text control on behalf of SPA is enabled. Toggled ON/OFF with button #5 on IHU
 boolean cdcActive = false;                          // True while our module, the simulated CDC, is active
+boolean sidWriteAccessWanted = false;               // True while we want to write on SID
 boolean cdcStatusResendNeeded = false;              // True if an internal operation has triggered the need to send the CDC status frame as an event
 boolean cdcStatusResendDueToCdcCommand = false;     // True if the need for sending the CDC status frame was triggered by CDC_CONTROL frame (IHU)
 boolean writeTextOnDisplayTimerActive = false;      // True while we are writing custom text on SID every SID_CONTROL_TX_BASETIME interval
@@ -75,17 +75,6 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
  [2-7]: Zeroed out; not in use
  */
 int soundCmd[] = {0x80,0x04,0x00,0x00,0x00,0x00,0x00,0x00,-1};
-
-/* Format of DISPLAY_RESOURCE_REQ frame:
- ID: Node ID requesting to write on SID
- [0]: Request source
- [1]: SID object to write on; 0 = entire SID; 1 = 1st row; 2 = 2nd row
- [2]: Request type: 1 = Engineering test; 2 = Emergency; 3 = Driver action; 4 = ECU action; 5 = Static text; 6 = We don't want to write on SID
- [3]: Request source function ID
- [4-7]: Zeroed out; not in use
- */
-int displayRequestCmd[] = {SPA_APL_ADR,0x02,0x01,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We pretend to be SPA and want a write access to 2nd row of SID
-int sidNotWantedCmd[]   = {SPA_APL_ADR,0x02,0xFF,SPA_SID_FUNCTION_ID,0x00,0x00,0x00,0x00,-1}; // We don't want to write to SID anymore; hence 0xFF as "message type"
 
 /**
  * DEBUG: Prints the CAN Tx frame to serial output
@@ -196,17 +185,19 @@ void CDChandler::handleIhuButtons() {
     }
     switch (CAN_RxMsg.data[1]) {
         case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
-            BT.bt_reconnect();
             cdcActive = true;
+            BT.bt_reconnect();
+            //sidWriteAccessWanted = true;
             //displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
             sendCanFrame(SOUND_REQUEST, soundCmd);
             break;
         case 0x14: // CDC = OFF (Back to Radio or Tape mode)
-            //time.stop(displayRequestTimerId);
+            //sidWriteAccessWanted = false;
             //time.stop(writeTextOnDisplayTimerId);
+            //writeTextOnDisplayTimerActive = false;
+            //time.stop(displayRequestTimerId);
             BT.bt_disconnect();
             cdcActive = false;
-            //writeTextOnDisplayTimerActive = false;
             break;
         default:
             break;
@@ -253,19 +244,6 @@ void CDChandler::handleIhuButtons() {
                             BT.bt_voldown();
                             break;
                         case 0x05:
-                            if (!sidTextControlTestMode) {
-                                displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
-                                sidTextControlTestMode = true;
-                                sendCanFrame(SOUND_REQUEST, soundCmd);
-                            }
-                            else {
-                                time.stop(writeTextOnDisplayTimerId);
-                                time.stop(displayRequestTimerId);
-                                sendCanFrame(DISPLAY_RESOURCE_REQ,sidNotWantedCmd);
-                                sidTextControlTestMode = false;
-                                writeTextOnDisplayTimerActive = false;
-                                sendCanFrame(SOUND_REQUEST, soundCmd);
-                            }
                             break;
                         case 0x06:
                             BT.bt_disconnect();
@@ -351,7 +329,7 @@ void CDChandler::sendCdcStatus(boolean event, boolean remote, boolean cdcActive)
     
     byte discMode          = 0x05;  // Play; 0x0E can also be tried for "test mode" but might stop IHU from updating the display
     
-    int cdcGeneralStatusCmd[8];
+    int cdcGeneralStatusCmd[9];
     cdcGeneralStatusCmd[0] = ((event ? 0x07 : 0x00) | (remote ? 0x00 : 0x01)) << 5;
     cdcGeneralStatusCmd[1] = (cdcActive ? 0xFF : 0x00);                             // Validation for presence of six discs in the magazine
     cdcGeneralStatusCmd[2] = (cdcActive ? 0x3F : 0x01);                             // There are six discs in the magazine
@@ -375,7 +353,28 @@ void CDChandler::sendCdcStatus(boolean event, boolean remote, boolean cdcActive)
  * Sends a request for using the SID, row 2. We may NOT start writing until we've received a grant frame with the correct function ID!
  */
 
-void CDChandler::sendDisplayRequest() {
+void CDChandler::sendDisplayRequest(boolean sidWriteAccessWanted) {
+    
+    /* Format of DISPLAY_RESOURCE_REQ frame:
+     ID: Node ID requesting to write on SID
+     [0]: Request source
+     [1]: SID object to write on; 0 = entire SID; 1 = 1st row; 2 = 2nd row
+     [2]: Request type: 1 = Engineering test; 2 = Emergency; 3 = Driver action; 4 = ECU action; 5 = Static text; 0xFF = We don't want to write on SID
+     [3]: Request source function ID
+     [4-7]: Zeroed out; not in use
+     */
+    
+    int displayRequestCmd[9];
+    displayRequestCmd[0] = SPA_APL_ADR;
+    displayRequestCmd[1] = 0x02;
+    displayRequestCmd[2] = (sidWriteAccessWanted ? 0x01 : 0xFF);
+    displayRequestCmd[3] = SPA_SID_FUNCTION_ID;
+    displayRequestCmd[4] = 0x00;
+    displayRequestCmd[5] = 0x00;
+    displayRequestCmd[6] = 0x00;
+    displayRequestCmd[7] = 0x00;
+    displayRequestCmd[8] = -1;
+
     sendCanFrame(DISPLAY_RESOURCE_REQ, displayRequestCmd);
 }
 
@@ -413,7 +412,7 @@ void sendCdcNodeStatus(void *p) {
  */
 
 void sendDisplayRequestOnTime(void*) {
-    CDC.sendDisplayRequest();
+    CDC.sendDisplayRequest(sidWriteAccessWanted);
 }
 
 /**
