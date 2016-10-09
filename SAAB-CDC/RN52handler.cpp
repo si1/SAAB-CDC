@@ -91,54 +91,67 @@ void RN52handler::monitor_serial_input() {
     if (Serial.available() > 0) {
         incomingByte = Serial.read();
         switch (incomingByte) {
+            case 'v':
             case 'V':
                 bt_visible();
                 Serial.println(F("Going into Discoverable Mode"));
                 break;
+            case 'i':
             case 'I':
                 bt_invisible();
                 Serial.println(F("Going into non-Discoverable/Connectable Mode"));
                 break;
+            case 'c':
             case 'C':
                 bt_reconnect();
                 Serial.println(F("Re-connecting to the Last Known Device"));
                 break;
+            case 'd':
             case 'D':
                 bt_disconnect();
                 Serial.println(F("Disconnecting from the Current Device"));
                 break;
+            case 'p':
             case 'P':
                 bt_play();
                 Serial.println(F("\"Play/Pause\" Current Track"));
                 break;
+            case 'n':
             case 'N':
                 bt_next();
                 Serial.println(F("Skip to \"Next\" Track"));
                 break;
+            case 'r':
             case 'R':
                 bt_prev();
                 Serial.println(F("Go back to \"Previous\" Track"));
                 break;
+            case 'a':
             case 'A':
                 bt_vassistant();
                 Serial.println(F("Invoking Voice Assistant"));
                 break;
+            case 'b':
             case 'B':
                 wdt_enable(WDTO_1S);
                 Serial.println(F("Rebooting the ATMega"));
                 break;
+            case 'u':
             case 'U':
                 bt_volup();
                 Serial.println(F("Turning RN52 Volume Up"));
                 break;
+            case 'o':
             case 'O':
                 bt_voldown();
                 Serial.println(F("Turning RN52 Volume Down"));
                 break;
+            case 'm':
             case 'M':
                 bt_set_maxvol();
                 Serial.println(F("Turning RN52 Volume to Max"));
                 break;
+            case 'h':
             case 'H':
                 Serial.println(F(""));
                 Serial.println(F("V - Go into Discoverable Mode"));
@@ -157,7 +170,7 @@ void RN52handler::monitor_serial_input() {
                 break;
             case '\n':
             case '\r':
-                // Ignore newline characters
+                // Ignore newline characters such as CR and LF
                 break;
             default:
                 Serial.println(F(""));
