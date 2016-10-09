@@ -155,6 +155,10 @@ void RN52handler::monitor_serial_input() {
                 Serial.println(F("M - Turn RN52 Volume to Max"));
                 Serial.println(F(""));
                 break;
+            case '\n':
+            case '\r':
+                // Ignore newline characters
+                break;
             default:
                 Serial.println(F(""));
                 Serial.println(F("Invalid command. Try one of these instead."));
