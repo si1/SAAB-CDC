@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Jan 22, 2015 release 4.1.9
+# Last update: Apr 22, 2016 release 4.5.0
 
 
 
@@ -21,6 +21,8 @@
 ifneq ($(PLATFORM),mbed)
     include $(MAKEFILE_PATH)/Avrdude.mk
 endif
+
+$(shell echo > $(UTILITIES_PATH)/serial.txt)
 
 ifeq ($(AVRDUDE_NO_SERIAL_PORT),1)
 #
@@ -121,7 +123,7 @@ ifdef CORE_LIB_PATH
 endif
 endif
 
-# APPlication Arduino/chipKIT/Digispark/Energia/Maple/Microduino/Teensy/Wiring sources
+# APPlication Arduino/chipKIT/Digistump/Energia/Maple/Microduino/Teensy/Wiring sources
 #
 ifndef APP_LIB_PATH
     APP_LIB_PATH  = $(APPLICATION_PATH)/libraries
@@ -173,9 +175,13 @@ ifneq ($(USER_LIBS_LIST),0)
     EXCLUDE_LIST     = $(shell echo $(strip $(EXCLUDE_NAMES)) | sed "s/ /|/g" )
     USER_LIBS       := $(sort $(foreach dir,$(s203),$(shell find $(dir) -type d | egrep -v '$(EXCLUDE_LIST)' )))
 
-    USER_LIB_CPP_SRC = $(wildcard $(patsubst %,%/*.cpp,$(USER_LIBS))) # */
-    USER_LIB_C_SRC   = $(wildcard $(patsubst %,%/*.c,$(USER_LIBS))) # */
-    USER_LIB_H_SRC   = $(wildcard $(patsubst %,%/*.h,$(USER_LIBS))) # */
+    USER_LIB_CPP_SRC = $(foreach dir,$(USER_LIBS),$(wildcard $(dir)/*.cpp)) # */
+    USER_LIB_C_SRC   = $(foreach dir,$(USER_LIBS),$(wildcard $(dir)/*.c)) # */
+    USER_LIB_H_SRC   = $(foreach dir,$(USER_LIBS),$(wildcard $(dir)/*.h)) # */
+
+#    USER_LIB_CPP_SRC = $(wildcard $(patsubst %,%/*.cpp,$(USER_LIBS))) # */
+#    USER_LIB_C_SRC   = $(wildcard $(patsubst %,%/*.c,$(USER_LIBS))) # */
+#    USER_LIB_H_SRC   = $(wildcard $(patsubst %,%/*.h,$(USER_LIBS))) # */
 
     USER_OBJS        = $(patsubst $(USER_LIB_PATH)/%.cpp,$(OBJDIR)/user/%.cpp.o,$(USER_LIB_CPP_SRC))
     USER_OBJS       += $(patsubst $(USER_LIB_PATH)/%.c,$(OBJDIR)/user/%.c.o,$(USER_LIB_C_SRC))
@@ -282,10 +288,10 @@ ECHO    = echo
 # General arguments
 #
 #ifeq ($(APP_LIBS_LOCK),)
-SYS_INCLUDES  = $(patsubst %,-I%,$(APP_LIBS))
-SYS_INCLUDES += $(patsubst %,-I%,$(BUILD_APP_LIBS))
-SYS_INCLUDES += $(patsubst %,-I%,$(USER_LIBS))
-SYS_INCLUDES += $(patsubst %,-I%,$(LOCAL_LIBS))
+    SYS_INCLUDES  = $(patsubst %,-I%,$(APP_LIBS))
+    SYS_INCLUDES += $(patsubst %,-I%,$(BUILD_APP_LIBS))
+    SYS_INCLUDES += $(patsubst %,-I%,$(USER_LIBS))
+    SYS_INCLUDES += $(patsubst %,-I%,$(LOCAL_LIBS))
 #endif
 
 SYS_OBJS      = $(wildcard $(patsubst %,%/*.o,$(APP_LIBS))) # */
@@ -566,7 +572,7 @@ endif
 # ----------------------------------
 #
 $(OBJDIR)/%.hex: $(OBJDIR)/%.elf
-	$(call SHOW,"6.1-COPY",$@,$<)
+	$(call SHOW,"6.1-COPY HEX",$@,$<)
 
 	$(OBJCOPY) -Oihex -R .eeprom $< $@
 
@@ -576,23 +582,23 @@ $(OBJDIR)/%.bin: $(OBJDIR)/%.elf
 	$(OBJCOPY) -Obinary $< $@
 
 $(OBJDIR)/%.bin2: $(OBJDIR)/%.elf
-	$(call SHOW,"6.4-COPY",$@,$<)
+	$(call SHOW,"6.4-COPY BIN",$@,$<)
 
 	$(ESP_POST_COMPILE) -eo $(BOOTLOADER_ELF) -bo Builds/$(TARGET)_$(ADDRESS_BIN1).bin -bm $(OBJCOPYFLAGS) -bf $(BUILD_FLASH_FREQ) -bz $(BUILD_FLASH_SIZE) -bs .text -bp 4096 -ec -eo $< -bs .irom0.text -bs .text -bs .data -bs .rodata -bc -ec
 	cp Builds/$(TARGET)_$(ADDRESS_BIN1).bin Builds/$(TARGET).bin
 
 $(OBJDIR)/%.eep: $(OBJDIR)/%.elf
-	$(call SHOW,"6.5-COPY",$@,$<)
+	$(call SHOW,"6.5-COPY EEP",$@,$<)
 
 	-$(OBJCOPY) -Oihex -j .eeprom --set-section-flags=.eeprom=alloc,load --no-change-warnings --change-section-lma .eeprom=0 $< $@
 
 $(OBJDIR)/%.lss: $(OBJDIR)/%.elf
-	$(call SHOW,"6.6-COPY",$@,$<)
+	$(call SHOW,"6.6-COPY LSS",$@,$<)
 
 	$(OBJDUMP) -h -S $< > $@
 
 $(OBJDIR)/%.sym: $(OBJDIR)/%.elf
-	$(call SHOW,"6.7-COPY",$@,$<)
+	$(call SHOW,"6.7-COPY SYM",$@,$<)
 
 	$(NM) -n $< > $@
 
@@ -603,7 +609,7 @@ $(OBJDIR)/%.txt: $(OBJDIR)/%.out
 	$(OBJCOPY) -boot -sci8 -a $< -o $@
 
 $(OBJDIR)/%.mcu: $(OBJDIR)/%.elf
-	$(call SHOW,"6.9-COPY",$@,$<)
+	$(call SHOW,"6.9-COPY MCU",$@,$<)
 
 	@rm -f $(OBJDIR)/intel_mcu.*
 	@cp $(OBJDIR)/embeddedcomputing.elf $(OBJDIR)/intel_mcu.elf
@@ -720,7 +726,6 @@ info:
 
 ifneq ($(MAKECMDGOALS),boards)
   ifneq ($(MAKECMDGOALS),clean)
-
 		@echo ==== Info ====
 		@echo ---- Project ----
 		@echo 'Target		'$(MAKECMDGOALS)
@@ -737,10 +742,10 @@ ifneq ($(MAKECMDGOALS),boards)
     endif
 
     ifneq ($(WARNING_MESSAGE),)
-		@echo 'WARNING		'$(WARNING_MESSAGE)
+		@echo 'WARNING		$(WARNING_MESSAGE)'
     endif
     ifneq ($(INFO_MESSAGE),)
-		@echo 'Information	'$(INFO_MESSAGE)
+		@echo 'Information	$(INFO_MESSAGE)'
     endif
 
     ifneq ($(BUILD_CORE),)
@@ -773,7 +778,7 @@ endif
 #   ifneq ($(MAX_RAM_SIZE),)
 #		@echo 'SRAM memory	'$(MAX_RAM_SIZE)' bytes'
 #   endif
-		@echo 'Memory		flash = '$(MAX_FLASH_SIZE)' bytes, RAM = '$(MAX_RAM_SIZE)' bytes'
+		@echo 'Memory		Flash = '$(MAX_FLASH_SIZE)' bytes, RAM = '$(MAX_RAM_SIZE)' bytes'
 
 		@echo ---- Port ----
 		@echo 'Uploader		'$(UPLOADER)
@@ -910,7 +915,7 @@ reset:
 
 		-stty -f $(AVRDUDE_PORT) 1200
 #		$(USB_RESET) $(USED_SERIAL_PORT)
-		@sleep 2
+		@sleep 1
 endif
 
 # stty on Mac OS likes -F, but on Debian it likes -f redirecting
@@ -942,7 +947,7 @@ endif
 ifneq ($(COMMAND_UPLOAD),)
 		$(call SHOW,"10.90-UPLOAD",$(UPLOADER))
 
-        $(COMMAND_UPLOAD)
+		$(COMMAND_UPLOAD)
 
 else ifeq ($(UPLOADER),micronucleus)
 		$(call SHOW,"10.3-UPLOAD",$(UPLOADER))
@@ -963,6 +968,7 @@ else ifeq ($(UPLOADER),micronucleus)
 
 else ifeq ($(PLATFORM),RedBearLab)
 		$(call SHOW,"10.6-UPLOAD",$(UPLOADER))
+		sleep 2
 
 		$(OBJCOPY) -Oihex -Ibinary $(TARGET_BIN) $(TARGET_HEX)
 		$(AVRDUDE_EXEC) $(AVRDUDE_COM_OPTS) $(AVRDUDE_OPTS) -P$(USED_SERIAL_PORT) -Uflash:w:$(TARGET_HEX):i
@@ -1197,52 +1203,7 @@ depends:	$(DEPS)
 
 boards:
 		@echo "==== Boards ===="
-		@echo "Tag=Name"
-		@if [ -f $(ARDUINO_PATH)/hardware/arduino/boards.txt ]; then echo "---- $(notdir $(basename $(ARDUINO_APP))) ---- "; \
-			grep .name $(ARDUINO_PATH)/hardware/arduino/boards.txt; echo; fi
-		@if [ -d $(ARDUINO_PATH)/hardware/arduino/sam ]; then echo "---- $(notdir $(basename $(ARDUINO_APP))) SAM ---- "; \
-			grep .name $(ARDUINO_PATH)/hardware/arduino/sam/boards.txt; echo; fi
-		@if [ -d $(ARDUINO_PATH)/hardware/arduino/avr ]; then echo "---- $(notdir $(basename $(ARDUINO_APP))) AVR ---- "; \
-			grep .name $(ARDUINO_PATH)/hardware/arduino/avr/boards.txt; echo; fi
-		@if [ -f $(ADAFRUIT_PATH)/hardware/arduino/boards.txt ]; then echo "---- $(notdir $(basename $(ADAFRUIT_APP))) ---- "; \
-			grep .name $(ADAFRUIT_PATH)/hardware/arduino/boards.txt; echo; fi
-
-		@if [ -d $(MPIDE_APP) ]; then echo "---- $(notdir $(basename $(MPIDE_APP))) ---- ";   \
-			grep .name $(MPIDE_PATH)/hardware/pic32/boards.txt | grep -v '^#';     echo; fi
-		@if [ -d $(DIGISPARK_APP) ]; then echo "---- $(notdir $(basename $(DIGISPARK_APP))) ---- ";  \
-			grep .name $(DIGISPARK_PATH)/hardware/digistump/avr/boards.txt;  echo; fi
-
-		@if [ -d $(ENERGIA_APP) ]; then echo "---- $(notdir $(basename $(ENERGIA_APP))) MSP430 ---- "; \
-			grep .name $(ENERGIA_PATH)/hardware/msp430/boards.txt | grep -v '^#';  echo; fi
-		@if [ -d $(ENERGIA_PATH)/hardware/lm4f ]; then echo "---- $(notdir $(basename $(ENERGIA_APP))) LM4F TM4C ---- ";  \
-			grep .name $(ENERGIA_PATH)/hardware/lm4f/boards.txt | grep -v '^#';  echo; fi
-		@if [ -d $(ENERGIA_PATH)/hardware/cc3200 ]; then echo "---- $(notdir $(basename $(ENERGIA_APP))) CC3200 ---- ";  \
-		grep .name $(ENERGIA_PATH)/hardware/cc3200/boards.txt | grep -v '^#';  echo; fi
-
-		@if [ -d $(MAPLE_APP) ]; then echo "---- $(notdir $(basename $(MAPLE_APP))) ---- ";    \
-			grep .name $(MAPLE_PATH)/hardware/leaflabs/boards.txt;  echo; fi
-		@if [ -d $(GALILEO_APP) ]; then echo "---- $(notdir $(basename $(GALILEO_APP))) ---- ";    \
-			grep .name $(GALILEO_PATH)/hardware/intel/i586-uclibc/boards.txt;  echo; fi
-			grep .name $(GALILEO_PATH)/hardware/intel/i686/boards.txt;  echo; fi
-
-		@if [ -f $(MBED_PATH)/boards.txt ] ; then echo "---- $(notdir $(basename $(MBED_PATH))) ---- ";    \
-			grep .name $(MBED_PATH)/boards.txt;  echo; fi
-
-		@if [ -d $(MICRODUINO_APP) ]; then echo "---- $(notdir $(basename $(MICRODUINO_APP))) ---- ";    \
-			grep .name $(MICRODUINO_PATH)/hardware/Microduino/boards.txt;  echo; fi
-
-		@if [ -d $(PANSTAMP_PATH) ]; then echo "---- $(notdir $(basename $(PANSTAMP_PATH))) ---- ";    \
-			grep .name $(PANSTAMP_PATH)/hardware/panstamp/avr/boards.txt;  echo; fi
-			grep .name $(PANSTAMP_PATH)/hardware/panstamp/msp430/boards.txt;  echo; fi
-
-		@if [ -f $(SPARK_PATH)/boards.txt ] ; then echo "---- $(notdir $(basename $(SPARK_PATH))) ---- ";    \
-			grep .name $(SPARK_PATH)/boards.txt;  echo; fi
-
-		@if [ -d $(TEENSY_APP) ]; then echo "---- $(notdir $(basename $(TEENSY_APP))) ---- ";   \
-			grep .name $(TEENSY_PATH)/hardware/teensy/avr/boards.txt | grep -v menu;    echo; fi
-
-		@if [ -d $(WIRING_APP) ]; then echo "---- $(notdir $(basename $(WIRING_APP))) ---- ";  \
-			grep .name $(WIRING_PATH)/hardware/Wiring/boards.txt;   echo; fi
+		@ls -1 Configurations/ | sed 's/\(.*\)\..*/\1/'
 		@echo "==== Boards done ==== "
 
 message_all:

@@ -31,22 +31,20 @@
 class RN52handler {
     RN52impl driver;
     
-    unsigned long lastEventIndicatorPinStateChange;
-    
 public:
-    RN52handler() {
-        lastEventIndicatorPinStateChange = 0;
-    }
     void update();
     void bt_play();
     void bt_pause();
     void bt_prev();
     void bt_next();
     void bt_vassistant();
+    void bt_volup();
+    void bt_voldown();
     void bt_visible();
     void bt_invisible();
     void bt_reconnect();
     void bt_disconnect();
+    void bt_set_maxvol();
     void monitor_serial_input();
     void initialize();
 };

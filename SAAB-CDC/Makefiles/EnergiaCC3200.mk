@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Nov 25, 2015 release 4.0.5
+# Last update: Apr 28, 2016 release 4.5.2
 
 
 
@@ -23,7 +23,11 @@ ifeq ($(shell if [[ '$(ENERGIA_RELEASE)' -ge '14' ]] ; then echo 1 ; else echo 0
     WARNING_MESSAGE = Energia 14 or later is required.
 endif
 
-PLATFORM         := Energia
+ifneq ($(filter ARDUCAM,$(GCC_PREPROCESSOR_DEFINITIONS)),ARDUCAM)
+    PLATFORM         := Energia
+else
+    PLATFORM         := ArduCAM
+endif
 BUILD_CORE       := cc3200
 PLATFORM_TAG      = ENERGIA=$(ENERGIA_RELEASE) ARDUINO=$(ARDUINO_RELEASE) EMBEDXCODE=$(RELEASE_NOW) $(filter __%__ ,$(GCC_PREPROCESSOR_DEFINITIONS))
 

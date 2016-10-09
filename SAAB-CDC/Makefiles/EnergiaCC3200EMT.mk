@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Jan 11, 2016 release 4.1.5
+# Last update: Apr 27, 2016 release 4.5.1
 
 
 
@@ -42,23 +42,9 @@ UPLOADER_OPTS =
 UPLOADER_COMMAND = prog
 
 APP_TOOLS_PATH  := $(APPLICATION_PATH)/hardware/tools/lm4f/bin
-#CORE_LIB_PATH    := $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt
 CORES_PATH      := $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt
 APP_LIB_PATH    := $(APPLICATION_PATH)/hardware/cc3200emt/libraries
 BOARDS_TXT      := $(APPLICATION_PATH)/hardware/cc3200emt/boards.txt
-
-#CORE_LIBS_LIST   := #
-#BUILD_CORE_LIBS_LIST := #
-
-#BUILD_CORE_LIB_PATH  = $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt/driverlib
-#BUILD_CORE_LIBS_LIST = $(subst .h,,$(subst $(BUILD_CORE_LIB_PATH)/,,$(wildcard $(BUILD_CORE_LIB_PATH)/*.h))) # */
-
-#BUILD_CORE_C_SRCS    = $(wildcard $(BUILD_CORE_LIB_PATH)/*.c) # */
-
-#BUILD_CORE_CPP_SRCS = $(filter-out %program.cpp %main.cpp,$(wildcard $(BUILD_CORE_LIB_PATH)/*.cpp)) # */
-
-#BUILD_CORE_OBJ_FILES  = $(BUILD_CORE_C_SRCS:.c=.c.o) $(BUILD_CORE_CPP_SRCS:.cpp=.cpp.o)
-#BUILD_CORE_OBJS       = $(patsubst $(BUILD_CORE_LIB_PATH)/%,$(OBJDIR)/%,$(BUILD_CORE_OBJ_FILES))
 
 
 # Sketchbook/Libraries path
@@ -100,7 +86,6 @@ BOARD            = $(call PARSE_BOARD,$(BOARD_TAG),board)
 VARIANT          = $(call PARSE_BOARD,$(BOARD_TAG),build.variant)
 VARIANT_PATH     = $(APPLICATION_PATH)/hardware/cc3200emt/variants/$(VARIANT)
 CORE_A           = $(CORES_PATH)/driverlib/libdriverlib.a
-#LDSCRIPT         = $(VARIANT_PATH)/linker.cmd
 LDSCRIPT         = $(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/cc3200/linker.cmd
 
 
@@ -125,31 +110,18 @@ INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/
 INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt/
 INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt/avr/
 INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt/inc/
-#INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt/inc/CMSIS
 INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt/driverlib/
 
 INCLUDE_PATH    += $(call SUB_PATH,$(CORES_PATH))
 INCLUDE_PATH    += $(call SUB_PATH,$(VARIANT_PATH))
 
-## INCLUDE_PATH     = $(call SUB_PATH,$(CORES_PATH))
-## INCLUDE_PATH    += $(call SUB_PATH,$(VARIANT_PATH))
-## INCLUDE_PATH    += $(call SUB_PATH,$(APPLICATION_PATH)/hardware/common)
-## INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/tools/lm4f/include
-## INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt/inc
-## #INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/cc3200emt/cores/cc3200emt/inc/CMSIS
-## #INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/cc3200emt/variants/$(call PARSE_BOARD,$(BOARD_TAG),build.hardware)
-## INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt/xdc/cfg
-## INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt
-## INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/cc3200
-## INCLUDE_PATH    += $(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/
-
 INCLUDE_LIBS     = $(APPLICATION_PATH)/hardware/common
 INCLUDE_LIBS    += $(APPLICATION_PATH)/hardware/tools/lm4f/lib
-#INCLUDE_LIBS    += $(APPLICATION_PATH)/hardware/cc3200emt/variants/$(call PARSE_BOARD,$(BOARD_TAG),build.hardware)
 INCLUDE_LIBS    += $(APPLICATION_PATH)/hardware/common/libs
 INCLUDE_LIBS    += $(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/cc3200
-INCLUDE_LIBS    += $(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/cc3200/variants/CC3200_LAUNCHXL
+INCLUDE_LIBS    += $(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/cc3200/variants/$(VARIANT)
 INCLUDE_LIBS    += $(APPLICATION_PATH)/hardware/emt
+INCLUDE_LIBS    += $(VARIANT_PATH)
 
 
 # Flags for gcc, g++ and linker
@@ -158,12 +130,7 @@ INCLUDE_LIBS    += $(APPLICATION_PATH)/hardware/emt
 # Common CPPFLAGS for gcc, g++, assembler and linker
 #
 CPPFLAGS     = $(OPTIMISATION) $(WARNING_FLAGS)
-#CPPFLAGS    += @$(APPLICATION_PATH)/hardware/cc3200emt/targets/MSP_EXP432P401R/compiler.opt
-#>>> VARIANT MSP_EXP432P401R
-#>>> VARIANT_PATH /Applications/IDE/Energia.app/Contents/Resources/Java/hardware/cc3200emt/variants/MSP_EXP432P401R
-#@"/Applications/IDE/Energia.app/Contents/Resources/Java/hardware/emt/ti/runtime/wiring/cc3200emt/compiler.opt"
 CPPFLAGS    += @$(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/cc3200/compiler.opt
-#CPPFLAGS    += @$(VARIANT_PATH)/compiler.opt
 CPPFLAGS    += $(addprefix -I, $(INCLUDE_PATH))
 CPPFLAGS    += $(addprefix -D, $(PLATFORM_TAG))
 CPPFLAGS    += -DF_CPU=$(F_CPU) -D$(call PARSE_BOARD,$(BOARD_TAG),build.hardware)
@@ -195,7 +162,7 @@ LDFLAGS     += -mcpu=cortex-m4 -march=armv7e-m
 #LDFLAGS     += @$(APPLICATION_PATH)/hardware/cc3200emt/variants/$(VARIANT)/compiler.opt
 LDFLAGS     += @$(APPLICATION_PATH)/hardware/emt/ti/runtime/wiring/cc3200/compiler.opt
 LDFLAGS     += -nostartfiles -Wl,--no-wchar-size-warning -Wl,-static -Wl,--gc-sections
-LDFLAGS     += $(CORES_PATH)/driverlib/libdriverlib.a
+#LDFLAGS     += $(CORES_PATH)/driverlib/libdriverlib.a
 LDFLAGS     += -lstdc++ -lgcc -lc -lm -lnosys
 
 # Specific OBJCOPYFLAGS for objcopy only

@@ -77,7 +77,7 @@ CURRENT_DIR   := $(shell echo '$(CURRENT_DIR)' | sed 's/ /\\\ /g')
 
 # C-compliant project name
 #
-PROJECT_NAME_AS_IDENTIFIER = SAAB-CDC
+PROJECT_NAME_AS_IDENTIFIER = Temp
 SKETCH_EXTENSION = ino
 
 MAKEFILE_PATH  = $(CURRENT_DIR)/Makefiles

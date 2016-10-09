@@ -19,10 +19,11 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Last modified on: September 2, 2016
  */
 
 #include "RN52impl.h"
+#include "RN52strings.h"
 
 /**
  * Reads the input (if any) from UART over software serial connection
@@ -59,17 +60,15 @@ void RN52impl::setMode(Mode mode){
     }
 };
 
-const char *CMD_QUERY = "Q\r";
 void RN52impl::onGPIO2() {
-    queueCommand(CMD_QUERY);
+    queueCommand(RN52_CMD_QUERY);
 }
 
 void RN52impl::onProfileChange(BtProfile profile, bool connected) {
     switch(profile) {
         case A2DP:bt_a2dp = connected;
             if (connected && playing) {
-                // Serial.println("DEBUG: RN52 connection ok; 'auto-play' should kick in now!");
-                sendAVCRP(RN52::RN52driver::PLAY);
+                sendAVCRP(RN52::RN52driver::PLAYPAUSE);
             }
             break;
         case SPP:bt_spp = connected;break;
@@ -78,17 +77,94 @@ void RN52impl::onProfileChange(BtProfile profile, bool connected) {
     }
 }
 
+void RN52impl::update() {
+    readFromUART();
+    if (digitalRead(BT_EVENT_INDICATOR_PIN) == 0) {
+        if ((millis() - lastEventIndicatorPinStateChange) > 100) {
+            lastEventIndicatorPinStateChange = millis();
+            onGPIO2();
+        }
+    }
+}
+
 /**
  * Initializes Atmel pins and software serial for their initial state on startup
  */
 
 void RN52impl::initialize() {
+    // Values used for "smoothing" analogRead() results for hardware revision check
+    const int numOfReadings = 10;
+    int sumOfReadings = 0;
+    int hwRevisionCheckValue = 0;
+    
     softSerial.begin(9600);
+    
+    for (int i = 0; i < numOfReadings; i++) {
+        sumOfReadings = sumOfReadings + analogRead(HW_REV_CHK_PIN);
+    }
+    hwRevisionCheckValue = sumOfReadings / numOfReadings;
+    
+    // Initializing ATMEGA pins
+    pinMode(BT_PWREN_PIN,OUTPUT);
     pinMode(BT_EVENT_INDICATOR_PIN,INPUT);
     pinMode(BT_CMD_PIN, OUTPUT);
     pinMode(BT_FACT_RST_PIN,INPUT);             // Some REALLY crazy stuff is going on if this pin is set as output and pulled low. Leave it alone! Trust me...
-    pinMode(BT_PWREN_PIN,OUTPUT);
+    pinMode(HW_REV_CHK_PIN,INPUT);              // We do an analogRead() on this pin to determine HW version of the module and take action accordingly
+    pinMode(SN_XCEIVER_RS_PIN,OUTPUT);
     digitalWrite(BT_EVENT_INDICATOR_PIN,HIGH);  // Default state of GPIO2, per data sheet, is HIGH
     digitalWrite(BT_CMD_PIN,HIGH);              // Default state of GPIO9, per data sheet, is HIGH
-    digitalWrite(BT_PWREN_PIN,HIGH);            // Keeping the PWREN pin HIGH for now to keep the module ON at all times. TODO: implement go-to-sleep/wakeup function.
+    
+    switch (hwRevisionCheckValue) {
+        case 38 ... 52:                             // PCBs v3.3A, v4.1 or v4.2 (100K/5K Ohm network); TODO: make sure the correct resistors are soldered on!!!
+            time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
+            Serial.println(F("Hardware version: v3.3A/v4.1/v4.2"));
+            break;
+        case 83 ... 97:                             // PCB v4.3 (100K/10K Ohm network)
+            time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
+            digitalWrite(SN_XCEIVER_RS_PIN,LOW);    // This pin needs to be pulled low, otherwise SN65HVD251D CAN transciever goes into sleep mode
+            Serial.println(F("Hardware version: v4.3"));
+            break;
+        case 161 ... 175:                           // PCB v5.0 (100K/20K Ohm network)
+            time.pulse(BT_PWREN_PIN,3000,0);        // Pulls PWREN pin HIGH for 3000ms, then pulls it LOW thus enabling power to RN52
+            digitalWrite(SN_XCEIVER_RS_PIN,LOW);    // This pin needs to be pulled low, otherwise SN65HVD251D CAN transciever goes into sleep mode
+            Serial.println(F("Hardware version: v5.0"));
+            break;
+        default:                                    // PCB revision is older than v3.3A; PWREN is hardwired to 3v3; no other action needs to be taken
+            Serial.println(F("Hardware version: Legacy"));
+            break;
+    }    
+    // Configuring RN52
+    /*
+    Serial.println(F("Configuring RN52... "));
+    set_baudrate();
+    waitForResponse();
+    delay(1000);
+    reboot();
+    delay(5000);
+    set_discovery_mask();
+    waitForResponse();
+    delay(1000);
+    set_connection_mask();
+    waitForResponse();
+    delay(1000);
+    set_cod();
+    waitForResponse();
+    delay(1000);
+    set_device_name();
+    waitForResponse();
+    delay(1000);
+    set_extended_features();
+    waitForResponse();
+    delay(1000);
+    set_max_volume();
+    waitForResponse();
+    delay(1000);
+    reboot();
+     */
+}
+
+void RN52impl::waitForResponse() {
+    do {
+        update();
+    } while (currentCommand != NULL);
 }

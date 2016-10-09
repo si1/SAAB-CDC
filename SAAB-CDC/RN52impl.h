@@ -19,7 +19,7 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Modified on: September 2, 2016
  */
 
 #ifndef RN52impl_H
@@ -30,13 +30,17 @@
 #include "SoftwareSerial.h"
 #include "Timer.h"
 
+extern Timer time;
+
 /**
  * Atmel 328 pin definitions:
  */
 
+const int BT_FACT_RST_PIN = A0;             // RN52 factory reset pin GPIO4
+const int HW_REV_CHK_PIN = A1;              // HW revision check pin
+const int SN_XCEIVER_RS_PIN = A3;           // Connected to "Sleep control" (RS) pin on SN65HVD251D CAN transciever
 const int BT_EVENT_INDICATOR_PIN = 3;       // RN52 GPIO2 pin for reading current status of the module
 const int BT_CMD_PIN = 4;                   // RN52 GPIO9 pin for enabling command mode
-const int BT_FACT_RST_PIN = A0;             // RN52 factory reset pin GPIO4
 const int BT_PWREN_PIN = 9;                 // RN52 Power enable pin
 const int UART_TX_PIN = 5;                  // UART Tx
 const int UART_RX_PIN = 6;                  // UART Rx
@@ -49,6 +53,8 @@ class RN52impl : public RN52::RN52driver {
     void onProfileChange(BtProfile profile, bool connected);
     
     SoftwareSerial softSerial =  SoftwareSerial(UART_RX_PIN, UART_TX_PIN);
+    
+    unsigned long lastEventIndicatorPinStateChange;
     
     bool playing;
     bool bt_iap;
@@ -64,6 +70,7 @@ public:
         bt_spp = false;
         bt_a2dp = false;
         bt_hfp = false;
+        lastEventIndicatorPinStateChange = 0;
     }
     
     void readFromUART();
@@ -81,6 +88,10 @@ public:
     // devices connects
     void onGPIO2();
     void initialize();
+    void update();
+
+private:
+    void waitForResponse();
 };
 
 #endif

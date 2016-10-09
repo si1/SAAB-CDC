@@ -19,33 +19,46 @@
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
  * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Last modified on: Aug 11, 2016
  */
 
 #ifndef RN52STRINGS_H_
 #define RN52STRINGS_H_
 
-const char *RN52_CMD_BEGIN = "CMD\r\n";
-const char *RN52_CMD_EXIT = "END\r\n";
-const char *RN52_CMD_QUERY = "Q\r";
-const char *RN52_CMD_DETAILS = "D\r";
-const char *RN52_CMD_RECONNECTLAST = "B,06\r";
-const char *RN52_CMD_DISCONNECT = "K,06\r";
-const char* RN52_CMD_MAXVOL = "SS,0F\r";
+// Action commands
+#define RN52_CMD_BEGIN              "CMD\r\n"
+#define RN52_CMD_EXIT               "END\r\n"
+#define RN52_CMD_QUERY              "Q\r"
+#define RN52_CMD_DETAILS            "D\r"
+#define RN52_CMD_RECONNECTLAST      "B,06\r"
+#define RN52_CMD_DISCONNECT         "K,06\r"
+#define RN52_CMD_REBOOT             "R,1\r"
+#define RN52_CMD_VOLUP              "AV+\r"
+#define RN52_CMD_VOLDOWN            "AV-\r"
+#define RN52_CMD_DISCOVERY_ON       "@,1\r"
+#define RN52_CMD_DISCOVERY_OFF      "@,0\r"
 
-const char* RN52_CMD_RESET = "R,1\r";
-const char* RN52_CMD_AVCRP_VOLUP = "AV+\r";
-const char* RN52_CMD_AVCRP_VOLDOWN = "AV-\r";
-const char* RN52_CMD_AVCRP_NEXT = "AT+\r";
-const char* RN52_CMD_AVCRP_PREV = "AT-\r";
-const char* RN52_CMD_AVCRP_VASSISTANT = "P\r";
-const char* RN52_CMD_AVCRP_PLAYPAUSE = "AP\r";
-const char* RN52_CMD_DISCOVERY_ON = "@,1\r";
-const char* RN52_CMD_DISCOVERY_OFF = "@,0\r";
+// RN52 settings commands
+#define RN52_SET_DISCOVERY_MASK     "SD,06\r"           // A2DP/AVRCP + SPP profiles
+#define RN52_SET_CONNECTION_MASK    "SK,06\r"           // A2DP/AVRCP + SPP profiles
+#define RN52_SET_COD                "SC,200420\r"       // Sets "CoD" (Class of Device)
+#define RN52_SET_DEVICE_NAME        "SN,BlueSaab\r"     // Broadcasted and shown in audio source's settigns
+#define RN52_SET_BAUDRATE_9600      "SU,01\r"           // Enables serial communications on RN52 @ 9600bps
+#define RN52_SET_MAXVOL             "SS,0F\r"           // Sets the volume gain to MAX level 15 (default 11)
+#define RN52_SET_EXTENDED_FEATURES  "S%,0084\r"         // Discoverable on startup; Disable system tones
 
-const char *RN52_RX_OK = "AOK\r\n";
-const char *RN52_RX_ERROR = "ERR\r\n";
-const char *RN52_RX_WHAT = "?\r\n";
+
+// AVRCP commands
+#define RN52_CMD_AVCRP_NEXT         "AT+\r"
+#define RN52_CMD_AVCRP_PREV         "AT-\r"
+#define RN52_CMD_AVCRP_VASSISTANT   "P\r"
+#define RN52_CMD_AVCRP_PLAYPAUSE    "AP\r"
+#define RN52_CMD_GET_TRACK_DATA     "AD\r"
+
+// RN52 reply messages
+#define RN52_RX_OK                  "AOK\r\n"
+#define RN52_RX_ERROR               "ERR\r\n"
+#define RN52_RX_WHAT                "?\r\n"
 
 
 #endif /* RN52STRINGS_H_ */

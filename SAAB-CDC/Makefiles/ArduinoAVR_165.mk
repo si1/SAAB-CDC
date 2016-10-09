@@ -8,7 +8,7 @@
 # All rights reserved
 #
 #
-# Last update: Dec 28, 2015 release 4.1.4
+# Last update: Mar 28, 2015 release 4.4.2
 
 
 
@@ -34,7 +34,7 @@ else ifneq ($(findstring ADAFRUIT,$(GCC_PREPROCESSOR_DEFINITIONS)),)
 
 else
     PLATFORM         := Arduino
-    PLATFORM_TAG      = ARDUINO=$(ARDUINO_RELEASE) ARDUINO_ARCH_AVR EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(ARDUINO_NAME)
+    PLATFORM_TAG      = ARDUINO=10608 ARDUINO_ARCH_AVR EMBEDXCODE=$(RELEASE_NOW) ARDUINO_$(ARDUINO_NAME)
     APPLICATION_PATH := $(ARDUINO_PATH)
     BOARDS_TXT       := $(APPLICATION_PATH)/hardware/arduino/avr/boards.txt
 endif
@@ -163,7 +163,7 @@ USB_PRODUCT := $(call PARSE_BOARD,$(BOARD_TAG),build.usb_product)
 ifneq ($(USB_VID),)
 USB_FLAGS    = -DUSB_VID=$(USB_VID)
 USB_FLAGS   += -DUSB_PID=$(USB_PID)
-USB_FLAGS   += -DUSBCON
+#USB_FLAGS   += -DUSBCON
 USB_FLAGS   += -DUSB_MANUFACTURER=''
 USB_FLAGS   += -DUSB_PRODUCT='$(USB_PRODUCT)'
 endif
@@ -189,7 +189,7 @@ INCLUDE_PATH   += $(sort $(dir $(BUILD_APP_LIB_CPP_SRC) $(BUILD_APP_LIB_C_SRC)))
 #
 CPPFLAGS     = $(OPTIMISATION) $(WARNING_FLAGS)
 CPPFLAGS    += -$(MCU_FLAG_NAME)=$(MCU) -DF_CPU=$(F_CPU)
-CPPFLAGS    += -ffunction-sections	-fdata-sections
+CPPFLAGS    += -ffunction-sections -fdata-sections
 CPPFLAGS    += $(addprefix -D, printf=iprintf $(PLATFORM_TAG))
 CPPFLAGS    += $(addprefix -I, $(INCLUDE_PATH))
 
@@ -201,7 +201,7 @@ CFLAGS       =
 # Specific CXXFLAGS for g++ only
 # g++ uses CPPFLAGS and CXXFLAGS
 #
-CXXFLAGS     = -fdata-sections -fno-threadsafe-statics
+CXXFLAGS     = -fdata-sections -fno-threadsafe-statics -std=gnu++11 -fno-exceptions
 
 # Specific ASFLAGS for gcc assembler only
 # gcc assembler uses CPPFLAGS and ASFLAGS
