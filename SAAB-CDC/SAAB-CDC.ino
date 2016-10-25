@@ -22,6 +22,8 @@
 CDChandler CDC;
 Timer time;
 
+unsigned long loopTimingChecker = 0;
+
 int freeRam ()
 {
     extern int __heap_start, *__brkval;
@@ -42,8 +44,10 @@ void setup() {
 }
 
 void loop() {
+    Serial.println(millis() - loopTimingChecker);
     time.update();
     CDC.handleCdcStatus();
     BT.update();
     BT.monitor_serial_input();
+    loopTimingChecker = millis();
 }
