@@ -45,6 +45,7 @@ public:
     void bt_reconnect();
     void bt_disconnect();
     void bt_set_maxvol();
+    void bt_reboot();
     void monitor_serial_input();
     void initialize();
 };

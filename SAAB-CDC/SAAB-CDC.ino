@@ -1,5 +1,5 @@
 /*
- BlueSaab v4.0 Beta
+ BlueSaab v4.0
 
  A CD changer emulator for older SAAB cars with RN52 Bluetooth module by Microchip Technology Inc.
  
@@ -15,14 +15,13 @@
 
 
 #include <Arduino.h>
+#include <avr/wdt.h>
 #include "CDC.h"
 #include "RN52handler.h"
 #include "Timer.h"
 
 CDChandler CDC;
 Timer time;
-
-unsigned long loopTimingChecker = 0;
 
 int freeRam ()
 {
@@ -32,22 +31,22 @@ int freeRam ()
 }
 
 void setup() {
+    wdt_enable(WDTO_30MS);
     Serial.begin(9600);
     Serial.println(F("\"BlueSaab\""));
     Serial.print(F("Free SRAM: "));
     Serial.print(freeRam());
     Serial.println(F(" bytes"));
-    Serial.println(F("Software version: v4.0 Beta"));
+    Serial.println(F("Software version: v4.0"));
     BT.initialize();
-    Serial.println(F("Press H for Help"));
+    //Serial.println(F("Press H for Help"));
     CDC.openCanBus();
 }
 
 void loop() {
-    Serial.println(millis() - loopTimingChecker);
     time.update();
     CDC.handleCdcStatus();
     BT.update();
     BT.monitor_serial_input();
-    loopTimingChecker = millis();
+    wdt_reset();
 }

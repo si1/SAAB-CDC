@@ -176,11 +176,8 @@ void CDChandler::handleRxFrame() {
 
 void CDChandler::handleIhuButtons() {
     boolean event = (CAN_RxMsg.data[0] == 0x80);
-    if (!event) {
-        /*
-         TODO: Pay attention at what's happening in this case
-         Occasionally there's a frame: 0x00 0x24 0x00 0x00 0x00 0x00 0x00 0x00; can we ignore this just because it wasn't sent on an event?
-        */
+    if ((!event) && (cdcActive)) {
+        checkCanEvent(1);
         return;
     }
     switch (CAN_RxMsg.data[1]) {
@@ -204,16 +201,13 @@ void CDChandler::handleIhuButtons() {
     }
     if ((event) && (CAN_RxMsg.data[1] != 0x00)) {
         if (cdcActive) {
-            checkCanEvent(1);
             switch (CAN_RxMsg.data[1]) {
                 case 0x59: // NXT
                     BT.bt_play();
                     break;
                 case 0x84: // SEEK button (middle) long press on IHU
-                    BT.bt_visible();
                     break;
                 case 0x88: // > 2 sec long press of SEEK button (middle) on IHU
-                    BT.bt_invisible();
                     break;
                 case 0x76: // Random ON/OFF (Long press of CD/RDM button)
                     break;
@@ -231,23 +225,20 @@ void CDChandler::handleIhuButtons() {
                     break;
                 case 0x68: // IHU buttons "1-6"
                     switch (CAN_RxMsg.data[2]) {
-                        case 0x01: // Button "1" on IHU
+                        case 0x01:
                             BT.bt_volup();
                             break;
-                        case 0x02: // Button "2" on IHU
+                        case 0x02:
                             BT.bt_set_maxvol();
                             break;
-                        case 0x03: // Button "3"... aren't we f***ing smart? :)
+                        case 0x03:
                             BT.bt_reconnect();
                             break;
                         case 0x04:
                             BT.bt_voldown();
                             break;
-                        case 0x05:
-                            break;
                         case 0x06:
                             BT.bt_disconnect();
-                            break;
                         default:
                             break;
                     }
@@ -509,15 +500,22 @@ void CDChandler::checkCanEvent(int frameElement) {
         lastIcomingEventTime = millis();
         if (incomingEventCounter == 3) {
             switch (CAN_RxMsg.data[frameElement]) {
-                case 0x04: // Long press of NXT button on steering wheel
+                case 0x04: // NXT button on steering wheel
                     BT.bt_vassistant();
                     break;
-                case 0x45: // SEEK+ button long press on IHU
-                    BT.bt_visible();
-                    break;
-                case 0x46: // SEEK- button long press on IHU
-                    BT.bt_invisible();
-                    break;
+                case 0x68: // IHU buttons "1-6"
+                    switch (CAN_RxMsg.data[2]) {
+                        case 0x03:
+                            BT.bt_visible();
+                            sendCanFrame(SOUND_REQUEST, soundCmd);
+                            break;
+                        case 0x06:
+                            BT.bt_reboot();
+                            sendCanFrame(SOUND_REQUEST, soundCmd);
+                            break;
+                        default:
+                            break;
+                    }
                 default:
                     break;
             }

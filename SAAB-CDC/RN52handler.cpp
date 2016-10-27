@@ -23,7 +23,6 @@
  */
 
 #include <avr/io.h>
-#include <avr/wdt.h>
 #include "RN52handler.h"
 
 RN52handler BT;
@@ -80,6 +79,10 @@ void RN52handler::bt_set_maxvol() {
     driver.set_max_volume();
 }
 
+void RN52handler::bt_reboot() {
+    driver.reboot();
+}
+
 
 /**
  * Debug function used only in 'bench' testing. Listens to input on serial console and calls out corresponding function.
@@ -123,22 +126,7 @@ void RN52handler::monitor_serial_input() {
                 bt_vassistant();
                 Serial.println(F("Invoking Voice Assistant"));
                 break;
-            case 'B':
-                wdt_enable(WDTO_1S);
-                Serial.println(F("Rebooting the ATMega"));
-                break;
-            case 'U':
-                bt_volup();
-                Serial.println(F("Turning RN52 Volume Up"));
-                break;
-            case 'O':
-                bt_voldown();
-                Serial.println(F("Turning RN52 Volume Down"));
-                break;
-            case 'M':
-                bt_set_maxvol();
-                Serial.println(F("Turning RN52 Volume to Max"));
-                break;
+                /*
             case 'H':
                 Serial.println(F(""));
                 Serial.println(F("V - Go into Discoverable Mode"));
@@ -149,10 +137,6 @@ void RN52handler::monitor_serial_input() {
                 Serial.println(F("N - Skip to Next Track"));
                 Serial.println(F("R - Previous Track/Beginning of Track"));
                 Serial.println(F("A - Invoke Voice Assistant"));
-                Serial.println(F("B - Reboot the ATMega"));
-                Serial.println(F("U - Turn RN52 Volume Up"));
-                Serial.println(F("O - Turn RN52 Volume Down"));
-                Serial.println(F("M - Turn RN52 Volume to Max"));
                 Serial.println(F(""));
                 break;
             default:
@@ -166,12 +150,9 @@ void RN52handler::monitor_serial_input() {
                 Serial.println(F("N - Skip to Next Track"));
                 Serial.println(F("R - Previous Track/Beginning of Track"));
                 Serial.println(F("A - Invoke Voice Assistant"));
-                Serial.println(F("B - Reboot the ATMega"));
-                Serial.println(F("U - Turn RN52 Volume Up"));
-                Serial.println(F("O - Turn RN52 Volume Down"));
-                Serial.println(F("M - Turn RN52 Volume to Max"));
                 Serial.println(F(""));
                 break;
+                 */
         }
     }
 }
