@@ -1,9 +1,19 @@
 # BlueSaab (SAAB-CDC)
-A CD changer emulator for older SAAB cars.
-http://bluesaab.blogspot.com
+BlueSaab is a Bluetooth Aux Input device compatible with some Saab cars between 1998 and 2005. 
 
-There's a lot of SAAB cars on the streets. Unfortunately back in the day they didn't have means to hook up an MP3 player to them like modern cars have now by default.
+This device allows connection via Bluetooth to stream music to the audio system with superior audio quality. Since BlueSaab uses the signal path originally intended for the CD changer it is possible to achieve a high quality audio transmission. 
 
-BlueSaab (SAAB-CDC) is a CD changer emulator for older SAAB cars (1998-2004) that "pretends" to be the original SAAB CD changer and passes through the audio from any bluetooth audio source. It even enables audio track control via the cars steering wheel controls.
+## Features
+1. Bluetooth Aux Input
+2. Steering Wheel Button Control:
+..* Play/Pause
+..* Next Track
+..* Previous Track
 
-PCBs can be ordered from https://oshpark.com/profiles/se4587
+## Hardware
+In order to get hold of a BlueSaab you need to order the individual components and build it yourself. PCBs can be ordered from [OSHPark](https://oshpark.com/profiles/se4587)
+
+## Resources
+[Main BlueSaab homepage](http://bluesaab.blogspot.com)
+[BlueSaab Forum](http://bluesaab-forum.2349123.n4.nabble.com/)
+[BlueSaab Facebook Page](https://www.facebook.com/BlueSaabCDC)
