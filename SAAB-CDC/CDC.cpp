@@ -503,6 +503,14 @@ void CDChandler::checkCanEvent(int frameElement) {
                 case 0x04: // NXT button on steering wheel
                     BT.bt_vassistant();
                     break;
+                case 0x45: // SEEK+ button long press on IHU
+                    BT.bt_visible();
+                    sendCanFrame(SOUND_REQUEST, soundCmd);
+                    break;
+                case 0x46: // SEEK- button long press on IHU
+                    BT.bt_reboot();
+                    sendCanFrame(SOUND_REQUEST, soundCmd);
+                    break;
                 case 0x68: // IHU buttons "1-6"
                     switch (CAN_RxMsg.data[2]) {
                         case 0x03:
