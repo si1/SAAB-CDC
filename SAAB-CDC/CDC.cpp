@@ -212,10 +212,10 @@ void CDChandler::handleIhuButtons() {
                 case 0x76: // Random ON/OFF (Long press of CD/RDM button)
                     break;
                 case 0xB1: // Pause ON
-                    // N/A for now
+                    BT.bt_play();
                     break;
                 case 0xB0: // Pause OFF
-                    // N/A for now
+                    BT.bt_play();
                     break;
                 case 0x35: // Track +
                     BT.bt_next();
