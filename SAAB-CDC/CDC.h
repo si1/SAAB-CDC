@@ -25,6 +25,7 @@
 #ifndef CDC_H
 #define CDC_H
 
+#include <Arduino.h>
 
 
 /**

@@ -25,6 +25,7 @@
 #include <Arduino.h>
 #include "CAN.h"
 #include "CDC.h"
+#include "MessageSender.h"
 #include "RN52handler.h"
 #include "Timer.h"
 
@@ -32,8 +33,8 @@
  * Variables:
  */
 
+MessageSender messageSender;
 extern Timer time;
-const int CAN_FRAME_LENGTH = 8;
 void sendCdcNodeStatus(void*);
 void sendCdcActiveStatus(void*);
 void sendCdcPowerdownStatus(void*);
@@ -131,16 +132,19 @@ void CDChandler::handleRxFrame() {
                  */
                 switch (CAN_RxMsg.data[3] & 0x0F){
                     case (0x3):
-                        currentCdcCmd = cdcPoweronCmd;
-                        sendCdcNodeStatus(NULL);
+                        //currentCdcCmd = cdcPoweronCmd;
+                        //sendCdcNodeStatus(NULL);
+                        messageSender.sendCanMessage(NODE_STATUS_TX_CDC,cdcPoweronCmd,4,NODE_STATUS_TX_INTERVAL);
                         break;
                     case (0x2):
-                        currentCdcCmd = cdcActiveCmd;
-                        sendCdcNodeStatus(NULL);
+                        //currentCdcCmd = cdcActiveCmd;
+                        //sendCdcNodeStatus(NULL);
+                        messageSender.sendCanMessage(NODE_STATUS_TX_CDC,cdcActiveCmd,4,NODE_STATUS_TX_INTERVAL);
                         break;
                     case (0x8):
-                        currentCdcCmd = cdcPowerdownCmd;
-                        sendCdcNodeStatus(NULL);
+                        //currentCdcCmd = cdcPowerdownCmd;
+                        //sendCdcNodeStatus(NULL);
+                        messageSender.sendCanMessage(NODE_STATUS_TX_CDC,cdcPowerdownCmd,4,NODE_STATUS_TX_INTERVAL);
                         break;
                 }
                 break;
@@ -432,51 +436,15 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
     for (i = n; i < 15; i++) {
         textToSid[i] = 0;
     }
-    /*
+    
     unsigned char sidMessageGroup[3][CAN_FRAME_LENGTH] = {
         {0x42,0x96,0x02,textToSid[0],textToSid[1],textToSid[2],textToSid[3],textToSid[4]},
         {0x01,0x96,0x02,textToSid[5],textToSid[6],textToSid[7],textToSid[8],textToSid[9]},
         {0x00,0x96,0x02,textToSid[10],textToSid[11],textToSid[12],textToSid[13],textToSid[14]}
     };
     
-    for (m = 0; m < 3; m++) {
-        time.after(10,sendCanFrame(WRITE_TEXT_ON_DISPLAY,sidMessageGroup[m]));
-    }
-    */
-    CAN_TxMsg.id = WRITE_TEXT_ON_DISPLAY;
-     
-    CAN_TxMsg.data[0] = 0x42; // TODO: check if this is really correct? According to the spec, the 4 shouldn't be there? It's just a normal transport layer sequence numbering?
-    CAN_TxMsg.data[1] = 0x96; // Address of the SID
-    CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
-    CAN_TxMsg.data[3] = textToSid[0];
-    CAN_TxMsg.data[4] = textToSid[1];
-    CAN_TxMsg.data[5] = textToSid[2];
-    CAN_TxMsg.data[6] = textToSid[3];
-    CAN_TxMsg.data[7] = textToSid[4];
-    CAN.send(&CAN_TxMsg);
-    delay(10);                // TODO: Fix this! This is not the Jedi way to work around a timing issue
-    
-    CAN_TxMsg.data[0] = 0x01; // Message 1
-    CAN_TxMsg.data[1] = 0x96; // Address of the SID
-    CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
-    CAN_TxMsg.data[3] = textToSid[5];
-    CAN_TxMsg.data[4] = textToSid[6];
-    CAN_TxMsg.data[5] = textToSid[7];
-    CAN_TxMsg.data[6] = textToSid[8];
-    CAN_TxMsg.data[7] = textToSid[9];
-    CAN.send(&CAN_TxMsg);
-    delay(10);                // TODO: Fix this! This is not the Jedi way to work around a timing issue
-    
-    CAN_TxMsg.data[0] = 0x00; // Message 0
-    CAN_TxMsg.data[1] = 0x96; // Address of the SID
-    CAN_TxMsg.data[2] = 0x02; // Sent on basetime; writing to row 2
-    CAN_TxMsg.data[3] = textToSid[10];
-    CAN_TxMsg.data[4] = textToSid[11];
-    CAN_TxMsg.data[5] = textToSid[12];
-    CAN_TxMsg.data[6] = textToSid[13];
-    CAN_TxMsg.data[7] = textToSid[14];
-    CAN.send(&CAN_TxMsg);
-    delay(10);                // TODO: Fix this! This is not the Jedi way to work around a timing issue
+    messageSender.sendCanMessage(WRITE_TEXT_ON_DISPLAY,sidMessageGroup,3,10);
+
 }
 
 /**
