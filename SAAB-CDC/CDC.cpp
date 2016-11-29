@@ -33,6 +33,7 @@
  */
 
 extern Timer time;
+const int CAN_FRAME_LENGTH = 8;
 void sendCdcNodeStatus(void*);
 void sendCdcActiveStatus(void*);
 void sendCdcPowerdownStatus(void*);
@@ -49,23 +50,23 @@ int displayRequestTimerId = -1;
 int writeTextOnDisplayTimerId = -1;
 int currentNodeStatusTxTimerEvent = -1;
 int textToSidTimer = -1;
-int cdcPoweronCmd[NODE_STATUS_TX_MSG_SIZE][9] = {
-    {0x32,0x00,0x00,0x03,0x01,0x02,0x00,0x00,-1},
-    {0x42,0x00,0x00,0x22,0x00,0x00,0x00,0x00,-1},
-    {0x52,0x00,0x00,0x22,0x00,0x00,0x00,0x00,-1},
-    {0x62,0x00,0x00,0x22,0x00,0x00,0x00,0x00,-1}
+unsigned char cdcPoweronCmd[NODE_STATUS_TX_MSG_SIZE][CAN_FRAME_LENGTH] = {
+    {0x32,0x00,0x00,0x03,0x01,0x02,0x00,0x00},
+    {0x42,0x00,0x00,0x22,0x00,0x00,0x00,0x00},
+    {0x52,0x00,0x00,0x22,0x00,0x00,0x00,0x00},
+    {0x62,0x00,0x00,0x22,0x00,0x00,0x00,0x00}
 };
-int cdcActiveCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
-    {0x32,0x00,0x00,0x16,0x01,0x02,0x00,0x00,-1},
-    {0x42,0x00,0x00,0x36,0x00,0x00,0x00,0x00,-1},
-    {0x52,0x00,0x00,0x36,0x00,0x00,0x00,0x00,-1},
-    {0x62,0x00,0x00,0x36,0x00,0x00,0x00,0x00,-1},
+unsigned char cdcActiveCmd[NODE_STATUS_TX_MSG_SIZE] [CAN_FRAME_LENGTH] = {
+    {0x32,0x00,0x00,0x16,0x01,0x02,0x00,0x00},
+    {0x42,0x00,0x00,0x36,0x00,0x00,0x00,0x00},
+    {0x52,0x00,0x00,0x36,0x00,0x00,0x00,0x00},
+    {0x62,0x00,0x00,0x36,0x00,0x00,0x00,0x00},
 };
-int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
-    {0x32,0x00,0x00,0x19,0x01,0x00,0x00,0x00,-1},
-    {0x42,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1},
-    {0x52,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1},
-    {0x62,0x00,0x00,0x38,0x01,0x00,0x00,0x00,-1}
+unsigned char cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [CAN_FRAME_LENGTH] = {
+    {0x32,0x00,0x00,0x19,0x01,0x00,0x00,0x00},
+    {0x42,0x00,0x00,0x38,0x01,0x00,0x00,0x00},
+    {0x52,0x00,0x00,0x38,0x01,0x00,0x00,0x00},
+    {0x62,0x00,0x00,0x38,0x01,0x00,0x00,0x00}
 };
 
 /* Format of SOUND_REQUEST frame:
@@ -74,7 +75,7 @@ int cdcPowerdownCmd[NODE_STATUS_TX_MSG_SIZE] [9] = {
  [1]: Type of sound
  [2-7]: Zeroed out; not in use
  */
-int soundCmd[] = {0x80,0x04,0x00,0x00,0x00,0x00,0x00,0x00,-1};
+unsigned char soundCmd[] = {0x80,0x04,0x00,0x00,0x00,0x00,0x00,0x00};
 
 /**
  * DEBUG: Prints the CAN Tx frame to serial output
@@ -83,7 +84,7 @@ int soundCmd[] = {0x80,0x04,0x00,0x00,0x00,0x00,0x00,0x00,-1};
 void CDChandler::printCanTxFrame() {
     Serial.print(CAN_TxMsg.id,HEX);
     Serial.print(F(" Tx-> "));
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < CAN_FRAME_LENGTH; i++) {
         Serial.print(CAN_TxMsg.data[i],HEX);
         Serial.print(" ");
     }
@@ -97,7 +98,7 @@ void CDChandler::printCanTxFrame() {
 void CDChandler::printCanRxFrame() {
     Serial.print(CAN_RxMsg.id,HEX);
     Serial.print(F(" Rx-> "));
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < CAN_FRAME_LENGTH; i++) {
         Serial.print(CAN_RxMsg.data[i],HEX);
         Serial.print(" ");
     }
@@ -111,7 +112,7 @@ void CDChandler::printCanRxFrame() {
 void CDChandler::openCanBus() {
     CAN.begin(47);
     CAN_TxMsg.header.rtr = 0;
-    CAN_TxMsg.header.length = 8;
+    CAN_TxMsg.header.length = CAN_FRAME_LENGTH;
 }
 
 /**
@@ -320,7 +321,7 @@ void CDChandler::sendCdcStatus(boolean event, boolean remote, boolean cdcActive)
     
     byte discMode          = 0x05;  // Play; 0x0E can also be tried for "test mode" but might stop IHU from updating the display
     
-    int cdcGeneralStatusCmd[9];
+    unsigned char cdcGeneralStatusCmd[CAN_FRAME_LENGTH];
     cdcGeneralStatusCmd[0] = ((event ? 0x07 : 0x00) | (remote ? 0x00 : 0x01)) << 5;
     cdcGeneralStatusCmd[1] = (cdcActive ? 0xFF : 0x00);                             // Validation for presence of six discs in the magazine
     cdcGeneralStatusCmd[2] = (cdcActive ? 0x3F : 0x01);                             // There are six discs in the magazine
@@ -329,7 +330,6 @@ void CDChandler::sendCdcStatus(boolean event, boolean remote, boolean cdcActive)
     cdcGeneralStatusCmd[5] = 0xFF;
     cdcGeneralStatusCmd[6] = 0xFF;
     cdcGeneralStatusCmd[7] = 0xD0;
-    cdcGeneralStatusCmd[8] = -1;
 
     sendCanFrame(GENERAL_STATUS_CDC, cdcGeneralStatusCmd);
 
@@ -355,7 +355,7 @@ void CDChandler::sendDisplayRequest(boolean sidWriteAccessWanted) {
      [4-7]: Zeroed out; not in use
      */
     
-    int displayRequestCmd[9];
+    unsigned char displayRequestCmd[CAN_FRAME_LENGTH];
     displayRequestCmd[0] = SPA_APL_ADR;
     displayRequestCmd[1] = 0x02;
     displayRequestCmd[2] = (sidWriteAccessWanted ? 0x01 : 0xFF);
@@ -364,7 +364,6 @@ void CDChandler::sendDisplayRequest(boolean sidWriteAccessWanted) {
     displayRequestCmd[5] = 0x00;
     displayRequestCmd[6] = 0x00;
     displayRequestCmd[7] = 0x00;
-    displayRequestCmd[8] = -1;
 
     sendCanFrame(DISPLAY_RESOURCE_REQ, displayRequestCmd);
 }
@@ -373,12 +372,10 @@ void CDChandler::sendDisplayRequest(boolean sidWriteAccessWanted) {
  * Formats and puts a frame on CAN bus
  */
 
-void CDChandler::sendCanFrame(int messageId, int *msg) {
+void CDChandler::sendCanFrame(int messageId, unsigned char *msg) {
     CAN_TxMsg.id = messageId;
-    int i = 0;
-    while (msg[i] != -1) {
+    for (int i = 0; i < CAN_FRAME_LENGTH; i++) {
         CAN_TxMsg.data[i] = msg[i];
-        i++;
     }
     CAN.send(&CAN_TxMsg);
 }
@@ -390,7 +387,7 @@ void CDChandler::sendCanFrame(int messageId, int *msg) {
 void sendCdcNodeStatus(void *p) {
     int i = (int)p;
     
-    CDC.sendCanFrame(NODE_STATUS_TX_CDC, ((int(*)[9])currentCdcCmd)[i]);
+    CDC.sendCanFrame(NODE_STATUS_TX_CDC, ((unsigned char(*)[CAN_FRAME_LENGTH])currentCdcCmd)[i]);
     if (i + 1 < NODE_STATUS_TX_MSG_SIZE) {
         currentNodeStatusTxTimerEvent = time.after(NODE_STATUS_TX_INTERVAL,sendCdcNodeStatus,(void*)(i + 1));
     }
@@ -436,10 +433,10 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
         textToSid[i] = 0;
     }
     /*
-    int sidMessageGroup[3][9] = {
-        {0x42,0x96,0x02,textToSid[0],textToSid[1],textToSid[2],textToSid[3],textToSid[4],-1},
-        {0x01,0x96,0x02,textToSid[5],textToSid[6],textToSid[7],textToSid[8],textToSid[9],-1},
-        {0x00,0x96,0x02,textToSid[10],textToSid[11],textToSid[12],textToSid[13],textToSid[14],-1},
+    unsigned char sidMessageGroup[3][CAN_FRAME_LENGTH] = {
+        {0x42,0x96,0x02,textToSid[0],textToSid[1],textToSid[2],textToSid[3],textToSid[4]},
+        {0x01,0x96,0x02,textToSid[5],textToSid[6],textToSid[7],textToSid[8],textToSid[9]},
+        {0x00,0x96,0x02,textToSid[10],textToSid[11],textToSid[12],textToSid[13],textToSid[14]}
     };
     
     for (m = 0; m < 3; m++) {

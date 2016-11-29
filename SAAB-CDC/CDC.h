@@ -88,7 +88,7 @@ public:
     void handleCdcStatus();
     void sendCdcStatus(boolean event, boolean remote, boolean cdcActive);
     void sendDisplayRequest(boolean sidWriteAccessWanted);
-    void sendCanFrame(int message_id, int *msg);
+    void sendCanFrame(int message_id, unsigned char *msg);
     void writeTextOnDisplay(const char textIn[]);
     void checkCanEvent(int frameElement);
 };
