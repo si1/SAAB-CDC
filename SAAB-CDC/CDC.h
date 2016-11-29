@@ -19,7 +19,7 @@
  * Created by: Karlis Veilands
  * Created on: Jun 4, 2015
  * Modified by: Karlis Veilands
- * Modified on: September 9, 2016
+ * Modified on: November 29, 2016
  */
 
 #ifndef CDC_H
