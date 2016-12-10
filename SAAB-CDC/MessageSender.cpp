@@ -19,7 +19,7 @@
  * Created by: Girts Linde
  * Created on: November 28, 2016
  * Modified by: Girts Linde
- * Modified on: November 28, 2016
+ * Modified on: December 9, 2016
  */
 
 #include "CDC.h"
@@ -44,6 +44,7 @@ void MessageSender::sendCanMessage(int frameId, unsigned char frames[][CAN_FRAME
     for (int i = 0; i < MESSAGE_COUNT; i++) {
         if (messages[i].frameCount == 0) {
             messages[i].frameCount = frameCount;
+            messages[i].frameId = frameId;
             messages[i].interval = interval;
             for (int frameNum = 0; frameNum < frameCount; frameNum++) {
                 for (int c = 0; c < CAN_FRAME_LENGTH; c++) {
