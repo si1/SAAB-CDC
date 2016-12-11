@@ -182,15 +182,15 @@ void CDChandler::handleIhuButtons() {
         case 0x24: // CDC = ON (CD/RDM button has been pressed twice)
             cdcActive = true;
             BT.bt_reconnect();
-            //sidWriteAccessWanted = true;
-            //displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
+            sidWriteAccessWanted = true;
+            displayRequestTimerId = time.every(SID_CONTROL_TX_BASETIME, &sendDisplayRequestOnTime,NULL);
             sendCanFrame(SOUND_REQUEST, soundCmd);
             break;
         case 0x14: // CDC = OFF (Back to Radio or Tape mode)
-            //sidWriteAccessWanted = false;
-            //time.stop(writeTextOnDisplayTimerId);
-            //writeTextOnDisplayTimerActive = false;
-            //time.stop(displayRequestTimerId);
+            sidWriteAccessWanted = false;
+            time.stop(writeTextOnDisplayTimerId);
+            writeTextOnDisplayTimerActive = false;
+            time.stop(displayRequestTimerId);
             BT.bt_disconnect();
             cdcActive = false;
             break;

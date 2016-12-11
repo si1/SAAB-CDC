@@ -30,12 +30,24 @@
 
 /**
  * Various constants used for SID text control
+ * Abbreviations:
+ *      IHU - Infotainment Head Unit
+ *      SPA - SAAB Park Assist
+ *      EMS - Engine Management System
  */
 
-//#define NODE_APL_ADR                 0x11 // IHU
-#define NODE_APL_ADR                 0x1F // SPA
-//#define NODE_SID_FUNCTION_ID         0x19 // IHU
-#define NODE_SID_FUNCTION_ID         0x18 // SPA
+//#define NODE_APL_ADR                  0x11    // IHU
+//#define NODE_APL_ADR                  0x1F    // SPA
+#define NODE_APL_ADR                    0x21    // ECS
+//#define NODE_SID_FUNCTION_ID          0x19    // IHU
+//#define NODE_SID_FUNCTION_ID          0x18    // SPA
+#define NODE_SID_FUNCTION_ID            0x32    // ECS
+//#define NODE_DISPLAY_RESOURCE_REQ     0x348   // IHU
+//#define NODE_DISPLAY_RESOURCE_REQ     0x357   // SPA
+#define NODE_DISPLAY_RESOURCE_REQ       0x358   // ECS
+//#define NODE_WRITE_TEXT_ON_DISPLAY    0x328   // IHU
+//#define NODE_WRITE_TEXT_ON_DISPLAY    0x337   // SPA
+#define NODE_WRITE_TEXT_ON_DISPLAY      0x33F   // ECS
 
 /**
  * Other useful stuff
@@ -50,10 +62,6 @@
  */
 
 #define GENERAL_STATUS_CDC          0x3C8
-//#define NODE_DISPLAY_RESOURCE_REQ        0x348   // IHU
-//#define NODE_WRITE_TEXT_ON_DISPLAY       0x328   // IHU
-#define NODE_DISPLAY_RESOURCE_REQ        0x357     // SPA
-#define NODE_WRITE_TEXT_ON_DISPLAY       0x337     // SPA
 #define NODE_STATUS_TX_CDC          0x6A2
 #define SOUND_REQUEST               0x430
 
