@@ -35,7 +35,6 @@
 
 MessageSender messageSender;
 extern Timer time;
-void sendCdcNodeStatus(void*);
 void sendCdcActiveStatus(void*);
 void sendCdcPowerdownStatus(void*);
 void *currentCdcCmd = NULL;
@@ -132,18 +131,12 @@ void CDChandler::handleRxFrame() {
                  */
                 switch (CAN_RxMsg.data[3] & 0x0F){
                     case (0x3):
-                        //currentCdcCmd = cdcPoweronCmd;
-                        //sendCdcNodeStatus(NULL);
                         messageSender.sendCanMessage(NODE_STATUS_TX_CDC,cdcPoweronCmd,4,NODE_STATUS_TX_INTERVAL);
                         break;
                     case (0x2):
-                        //currentCdcCmd = cdcActiveCmd;
-                        //sendCdcNodeStatus(NULL);
                         messageSender.sendCanMessage(NODE_STATUS_TX_CDC,cdcActiveCmd,4,NODE_STATUS_TX_INTERVAL);
                         break;
                     case (0x8):
-                        //currentCdcCmd = cdcPowerdownCmd;
-                        //sendCdcNodeStatus(NULL);
                         messageSender.sendCanMessage(NODE_STATUS_TX_CDC,cdcPowerdownCmd,4,NODE_STATUS_TX_INTERVAL);
                         break;
                 }
@@ -156,7 +149,7 @@ void CDChandler::handleRxFrame() {
                 break;
             case DISPLAY_RESOURCE_GRANT:
                 if ((cdcActive) && (CAN_RxMsg.data[0] == 0x02)) {
-                    if (CAN_RxMsg.data[1] == SPA_SID_FUNCTION_ID) {
+                    if (CAN_RxMsg.data[1] == NODE_SID_FUNCTION_ID) {
                         // We have been granted the right to write text to the second row on the SID"
                         if (!writeTextOnDisplayTimerActive) {
                             writeTextOnDisplayTimerId = time.every(SID_CONTROL_TX_BASETIME, &writeTextOnDisplayOnTime,NULL);
@@ -350,7 +343,7 @@ void CDChandler::sendCdcStatus(boolean event, boolean remote, boolean cdcActive)
 
 void CDChandler::sendDisplayRequest(boolean sidWriteAccessWanted) {
     
-    /* Format of DISPLAY_RESOURCE_REQ frame:
+    /* Format of NODE_DISPLAY_RESOURCE_REQ frame:
      ID: Node ID requesting to write on SID
      [0]: Request source
      [1]: SID object to write on; 0 = entire SID; 1 = 1st row; 2 = 2nd row
@@ -360,16 +353,16 @@ void CDChandler::sendDisplayRequest(boolean sidWriteAccessWanted) {
      */
     
     unsigned char displayRequestCmd[CAN_FRAME_LENGTH];
-    displayRequestCmd[0] = SPA_APL_ADR;
+    displayRequestCmd[0] = NODE_APL_ADR;
     displayRequestCmd[1] = 0x02;
     displayRequestCmd[2] = (sidWriteAccessWanted ? 0x01 : 0xFF);
-    displayRequestCmd[3] = SPA_SID_FUNCTION_ID;
+    displayRequestCmd[3] = NODE_SID_FUNCTION_ID;
     displayRequestCmd[4] = 0x00;
     displayRequestCmd[5] = 0x00;
     displayRequestCmd[6] = 0x00;
     displayRequestCmd[7] = 0x00;
 
-    sendCanFrame(DISPLAY_RESOURCE_REQ, displayRequestCmd);
+    sendCanFrame(NODE_DISPLAY_RESOURCE_REQ, displayRequestCmd);
 }
 
 /**
@@ -382,21 +375,6 @@ void CDChandler::sendCanFrame(int messageId, unsigned char *msg) {
         CAN_TxMsg.data[i] = msg[i];
     }
     CAN.send(&CAN_TxMsg);
-}
-
-/**
- * Sends a reply of four messages to '6A1' requests
- */
-
-void sendCdcNodeStatus(void *p) {
-    int i = (int)p;
-    
-    CDC.sendCanFrame(NODE_STATUS_TX_CDC, ((unsigned char(*)[CAN_FRAME_LENGTH])currentCdcCmd)[i]);
-    if (i + 1 < NODE_STATUS_TX_MSG_SIZE) {
-        currentNodeStatusTxTimerEvent = time.after(NODE_STATUS_TX_INTERVAL,sendCdcNodeStatus,(void*)(i + 1));
-    }
-    
-    else currentNodeStatusTxTimerEvent = -1;
 }
 
 /**
@@ -443,7 +421,7 @@ void CDChandler::writeTextOnDisplay(const char textIn[]) {
         {0x00,0x96,0x02,textToSid[10],textToSid[11],textToSid[12],textToSid[13],textToSid[14]}
     };
     
-    messageSender.sendCanMessage(WRITE_TEXT_ON_DISPLAY,sidMessageGroup,3,10);
+    messageSender.sendCanMessage(NODE_WRITE_TEXT_ON_DISPLAY,sidMessageGroup,3,10);
 
 }
 

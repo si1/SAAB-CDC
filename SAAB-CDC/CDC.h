@@ -32,10 +32,10 @@
  * Various constants used for SID text control
  */
 
-//#define IHU_APL_ADR                 0x11
-#define SPA_APL_ADR                 0x1F
-//#define IHU_SID_FUNCTION_ID         0x19
-#define SPA_SID_FUNCTION_ID         0x18
+//#define NODE_APL_ADR                 0x11 // IHU
+#define NODE_APL_ADR                 0x1F // SPA
+//#define NODE_SID_FUNCTION_ID         0x19 // IHU
+#define NODE_SID_FUNCTION_ID         0x18 // SPA
 
 /**
  * Other useful stuff
@@ -50,10 +50,10 @@
  */
 
 #define GENERAL_STATUS_CDC          0x3C8
-//#define DISPLAY_RESOURCE_REQ        0x348   // 'Stolen' from the IHU
-//#define WRITE_TEXT_ON_DISPLAY       0x328   // 'Stolen' from the IHU
-#define DISPLAY_RESOURCE_REQ        0x357     // 'Stolen' from the SPA
-#define WRITE_TEXT_ON_DISPLAY       0x337     // 'Stolen' from the SPA
+//#define NODE_DISPLAY_RESOURCE_REQ        0x348   // IHU
+//#define NODE_WRITE_TEXT_ON_DISPLAY       0x328   // IHU
+#define NODE_DISPLAY_RESOURCE_REQ        0x357     // SPA
+#define NODE_WRITE_TEXT_ON_DISPLAY       0x337     // SPA
 #define NODE_STATUS_TX_CDC          0x6A2
 #define SOUND_REQUEST               0x430
 
