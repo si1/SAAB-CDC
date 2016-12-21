@@ -18,8 +18,8 @@
  *
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
- * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Modified by: Sam Thompson
+ * Last modified on: Dec 16, 2016
  */
 
 #include <avr/io.h>
@@ -126,22 +126,16 @@ void RN52handler::monitor_serial_input() {
                 bt_vassistant();
                 Serial.println(F("Invoking Voice Assistant"));
                 break;
-                /*
-            case 'H':
-                Serial.println(F(""));
-                Serial.println(F("V - Go into Discoverable Mode"));
-                Serial.println(F("I - Go into non-Discoverable but Connectable Mode"));
-                Serial.println(F("C - Reconnect to Last Known Device"));
-                Serial.println(F("D - Disconnect from Current Device"));
-                Serial.println(F("P - Play/Pause Current Track"));
-                Serial.println(F("N - Skip to Next Track"));
-                Serial.println(F("R - Previous Track/Beginning of Track"));
-                Serial.println(F("A - Invoke Voice Assistant"));
-                Serial.println(F(""));
+            case 'B':
+                bt_reboot();
+                Serial.println(F("Rebooting the RN52"));
                 break;
             default:
+                Serial.print(F("Invalid command."));
+#if (DEBUGMODE==1) // Need the extended watchdog period to show this help.
+            case 'H':
+                Serial.println(F(" Try one of these instead:"));
                 Serial.println(F(""));
-                Serial.println(F("Invalid command. Try one of these instead."));
                 Serial.println(F("V - Go into Discoverable Mode"));
                 Serial.println(F("I - Go into non-Discoverable but Connectable Mode"));
                 Serial.println(F("C - Reconnect to Last Known Device"));
@@ -150,9 +144,16 @@ void RN52handler::monitor_serial_input() {
                 Serial.println(F("N - Skip to Next Track"));
                 Serial.println(F("R - Previous Track/Beginning of Track"));
                 Serial.println(F("A - Invoke Voice Assistant"));
+                Serial.println(F("B - Reboot the RN52 module"));
+                Serial.println(F("H - Show this list of commands"));
+#endif
                 Serial.println(F(""));
                 break;
-                 */
+            case ' ':
+            case '\t':
+            case '\r':
+            case '\n':
+                break; // just discard whitespace
         }
     }
 }

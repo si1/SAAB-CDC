@@ -18,8 +18,8 @@
  *
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
- * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Modified by: Sam Thompson
+ * Last modified on: Dec 15, 2016
  */
 
 #ifndef RN52CONFIGURATION_H
@@ -28,6 +28,7 @@
 
 #define SPP_TX_BUFFER_SIZE		128
 #define CMD_RX_BUFFER_SIZE		64
-#define CMD_QUEUE_SIZE			8
+#define CMD_QUEUE_SIZE			12 // Leave enough room to queue the config cmds in initialize()
+#define CMD_TIMEOUT				3000
 
 #endif /* RN52CONFIGURATION_H */

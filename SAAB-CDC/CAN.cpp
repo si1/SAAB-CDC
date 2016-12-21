@@ -114,7 +114,7 @@ void CANClass::begin(uint16_t speed)
              mcp2515_write_register(CNF1,0x4B);
              mcp2515_write_register(CNF2,0xF1);
              mcp2515_write_register(CNF3,0x03);
-            /*
+             
              T1   = 14
              T2   = 7
              BTQ  = 21
@@ -127,7 +127,7 @@ void CANClass::begin(uint16_t speed)
              mcp2515_write_register(CNF1,0xC7);
              mcp2515_write_register(CNF2,0xFE);
              mcp2515_write_register(CNF3,0x44);
-            /*
+             
              T1   = 16
              T2   = 8
              BTQ  = 24

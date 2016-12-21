@@ -18,8 +18,8 @@
  *
  * Created by: Karlis Veilands
  * Created on: Jun 4, 2015
- * Modified by: Karlis Veilands
- * Modified on: November 29, 2016
+ * Modified by: Sam Thompson
+ * Modified on: December 15, 2016
  */
 
 #include <Arduino.h>
@@ -28,6 +28,8 @@
 #include "MessageSender.h"
 #include "RN52handler.h"
 #include "Timer.h"
+
+#define DEBUGMODE  0
 
 /**
  * Variables:
@@ -82,6 +84,7 @@ unsigned char soundCmd[] = {0x80,0x04,0x00,0x00,0x00,0x00,0x00,0x00};
  */
 
 void CDChandler::printCanTxFrame() {
+#if (DEBUGMODE==1)
     Serial.print(CAN_TxMsg.id,HEX);
     Serial.print(F(" Tx-> "));
     for (int i = 0; i < CAN_FRAME_LENGTH; i++) {
@@ -89,6 +92,7 @@ void CDChandler::printCanTxFrame() {
         Serial.print(" ");
     }
     Serial.println();
+#endif
 }
 
 /**
@@ -96,6 +100,7 @@ void CDChandler::printCanTxFrame() {
  */
 
 void CDChandler::printCanRxFrame() {
+#if (DEBUGMODE==1)
     Serial.print(CAN_RxMsg.id,HEX);
     Serial.print(F(" Rx-> "));
     for (int i = 0; i < CAN_FRAME_LENGTH; i++) {
@@ -103,6 +108,7 @@ void CDChandler::printCanRxFrame() {
         Serial.print(" ");
     }
     Serial.println();
+#endif
 }
 
 /**

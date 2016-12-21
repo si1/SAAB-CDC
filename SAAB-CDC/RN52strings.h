@@ -18,8 +18,8 @@
  *
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
- * Modified by: Karlis Veilands
- * Last modified on: Aug 11, 2016
+ * Modified by: Sam Thompson
+ * Last modified on: Dec 15, 2016
  */
 
 #ifndef RN52STRINGS_H_
@@ -39,6 +39,7 @@
 #define RN52_CMD_DISCOVERY_OFF      "@,0\r"
 
 // RN52 settings commands
+#define RN52_SET_PAIR_TIMEOUT       "S^,0\r"            // Shutdown module if pairing doesn't happen. 0 means don't enable this feature
 #define RN52_SET_DISCOVERY_MASK     "SD,06\r"           // A2DP/AVRCP + SPP profiles
 #define RN52_SET_CONNECTION_MASK    "SK,06\r"           // A2DP/AVRCP + SPP profiles
 #define RN52_SET_COD                "SC,200420\r"       // Sets "CoD" (Class of Device)
@@ -59,6 +60,7 @@
 #define RN52_RX_OK                  "AOK\r\n"
 #define RN52_RX_ERROR               "ERR\r\n"
 #define RN52_RX_WHAT                "?\r\n"
+#define RN52_RX_REBOOT              "Reboot!"
 
 
 #endif /* RN52STRINGS_H_ */
