@@ -18,8 +18,8 @@
  *
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
- * Modified by: Karlis Veilands
- * Modified on: September 2, 2016
+ * Modified by: Sam Thompson
+ * Modified on: December 15, 2016
  */
 
 #ifndef RN52impl_H
@@ -45,6 +45,8 @@ const int BT_PWREN_PIN = 9;                 // RN52 Power enable pin
 const int UART_TX_PIN = 5;                  // UART Tx
 const int UART_RX_PIN = 6;                  // UART Rx
 
+const unsigned long cmdResponseTimeout = CMD_TIMEOUT; // Abandon command and reset if no response/no valid response received within this period.
+
 
 // extend the RN52driver to implement callbacks and hardware interface
 class RN52impl : public RN52::RN52driver {
@@ -55,6 +57,7 @@ class RN52impl : public RN52::RN52driver {
     SoftwareSerial softSerial =  SoftwareSerial(UART_RX_PIN, UART_TX_PIN);
     
     unsigned long lastEventIndicatorPinStateChange;
+    unsigned long cmdResponseDeadline;
     
     bool playing;
     bool bt_iap;
@@ -71,6 +74,7 @@ public:
         bt_a2dp = false;
         bt_hfp = false;
         lastEventIndicatorPinStateChange = 0;
+        cmdResponseDeadline = 0;
     }
     
     void readFromUART();
@@ -84,6 +88,7 @@ public:
     // this method is called by RN52lib whenever it needs to
     // switch between SPP and command mode
     void setMode(Mode mode);
+    void onError(int location, Error error);
     // GPIO2 of RN52 is toggled on state change, eg. a Bluetooth
     // devices connects
     void onGPIO2();
@@ -91,7 +96,7 @@ public:
     void update();
 
 private:
-    void waitForResponse();
+    void processCmdQueue();
 };
 
 #endif

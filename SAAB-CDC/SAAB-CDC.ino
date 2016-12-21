@@ -10,7 +10,7 @@
  CAN code:                  Igor Real (http://secuduino.blogspot.com)
  Information on SAAB I-Bus: Tomi Liljemark (http://pikkupossu.1g.fi/tomi/projects/i-bus/i-bus.html)
  RN52 handling:             based on code by Tim Otto
- Additions/bug fixes:       Karlis Veilands and Girts Linde
+ Additions/bug fixes:       Karlis Veilands, Girts Linde and Sam Thompson
 */
 
 
@@ -19,6 +19,8 @@
 #include "CDC.h"
 #include "RN52handler.h"
 #include "Timer.h"
+
+#define DEBUGMODE 0
 
 CDChandler CDC;
 Timer time;
@@ -31,7 +33,7 @@ int freeRam ()
 }
 
 void setup() {
-    wdt_enable(WDTO_30MS);
+    wdt_disable(); // Allow delay loops greater than 15ms during setup.
     Serial.begin(9600);
     Serial.println(F("\"BlueSaab\""));
     Serial.print(F("Free SRAM: "));
@@ -41,12 +43,23 @@ void setup() {
     BT.initialize();
     //Serial.println(F("Press H for Help"));
     CDC.openCanBus();
+#if (DEBUGMODE==1)
+    wdt_enable(WDTO_500MS); // give the loop time to do more serial diagnostic logging.
+#else
+    wdt_enable(WDTO_30MS);
+#endif
 }
 
 void loop() {
+#if (DEBUGMODE==1)
+//    Serial.println(F("in loop()"));
+#endif
     time.update();
+    wdt_reset();
     CDC.handleCdcStatus();
+    wdt_reset();
     BT.update();
+    wdt_reset();
     BT.monitor_serial_input();
     wdt_reset();
 }

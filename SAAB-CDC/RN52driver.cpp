@@ -18,14 +18,16 @@
  *
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
- * Modified by: Karlis Veilands
- * Last modified on: Aug 11, 2016
+ * Modified by: Sam Thompson
+ * Last modified on: Dec 16, 2016
  */
 
 #include <Arduino.h>
 #include <string.h>
 #include "RN52driver.h"
 #include "RN52strings.h"
+
+#define DEBUGMODE  0
 
 using namespace std;
 
@@ -129,6 +131,11 @@ namespace RN52 {
             
             cmdRxBuffer[cmdRxBufferPos++] = data[parsed++];
             if (mode == DATA) {
+#if (DEBUGMODE==1)
+                Serial.print(F("Data: "));
+                Serial.write(cmdRxBuffer, cmdRxBufferPos);
+                Serial.println(F(""));
+#endif
                 // did not receive CMD\r\n yet
                 if (cmdRxBufferPos == 5) {
                     if (isCmd(cmdRxBuffer, RN52_CMD_BEGIN)) {
@@ -145,6 +152,11 @@ namespace RN52 {
             } else if (cmdRxBufferPos >= 2) {
                 if (cmdRxBuffer[cmdRxBufferPos - 1] == '\n' && cmdRxBuffer[cmdRxBufferPos - 2] == '\r') {
                     // this is a line
+#if (DEBUGMODE==1)
+                    Serial.print(F("CMD Response: "));
+                    Serial.write(cmdRxBuffer, cmdRxBufferPos);
+                    Serial.println(F(""));
+#endif
                     if (isCmd(cmdRxBuffer, RN52_CMD_EXIT)) {
                         mode = DATA;
                         cmdRxBufferPos = 0;
@@ -177,8 +189,12 @@ namespace RN52 {
                         } else {
                             cmdRxBuffer[cmdRxBufferPos - 2] = 0;
                             onError(4, PROTOCOL);
-                            debug("Invalid response:");
-                            debug(cmdRxBuffer);
+#if (DEBUGMODE==1)
+                            Serial.print(F("Invalid Response: "));
+                            Serial.println(cmdRxBuffer);
+//                            debug("Invalid response:");
+//                            debug(cmdRxBuffer);
+#endif
                         }
                         currentCommand = NULL;
                     }
@@ -250,11 +266,17 @@ namespace RN52 {
     }
     
     void RN52driver::prepareCommandMode() {
-        if (mode == COMMAND)
+        if (mode == COMMAND) {
+#if (DEBUGMODE==1)
+        Serial.println(F("DEBUG: prepareCommandMode(): Already in command mode."));
+#endif
             return;
+        }
         enterCommandMode = true;
         setMode(COMMAND);
-        // Serial.println(F("DEBUG: RN52 'SPP -> CMD'."));
+#if (DEBUGMODE==1)
+        Serial.println(F("DEBUG: RN52 'SPP -> CMD'."));
+#endif
     }
     
     void RN52driver::prepareDataMode() {
@@ -262,36 +284,51 @@ namespace RN52 {
             return;
         
         if (enterCommandMode) {
+#if (DEBUGMODE==1)
+            Serial.println(F("DEBUG: Command mode was attempted but never reached."));
+#endif
             // command mode was attempted but never reached
             enterCommandMode = false;
         }
         setMode(DATA);
-        // Serial.println(F("DEBUG: RN52 'CMD -> SPP'."));
+#if (DEBUGMODE==1)
+        Serial.println(F("DEBUG: RN52 'CMD -> SPP'."));
+#endif
     }
     
     int RN52driver::sendAVCRP(AVCRP cmd)
     {
         if(!a2dpConnected) {
             onError(6, NOTCONNECTED);
-            // Serial.println(F("ERROR: RN52 A2DP not connected."));
+#if (DEBUGMODE==1)
+            Serial.println(F("ERROR: RN52 A2DP not connected."));
+#endif
             return -2;
         }
         switch(cmd) {
             case PLAYPAUSE:
                 queueCommand(RN52_CMD_AVCRP_PLAYPAUSE);
-                // Serial.println(F("DEBUG: Sending 'Play/Pause' command to RN52."));
+#if (DEBUGMODE==1)
+                Serial.println(F("DEBUG: Sending 'Play/Pause' command to RN52."));
+#endif
                 break;
             case PREV:
                 queueCommand(RN52_CMD_AVCRP_PREV);
-                // Serial.println(F("DEBUG: Sending 'Previous Track' command to RN52."));
+#if (DEBUGMODE==1)
+                Serial.println(F("DEBUG: Sending 'Previous Track' command to RN52."));
+#endif
                 break;
             case NEXT:
                 queueCommand(RN52_CMD_AVCRP_NEXT);
-                // Serial.println(F("DEBUG: Sending 'Next Track' command to RN52."));
+#if (DEBUGMODE==1)
+                Serial.println(F("DEBUG: Sending 'Next Track' command to RN52."));
+#endif
                 break;
             case VASSISTANT:
                 queueCommand(RN52_CMD_AVCRP_VASSISTANT);
-                //Serial.println(F("DEBUG: Sending 'Invoke voice assistant' command to RN52."));
+#if (DEBUGMODE==1)
+                Serial.println(F("DEBUG: Sending 'Invoke voice assistant' command to RN52."));
+#endif
                 break;
             case VOLUP:
                 queueCommand(RN52_CMD_VOLUP);
@@ -307,64 +344,102 @@ namespace RN52 {
     
     void RN52driver::reconnectLast(){
         queueCommand(RN52_CMD_RECONNECTLAST);
-        // Serial.println(F("DEBUG: RN52 connecting to the last known device."));
+#if (DEBUGMODE==1)
+        Serial.println(F("DEBUG: RN52 connecting to the last known device."));
+#endif
     }
     void RN52driver::disconnect(){
         queueCommand(RN52_CMD_DISCONNECT);
-        // Serial.println(F("DEBUG: RN52 disconnecting from the 'active' device."));
+#if (DEBUGMODE==1)
+        Serial.println(F("DEBUG: RN52 disconnecting from the 'active' device."));
+#endif
     }
     void RN52driver::visible(bool visible){
         if (visible) {
             queueCommand(RN52_CMD_DISCOVERY_ON);
-            // Serial.println(F("DEBUG: RN52 discoverable = ON."));
+#if (DEBUGMODE==1)
+            Serial.println(F("DEBUG: RN52 discoverable = ON."));
+#endif
         }
         else {
             queueCommand(RN52_CMD_DISCOVERY_OFF);
-            // Serial.println(F("DEBUG: RN52 discoverable = OFF (connectable)."));
+#if (DEBUGMODE==1)
+            Serial.println(F("DEBUG: RN52 discoverable = OFF (connectable)."));
+#endif
         }
     }
     
     void RN52driver::set_discovery_mask() {
+#if (DEBUGMODE==1)
         Serial.print(F("Setting discovery mask to: "));
+        Serial.println(RN52_SET_DISCOVERY_MASK);
+#endif
         queueCommand(RN52_SET_DISCOVERY_MASK);
     }
     
     void RN52driver::set_connection_mask() {
+#if (DEBUGMODE==1)
         Serial.print(F("Setting connection mask to: "));
+        Serial.println(RN52_SET_CONNECTION_MASK);
+#endif
         queueCommand(RN52_SET_CONNECTION_MASK);
     }
     
     
     void RN52driver::set_cod() {
+#if (DEBUGMODE==1)
         Serial.print(F("Setting class of device to: "));
+        Serial.println(RN52_SET_COD);
+#endif
         queueCommand(RN52_SET_COD);
     }
     
     
     void RN52driver::set_device_name() {
+#if (DEBUGMODE==1)
         Serial.print(F("Setting device name to: "));
+        Serial.println(RN52_SET_DEVICE_NAME);
+#endif
         queueCommand(RN52_SET_DEVICE_NAME);
     }
     
     
     void RN52driver::set_baudrate() {
+#if (DEBUGMODE==1)
         Serial.print(F("Setting RN52 baudrate to: "));
+        Serial.println(RN52_SET_BAUDRATE_9600);
+#endif
         queueCommand(RN52_SET_BAUDRATE_9600);
     }
     
     
     void RN52driver::set_max_volume() {
+#if (DEBUGMODE==1)
         Serial.println(F("Turning RN52 volume gain to max..."));
+#endif
         queueCommand(RN52_SET_MAXVOL);
     }
     
     void RN52driver::set_extended_features() {
+#if (DEBUGMODE==1)
         Serial.print(F("Setting extended features to: "));
+        Serial.println(RN52_SET_EXTENDED_FEATURES);
+#endif
         queueCommand(RN52_SET_EXTENDED_FEATURES);
     }
     
+    void RN52driver::set_pair_timeout() {
+#if (DEBUGMODE==1)
+        Serial.print(F("Setting pair timeout to: "));
+        Serial.println(RN52_SET_PAIR_TIMEOUT);
+#endif
+        queueCommand(RN52_SET_PAIR_TIMEOUT);
+    }
+    
     void RN52driver::reboot() {
+#if (DEBUGMODE==1)
         Serial.println(F("Rebooting RN52..."));
+#endif
         queueCommand(RN52_CMD_REBOOT);
     }
     

@@ -18,8 +18,8 @@
  *
  * Created by: Tim Otto
  * Created on: Jun 21, 2013
- * Modified by: Karlis Veilands
- * Modified on: May 17, 2016
+ * Modified by: Sam Thompson
+ * Last Modified on: Dec 16, 2016
  */
 
 #ifndef RN52DRIVER_H
@@ -57,6 +57,7 @@ namespace RN52 {
         void set_baudrate();
         void set_max_volume();
         void set_extended_features();
+        void set_pair_timeout();
         void reboot();
         void visible(bool visible);
         int sendAVCRP(AVCRP cmd);
@@ -65,6 +66,19 @@ namespace RN52 {
     protected:
         void refreshState();
         int queueCommand(const char *cmd);
+        int getQueueSize() { 
+          return (commandQueuePos);
+        }
+        void abortCurrentCommand() {
+            currentCommand = NULL;
+            mode = DATA;
+            cmdRxBufferPos = 0;
+            enterDataMode = false;
+            if (commandQueuePos > 0) {
+                // there's outgoing command requests (yet or again)
+                prepareCommandMode();
+            }
+        }
         
     private:
         Mode mode;
