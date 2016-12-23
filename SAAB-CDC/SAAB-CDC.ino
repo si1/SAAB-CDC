@@ -9,7 +9,7 @@
  Initial code:              Seth Evans and Emil Fors
  CAN code:                  Igor Real (http://secuduino.blogspot.com)
  Information on SAAB I-Bus: Tomi Liljemark (http://pikkupossu.1g.fi/tomi/projects/i-bus/i-bus.html)
- RN52 handling:             based on code by Tim Otto
+ RN52 handling:             based on code by Tim Otto (https://github.com/timotto/RN52lib)
  Additions/bug fixes:       Karlis Veilands, Girts Linde and Sam Thompson
 */
 
