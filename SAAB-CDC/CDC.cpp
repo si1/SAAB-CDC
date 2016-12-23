@@ -41,13 +41,13 @@ void sendCdcActiveStatus(void*);
 void sendCdcPowerdownStatus(void*);
 void *currentCdcCmd = NULL;
 volatile unsigned long cdcStatusLastSendTime = 0;            // Timer used to ensure we send the CDC status frame in a timely manner
-unsigned long lastIcomingEventTime = 0;             // Timer used for determening if we should treat current event as, for example, a long press of a button
-boolean cdcActive = false;                          // True while our module, the simulated CDC, is active
-boolean sidWriteAccessWanted = false;               // True while we want to write on SID
+unsigned long lastIcomingEventTime = 0;                      // Timer used for determening if we should treat current event as, for example, a long press of a button
+boolean cdcActive = false;                                   // True while our module, the simulated CDC, is active
+boolean sidWriteAccessWanted = false;                        // True while we want to write on SID
 volatile boolean cdcStatusResendNeeded = false;              // True if an internal operation has triggered the need to send the CDC status frame as an event
 volatile boolean cdcStatusResendDueToCdcCommand = false;     // True if the need for sending the CDC status frame was triggered by CDC_CONTROL frame (IHU)
-boolean writeTextOnDisplayTimerActive = false;      // True while we are writing custom text on SID every SID_CONTROL_TX_BASETIME interval
-int incomingEventCounter = 0;                       // Counter for incoming events to determine when we will treat the event, for example, as a long press of a button
+boolean writeTextOnDisplayTimerActive = false;               // True while we are writing custom text on SID every SID_CONTROL_TX_BASETIME interval
+int incomingEventCounter = 0;                                // Counter for incoming events to determine when we will treat the event, for example, as a long press of a button
 int displayRequestTimerId = -1;
 int writeTextOnDisplayTimerId = -1;
 int currentNodeStatusTxTimerEvent = -1;
@@ -133,7 +133,7 @@ void CDChandler::handleRxFrame() {
             case NODE_STATUS_RX_IHU:
                 /*
                  Here be dragons... This part of the code is responsible for causing lots of headache
-                 We look at the bottom half of 3rd byte of '6A1' frame to determine what 'currentCdcCommand' should be
+                 We look at the bottom half of 3rd byte of '6A1' frame to determine what the "reply" should be
                  */
                 switch (CAN_RxMsg.data[3] & 0x0F){
                     case (0x3):
