@@ -52,14 +52,11 @@ void setup() {
 
 void loop() {
 #if (DEBUGMODE==1)
-//    Serial.println(F("in loop()"));
+    //    Serial.println(F("in loop()"));
 #endif
     time.update();
-    wdt_reset();
     CDC.handleCdcStatus();
-    wdt_reset();
     BT.update();
-    wdt_reset();
     BT.monitor_serial_input();
     wdt_reset();
 }
